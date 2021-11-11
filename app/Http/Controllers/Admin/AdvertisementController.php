@@ -1,0 +1,146 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use Illuminate\Support\Facades\Log;
+use DB;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Admin\Traits\{
+    DataTableTrait,
+    TimeConditionTrait,
+};
+use App\Notifications\AdvertisementUnavailableNotification;
+use App\Http\Requests\Admin\{
+    AdvertisementSearchRequest,
+};
+use App\Repos\Interfaces\{
+    AdvertisementRepo,
+    AdminActionRepo,
+};
+use App\Models\{
+    Advertisement,
+    AdminAction,
+};
+use App\Services\AdvertisementServiceInterface;
+
+class AdvertisementController extends AdminController
+{
+    use DataTableTrait, TimeConditionTrait;
+
+    public function __construct(
+        AdvertisementRepo $AdvertisementRepo,
+        AdminActionRepo $AdminActionRepo,
+        AdvertisementServiceInterface $AdvertisementService
+    ) {
+        parent::__construct();
+        $this->AdvertisementRepo = $AdvertisementRepo;
+        $this->AdminActionRepo = $AdminActionRepo;
+        $this->AdvertisementService = $AdvertisementService;
+        $this->tz = config('core.timezone.default');
+    }
+
+    public function index()
+    {
+        $dateFormat = 'Y-m-d';
+        return view('admin.advertisements', [
+            'from' => null,
+            'to' => null,
+            'status' => [
+                'all' => 'All',
+                Advertisement::STATUS_AVAILABLE => 'Available',
+                Advertisement::STATUS_UNAVAILABLE => 'Unavailable',
+                Advertisement::STATUS_COMPLETED => 'Completed',
+                Advertisement::STATUS_DELETED => 'Deleted',
+            ],
+        ]);
+    }
+
+    public function show(string $advertisement)
+    {
+        $advertisement = Advertisement::find($advertisement);
+        if ($advertisement->deleted_at) {
+            $info = [];
+            $info['deleted_at'] = $advertisement->deleted_at->setTimezone($this->tz)->toDateTimeString();
+            if ($admin_action = $advertisement->admin_actions()->first()) {
+                $info['action'] = 'Admin';
+                $info['admin'] = $admin_action->admin_id;
+                $info['description'] = $admin_action->description;
+            } else {
+                $info['action'] = 'User';
+            }
+        }
+
+        return view('admin.advertisement', [
+            'advertisement' => $advertisement,
+            'bank_accounts' => $advertisement->bank_accounts,
+            'delete_info' => $info ?? null,
+        ]);
+
+    }
+
+    public function update(Advertisement $advertisement, Request $request)
+    {
+        $description = $request->input('description');
+        DB::transaction(function () use ($advertisement, $description) {
+            $this->AdvertisementService->deactivate(
+                $advertisement->owner,
+                $advertisement
+            );
+            $this->AdminActionRepo->createByApplicable($advertisement, [
+                'admin_id' => \Auth::id(),
+                'type' => AdminAction::TYPE_UNAVAILABLE_ADVERTISEMENT,
+                'description' => $description,
+            ]);
+        });
+
+        # send notification
+        $advertisement->owner->notify(new AdvertisementUnavailableNotification($advertisement, AdminAction::class));
+
+        return redirect()->route('admin.advertisements.index')->with('flash_message', ['message' => '廣告資料操作成功']);
+
+    }
+
+    public function getAdvertisements(AdvertisementSearchRequest $request)
+    {
+        $values = $request->validated();
+        $keyword = data_get($values, 'search.value');
+        $status = data_get($values, 'status');
+
+        if ($status !== 'all') {
+            $condition = [['status', '=', $status]];
+        } else {
+            $condition = [];
+        }
+        if (!empty(data_get($values, 'from')) and !empty(data_get($values, 'to'))) {
+            $from = Carbon::parse(data_get($values, 'from'), $this->tz);
+            $to = Carbon::parse(data_get($values, 'to'), $this->tz)->addDay();
+            if ($status !== 'all') {
+                $condition = $this->searchConditionWithTimeInterval(
+                    $condition,
+                    'created_at',
+                    $from,
+                    $to
+                );
+            } else {
+                $condition = array_merge($this->timeIntervalCondition('created_at', $from, $to), $condition);
+            }
+        }
+        $query = $this->AdvertisementRepo->queryAdvertisement($condition, $keyword);
+        $total = $this->AdvertisementRepo->countAll();
+        $filtered = $query->count();
+
+        $data = $this->queryPagination($query, $total)
+            ->map(function ($item) {
+                $item->remaining_amount = formatted_coin_amount($item->remaining_amount);
+                return $item;
+            });
+        return $this->draw(
+            $this->result(
+                $total,
+                $filtered,
+                $data
+            )
+        );
+    }
+}

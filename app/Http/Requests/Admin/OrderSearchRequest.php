@@ -1,0 +1,14 @@
+<?php
+
+namespace App\Http\Requests\Admin;
+
+use App\Models\Order;
+
+class OrderSearchRequest extends SearchRequest
+{
+    public static function rules()
+    {
+        $rules = ['status' => 'required|in:'.implode(',', array_merge(Order::STATUS, ['all']))];
+        return array_merge(parent::rules(), $rules);
+    }
+}
