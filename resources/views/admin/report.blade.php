@@ -66,7 +66,7 @@
 <div class="row">
     <div class="col-12">
         <div class="card">
-            <div class="card-header"><h2 class="card-title">當日最後虛擬幣報價 (USD)</h2></div>
+            <div class="card-header"><h2 class="card-title">當日最後虛擬幣報價 (Base currency)</h2></div>
             <div class="card-block">
                 <table id="assets" class="table">
                     <thead>

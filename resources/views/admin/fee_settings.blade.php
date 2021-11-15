@@ -80,7 +80,7 @@
                             <th>基礎提現金額</th>
                             <th>折扣數 (%)</th>
                             <th>折扣後金額 ({{ $coin }})</th>
-                            <th>換算金額 (USD)</th>
+                            <th>換算金額 (Base currency)</th>
                         </tr>
                     </thead>
                     <tbody>

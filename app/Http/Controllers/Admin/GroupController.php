@@ -224,7 +224,7 @@ class GroupController extends AdminController
         foreach ($this->coins as $coin) {
             $amount = $FeeService->getWithdrawalFee($coin, $group);
             $fee[$coin]['amount'] = trim_zeros($amount);
-            $fee[$coin]['price'] = $ExchangeService->coinToUSDValue($coin, $amount);
+            $fee[$coin]['price'] = $ExchangeService->coinToBaseValue($coin, $amount);
         }
         return $fee;
     }

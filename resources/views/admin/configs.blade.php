@@ -48,7 +48,7 @@
     <div class="card">
         <div class="card-header"><h3 class="card-title">提現限額設定</h3></div>
         <div class="card-block">
-            @include('widgets.forms.input', ['name' => "daily_limit", 'class' => 'text-lowercase', 'value' => data_get($withdrawal_limit, 'daily'), 'title' => '每日提現限額(USD)', 'required' => true])
+            @include('widgets.forms.input', ['name' => "daily_limit", 'class' => 'text-lowercase', 'value' => data_get($withdrawal_limit, 'daily'), 'title' => '每日提現限額(Base currency)', 'required' => true])
         </div>
         <div class="card-block">
             <button type="submit" class="btn btn-primary">Submit</button>

@@ -10,10 +10,10 @@ class LimitationResource extends JsonResource
 {
     protected $daily_params;
 
-    public function withUSDLimit($daily_params)
+    public function withBaseLimit($daily_params)
     {
         extract($daily_params);
-        $this->USD = [
+        $this->limit = [
             'daily_max' => $daily_max,
             'daily_used' => $daily_used,
             'daily_remain' => $daily_remain,
@@ -37,12 +37,12 @@ class LimitationResource extends JsonResource
             'coin' => $this->coin,
             'min' => $this->min,
             'max' => $this->max,
-            'remain_max' => $this->when($this->USD, function () {
+            'remain_max' => $this->when($this->limit, function () {
                 $service = app()->make(ExchangeServiceInterface::class);
-                $compare = $service->USDTToCoin($this->USD['daily_remain'], $this->coin);
+                $compare = $service->USDTToCoin($this->limit['daily_remain'], $this->coin);
                 return min($this->max, $compare);
             }),
-            'USD' => $this->when($this->USD, $this->USD),
+            'limit' => $this->when($this->limit, $this->limit),
         ];
     }
 }

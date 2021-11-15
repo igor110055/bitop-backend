@@ -1123,9 +1123,8 @@ class AccountService implements  AccountServiceInterface
             $to
         );
         foreach ($withdrawals as $w) {
-            $res = Dec::add($res, $this->ExchangeService->coinToUSDT($w->coin, $w->amount));
+            $res = Dec::add($res, $this->ExchangeService->coinToBaseValue($w->coin, $w->amount));
         }
-        # consider usdt as usd => round to decimal 2
         return formatted_price((string) $res);
     }
 }

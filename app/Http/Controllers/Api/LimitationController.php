@@ -42,7 +42,7 @@ class LimitationController extends AuthenticatedController
         $args = $this->AccountService->getDailyWithdrawalLimitationArguments($user);
 
         if ($limitation) {
-            return (new LimitationResource($limitation))->withUSDLimit($args);
+            return (new LimitationResource($limitation))->withBaseLimit($args);
         } else {
             return [
                 'type' => $type,
@@ -50,7 +50,7 @@ class LimitationController extends AuthenticatedController
                 'min' => '0.000000',
                 'max' => '0.000000',
                 'remain_max' => $this->ExchangeService->USDTToCoin($args['daily_remain'], $coin),
-                'USD' => $args,
+                'limit' => $args,
             ];
         }
     }

@@ -18,7 +18,7 @@ interface ExchangeServiceInterface
     public function getCoinPrice($coin, $currency, $price_type, $group = null);
     public function coinToCurrency(User $user, $coin, $currency, $type, $coin_amount = '1');
 
-    public function coinToUSDValue($coin, $amount);
+    public function coinToBaseValue($coin, $amount);
 
     # coin amount => USDT amount
     public function coinToUSDT($coin, $amount);

@@ -27,27 +27,17 @@ class CurrencyExchangeService implements CurrencyExchangeServiceInterface
         $this->tw_bank_csv_file = config('services.tw-bank.csv-file');
     }
 
-    protected function formula($cny, $usdt_cny, $hkd_cny)
+    protected function formula()
     {
         $currencies = [];
-        $currencies['TWD']['ask'] = (string) Dec::add($cny, 0.07)->mul($usdt_cny)->add(0.3, 6);
-        $currencies['TWD']['bid'] = (string) Dec::add($cny, 0.07)->mul($usdt_cny)->sub(0.1, 6);
-        $currencies['CNY']['ask'] = (string) Dec::sub($usdt_cny, 0.05, 6);
-        $currencies['CNY']['bid'] = (string) Dec::sub($usdt_cny, 0.06, 6);
-        $currencies['USD']['ask'] = '1.000000';
-        $currencies['USD']['bid'] = '0.998000';
-        $currencies['HKD']['ask'] = (string) Dec::div($currencies['CNY']['ask'], $hkd_cny, 6);
-        $currencies['HKD']['bid'] = (string) Dec::div($currencies['CNY']['bid'], $hkd_cny, 6);
+        $currencies['CNY']['ask'] = '1.000000';
+        $currencies['CNY']['bid'] = '0.998000';
         return $currencies;
     }
 
     public function currencyExchangeRates()
     {
-        return $this->formula(
-            $this->getTWBankCurrency('CNY', 'bid'),
-            $this->getHuobiUSDTtoCNYrate(),
-            $this->getHKDtoCNYrate()
-        );
+        return $this->formula();
     }
 
     public function update()

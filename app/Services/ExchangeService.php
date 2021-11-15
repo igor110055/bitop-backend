@@ -29,6 +29,7 @@ class ExchangeService implements ExchangeServiceInterface
         $this->CoinExchangeRateRepo = $CoinRepo;
         $this->coins = config('coin');
         $this->currencies = config('currency');
+        $this->base_currency = config('core.currency.base');
         $this->price_types = CurrencyExchangeRate::PRICE_TYPES;
     }
 
@@ -74,7 +75,7 @@ class ExchangeService implements ExchangeServiceInterface
 
         $decimal = config('core.currency.scale');
 
-        # base USD
+        # base currency
         $unit_price_base = $this->CoinExchangeRateRepo
             ->getLatest($coin)
             ->price;
@@ -154,10 +155,10 @@ class ExchangeService implements ExchangeServiceInterface
         return null;
     }
 
-    public function coinToUSDValue($coin, $amount)
+    public function coinToBaseValue($coin, $amount)
     {
         $price = $this->CoinExchangeRateRepo->getLatest($coin)->price;
-        return (string) Dec::mul($amount, $price, $this->currencies['USD']['decimal']);
+        return (string) Dec::mul($amount, $price, $this->currencies[$this->base_currency]['decimal']);
     }
 
     public function coinToUSDT($coin, $amount)
