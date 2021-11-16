@@ -17,6 +17,7 @@ class BankAccount extends UuidModel
     const REASON_INVALID_PROVINCE_NAME = 'invalid_province_name';
     const REASON_INVALID_CITY_NAME = 'invalid_city_name';
     const REASON_INVALID_ACCOUNT = 'invalid_account';
+    const REASON_INVALID_TYPE = 'invalid_type';
 
     const STATUS_PENDING = 'pending';
     const STATUS_ACTIVE = 'active';
@@ -28,6 +29,7 @@ class BankAccount extends UuidModel
         self::REASON_INVALID_PROVINCE_NAME,
         self::REASON_INVALID_CITY_NAME,
         self::REASON_INVALID_ACCOUNT,
+        self::REASON_INVALID_TYPE,
     ];
 
     protected $dataFormat = Model::DATE_FORMAT;
