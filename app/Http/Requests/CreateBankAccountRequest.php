@@ -17,7 +17,6 @@ class CreateBankAccountRequest extends PublicRequest
      */
     public function rules()
     {
-        $prime_nationalities = config('core')['nationality'];
         $types = BankAccount::$types;
 
         return [
