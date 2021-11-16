@@ -101,10 +101,6 @@ class BankAccountRepo implements \App\Repos\Interfaces\BankAccountRepo
         $nationalities = config('core.nationality');
         $result = [];
         foreach ($nationalities as $nationality => $data) {
-            if ((($user_nationality === "TW") and ($nationality === 'CN')) OR
-                (($user_nationality !== "TW") and ($nationality === 'TW'))) {
-                continue;
-            }
             $result[$nationality] = $data['currency'];
         }
         return $result;
@@ -117,7 +113,7 @@ class BankAccountRepo implements \App\Repos\Interfaces\BankAccountRepo
             ->with('bank');
         if ($status === BankAccount::STATUS_ACTIVE) {
             $query = $this->queryIsVerified($query, true);
-            $query = $this->queryIsDeleted($query, false);    
+            $query = $this->queryIsDeleted($query, false);
         } elseif ($status === BankAccount::STATUS_PENDING) {
             $query = $this->queryIsVerified($query, false);
             $query = $this->queryIsDeleted($query, false);

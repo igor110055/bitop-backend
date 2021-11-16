@@ -45,10 +45,8 @@ class BankAccountController extends AuthenticatedController
     {
         $user = auth()->user();
         $input = $request->validated();
-        $supported = $this->BankAccountRepo->getSupportMap($user->nationality);
-        if (!array_key_exists($input['nationality'], $supported)) {
-            throw new BadRequestError;
-        }
+        $input['nationality'] = 'CN';
+        $input['currency'] = ['CNY'];
         return new BankAccountResource($this->BankAccountRepo->create($user, $input));
     }
 

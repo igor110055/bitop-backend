@@ -4,25 +4,29 @@ namespace App\Models;
 
 class BankAccount extends UuidModel
 {
+    const TYPE_PERSONAL = 'personal';
+    const TYPE_CORPORATE = 'corporate';
+    const TYPES = [
+        self::TYPE_PERSONAL,
+        self::TYPE_CORPORATE,
+    ];
+    public static $types = self::TYPES;
+
     const REASON_NAME_NOT_MATCHED = 'name_not_matched';
-    const REASON_PHONETIC_NAME_NOT_MATCHED = 'phontic_name_not_matched';
     const REASON_INVALID_NAME = 'invalid_name';
-    const REASON_INVALID_PHONETIC_NAME = 'invalid_phonetic_name';
-    const REASON_INVALID_BRANCH_NAME = 'invalid_branch_name';
-    const REASON_INVALID_BRANCH_PHONETIC_NAME = 'invalid_branch_phonetic_name';
+    const REASON_INVALID_PROVINCE_NAME = 'invalid_province_name';
+    const REASON_INVALID_CITY_NAME = 'invalid_city_name';
     const REASON_INVALID_ACCOUNT = 'invalid_account';
-    
+
     const STATUS_PENDING = 'pending';
     const STATUS_ACTIVE = 'active';
     const STATUS_DELETED = 'deleted';
-    
+
     const REASONS = [
         self::REASON_NAME_NOT_MATCHED,
-        self::REASON_PHONETIC_NAME_NOT_MATCHED,
         self::REASON_INVALID_NAME,
-        self::REASON_INVALID_PHONETIC_NAME,
-        self::REASON_INVALID_BRANCH_NAME,
-        self::REASON_INVALID_BRANCH_PHONETIC_NAME,
+        self::REASON_INVALID_PROVINCE_NAME,
+        self::REASON_INVALID_CITY_NAME,
         self::REASON_INVALID_ACCOUNT,
     ];
 
@@ -35,9 +39,8 @@ class BankAccount extends UuidModel
         'account',
         'type',
         'name',
-        'phonetic_name',
-        'bank_branch_name',
-        'bank_branch_phonetic_name',
+        'bank_province_name',
+        'bank_city_name',
         'verified_at',
         'deleted_at',
     ];

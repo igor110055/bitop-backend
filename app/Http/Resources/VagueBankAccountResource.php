@@ -20,10 +20,9 @@ class VagueBankAccountResource extends JsonResource
             'bank_id' => $this->bank_id,
             'currency' => $this->currency,
             'type' => $this->type,
+            'bank_province_name' => $this->bank_province_name,
+            'bank_city_name' => $this->bank_city_name,
             'bank' => new BankResource($this->bank),
-            'bank_branch_name' => $this->bank_branch_name,
-            'bank_branch_phonetic_name' => $this->bank_branch_phonetic_name,
-            'bank' => $this->bank,
         ];
     }
 }

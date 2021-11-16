@@ -22,12 +22,11 @@ class BankAccountResource extends JsonResource
             'account' => $this->account,
             'type' => $this->type,
             'name' => $this->name,
-            'phonetic_name' => $this->phonetic_name,
-            'bank_branch_name' => $this->bank_branch_name,
-            'bank_branch_phonetic_name' => $this->bank_branch_phonetic_name,
+            'bank_province_name' => $this->bank_province_name,
+            'bank_city_name' => $this->bank_city_name,
             'is_verified' => $this->is_verified,
             'created_at' => $this->created_at,
-            'bank' => $this->bank,
+            'bank' => new BankResource($this->bank),
         ];
     }
 }

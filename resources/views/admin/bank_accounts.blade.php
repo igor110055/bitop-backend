@@ -84,17 +84,14 @@ $(function () {
             {
                 data: 'bank_id',
                 render: function (data, type, row) {
-                    return row.bank.nationality + '<br>' 
+                    return row.bank.nationality + '<br>'
                     + row.bank.name + '<br>'
-                    + (row.bank_branch_name ? ('分行: ' + row.bank_branch_name + '<br>') : '')
-                    + (row.bank_branch_phonetic_name ? ('分行英文名: ' + row.bank_branch_phonetic_name + '<br>') : '')
                 },
             },
             {
                 data: 'account',
                 render: function (data, type, row) {
                     return '戶名: ' + row.name + '<br>'
-                        + (row.phonetic_name ? ('英文戶名: ' + row.phonetic_name + '<br>') : '')
                         + '帳號: ' + row.account + '<br>'
                         + '幣別: ' + row.currency
                 },

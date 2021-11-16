@@ -116,12 +116,12 @@
                             <dd class="col-sm-9">{{ $bank_account->id }}</dd>
                             <dt class="col-sm-3">銀行</dt>
                             <dd class="col-sm-9">{{ $bank_account->bank->nationality }} {{ $bank_account->bank_name }}</dd>
-                            <dt class="col-sm-3">分行</dt>
-                            <dd class="col-sm-9">{{ $bank_account->bank_branch_name }} {{ ($bank_account->bank_branch_phonetic_name ? "($bank_account->bank_branch_phonetic_name)" : '')}}</dd>
+                            <dt class="col-sm-3">省份/城市</dt>
+                            <dd class="col-sm-9">{{ $bank_account->bank_province }} {{ ($bank_account->bank_city_name }}</dd>
+                            <dt class="col-sm-3">帳戶類型</dt>
+                            <dd class="col-sm-9">{{ $bank_account->type }}</dd>
                             <dt class="col-sm-3">戶名</dt>
                             <dd class="col-sm-9">{{ $bank_account->name }}</dd>
-                            <dt class="col-sm-3">英文戶名</dt>
-                            <dd class="col-sm-9">{{ $bank_account->phonetic_name }}</dd>
                             <dt class="col-sm-3">帳號</dt>
                             <dd class="col-sm-9">{{ $bank_account->account }}</dd>
                             <dt class="col-sm-3">幣別</dt>
@@ -137,7 +137,6 @@
                             <dd class="col-sm-9">{{ datetime($bank_account->deleted_at) }}</dd>
                             @endif
                         </dl>
-                        
                     </div>
                     @if ($bank_account->deleted_at)
                         <span class="badge badge-pill badge-default">{{ __("messages.bank_account.status.deleted") }}</span>
