@@ -119,6 +119,10 @@ class AdvertisementController extends AuthenticatedController
         $origin_ad = $this->AdvertisementRepo->findOrFail($id);
         $this->checkAuthorization($origin_ad);
 
+        if ($origin_ad->is_express && !$user->is_merchant) {
+            throw new BadRequestError;
+        }
+
         $values['amount'] = trim_redundant_decimal($values['amount'], $origin_ad->coin);
 
         if ($origin_ad->status === Advertisement::STATUS_UNAVAILABLE) {
