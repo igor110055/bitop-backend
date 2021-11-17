@@ -9,6 +9,7 @@ class Config extends UuidModel
     const ATTRIBUTE_APP_VERSION = 'app-version';
     const ATTRIBUTE_INVITATION_REQUIRED = 'invitation-required';
     const ATTRIBUTE_PAYMENT_WINDOW = 'payment-window';
+    const ATTRIBUTE_EXPRESS_PAYMENT_WINDOW = 'express-payment-window';
     const ATTRIBUTES = [
         self::ATTRIBUTE_WALLET,
         self::ATTRIBUTE_WITHDRAWAL_FEE_FACTOR,
@@ -16,6 +17,7 @@ class Config extends UuidModel
         self::ATTRIBUTE_APP_VERSION,
         self::ATTRIBUTE_INVITATION_REQUIRED,
         self::ATTRIBUTE_PAYMENT_WINDOW,
+        self::ATTRIBUTE_EXPRESS_PAYMENT_WINDOW,
     ];
     const DEFAULT = [
         self::ATTRIBUTE_INVITATION_REQUIRED => true,
@@ -23,6 +25,7 @@ class Config extends UuidModel
             'min' => 360,
             'max' => 1440,
         ],
+        self::ATTRIBUTE_EXPRESS_PAYMENT_WINDOW => 25,
     ];
 
     protected $fillable = [

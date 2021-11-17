@@ -94,6 +94,10 @@ class AdvertisementController extends AuthenticatedController
         $values = $request->validated();
         $values['amount'] = trim_redundant_decimal($values['amount'], $values['coin']);
         $this->checkSecurityCode($user, $values['security_code']);
+        $values['is_express'] = (bool)data_get($values, 'is_express');
+        if ($values['is_express'] && !$user->is_merchant) {
+            throw new BadRequestError;
+        }
         $advertisement = $this->AdvertisementService->make(
                 $user,
                 $values,
@@ -122,6 +126,7 @@ class AdvertisementController extends AuthenticatedController
                 'coin' => $origin_ad->coin,
                 'currency' => $origin_ad->currency,
                 'type' => $origin_ad->type,
+                'is_express' => $origin_ad->is_express,
             ];
             $new_ad = $this->AdvertisementService->make(
                     $user,
@@ -194,8 +199,8 @@ class AdvertisementController extends AuthenticatedController
                     $user,
                     data_get($values, 'action', 'sell'),
                     [Advertisement::STATUS_AVAILABLE, Advertisement::STATUS_UNAVAILABLE],
+                    null, // is_express
                     data_get($values, 'currency'),
-                    data_get($values, 'nationality'),
                     $this->inputLimit(),
                     $this->inputOffset()
                 );
@@ -204,27 +209,20 @@ class AdvertisementController extends AuthenticatedController
                     $user,
                     data_get($values, 'action', 'sell'),
                     [Advertisement::STATUS_AVAILABLE],
+                    false, // is_express
                     data_get($values, 'currency'),
-                    data_get($values, 'nationality'),
                     $this->inputLimit(),
                     $this->inputOffset()
                 );
-                /* agent feature is not activated now
-                $result['data'] = $this->checkAdsRecommended($result['data']); */
             }
         } else {
             $result = $this->AdvertisementRepo->getAdList(
                 $values['action'],
                 $values['coin'],
                 data_get($values, 'currency'),
-                data_get($values, 'nationality'),
                 $this->inputLimit(),
                 $this->inputOffset()
             );
-            /* agent feature is not activated now
-            if ($values['coin'] === config('core.coin.control')) {
-                $result['data'] = $this->checkAdsRecommended($result['data']);
-            } */
         }
         return $this->paginationResponse(
             AdvertisementResource::collection($result['data']),

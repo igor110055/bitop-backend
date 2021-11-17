@@ -86,19 +86,16 @@ class AdvertisementRepo implements \App\Repos\Interfaces\AdvertisementRepo
         string $type,
         string $coin,
         $currency = null,
-        $nationality = null,
         int $limit,
         int $offset
     ) {
         $query = $this->ad
+            ->where('is_express', false)
             ->where('status', Advertisement::STATUS_AVAILABLE)
             ->where('type', $type)
             ->where('coin', $coin)
             ->when($currency, function ($query, $currency) {
                 return $query->where('currency', $currency);
-            })
-            ->when($nationality, function ($query, $nationality) {
-                return $query->whereJsonContains('nationality', $nationality);
             })
             ->when($type, function ($query, $type) {
                 if ($type === Advertisement::TYPE_BUY) {
@@ -128,8 +125,8 @@ class AdvertisementRepo implements \App\Repos\Interfaces\AdvertisementRepo
         User $user,
         string $type,
         array $status,
+        $is_express = false,
         $currency = null,
-        $nationality = null,
         int $limit,
         int $offset
     ) {
@@ -139,10 +136,10 @@ class AdvertisementRepo implements \App\Repos\Interfaces\AdvertisementRepo
             ->whereIn('status', $status)
             ->when($currency, function ($query, $currency) {
                 return $query->where('currency', $currency);
-            })
-            ->when($nationality, function ($query, $nationality) {
-                return $query->whereJsonContains('nationality', $nationality);
             });
+        if (!is_null($is_express)) {
+            $query->where('is_express', $is_express);
+        }
 
         $total = $query->count();
         $data = $query

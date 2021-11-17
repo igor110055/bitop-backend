@@ -24,6 +24,7 @@ class User extends AuthModel
 
     protected $casts = [
         'is_admin' => 'boolean',
+        'is_merchant' => 'boolean',
         'is_tester' => 'boolean',
     ];
 
@@ -37,6 +38,7 @@ class User extends AuthModel
         'group_id',
         'nationality',
         'is_admin',
+        'is_merchant',
         'agency_id',
         'email_verification_id',
         'mobile_verification_id',

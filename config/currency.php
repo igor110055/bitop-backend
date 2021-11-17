@@ -3,6 +3,6 @@
 return [
     "CNY" => [
         'decimal' => 2,
-        'min_limit' => 7000,
+        'min_limit' => 100,
     ],
 ];

@@ -20,6 +20,7 @@ class AdvertisementResource extends JsonResource
 
         return [
             'id' => $this->id,
+            'is_express' => $this->is_express,
             'user_id' => $this->user_id,
             'username' => $this->owner->username,
             'type' => $this->type,

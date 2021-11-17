@@ -19,22 +19,22 @@ class CreateAdRequest extends PublicRequest
         $currencies = array_keys(config('currency'));
 
         return [
+            'is_express' => 'nullable|boolean',
             'type' => 'required|in:'.implode(',', $types),
             'coin' => 'required|in:'.implode(',', $coins),
             'amount' => 'required|numeric|min:0',
             'currency' => 'required|in:'.implode(',', $currencies),
             'unit_price' => 'required|numeric|min:0',
             'min_trades' => 'required|numeric|min:0',
-            'nationality' => 'nullable',
             'terms' => 'nullable|string',
             'message' => 'nullable|string',
-            'payables' => 'required',
+            'payables' => 'required_unless:is_express,1',
             'payables.bank_account' => 'array',
             'payables.bank_account.*' => [new AvailableBankAccountId(auth()->user())],
             'security_code' => "required|string|max:60",
             'min_limit' => 'required|numeric',
             'max_limit' => 'required|numeric|gte:min_limit',
-            'payment_window' => 'required|integer',
+            'payment_window' => 'required_unless:is_express,1|integer',
         ];
     }
 
@@ -48,6 +48,9 @@ class CreateAdRequest extends PublicRequest
         }
 
         $validator->sometimes('payables.bank_account', 'required', function ($input) {
+            if ($input->is_express == 1) {
+                return false;
+            }
             return ($input->type === Advertisement::TYPE_SELL) or !(auth()->user()->is_agent);
         });
     }

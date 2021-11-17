@@ -27,6 +27,7 @@ class MeResource extends JsonResource
             'trade_number' => $this->trade_number,
             'two_factor_auth' => ($this->two_factor_auth) ? true : false,
             'is_agent' => $this->when($this->is_agent, $this->is_agent),
+            'is_merchant' => $this->when($this->is_merchant, $this->is_merchant),
         ];
     }
 }

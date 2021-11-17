@@ -39,10 +39,12 @@ class Advertisement extends RandomIDModel
 
     protected $casts = [
         'nationality' => 'array',
+        'is_express' => 'boolean',
     ];
 
     protected $fillable = [
         'id',
+        'is_express',
         'reference_id',
         'user_id',
         'type',

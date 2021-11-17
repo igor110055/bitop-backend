@@ -19,6 +19,7 @@ class GetAdRequest extends PublicRequest
         $nationalities = array_keys(config('core.nationality'));
 
         return [
+            'is_express' => 'nullable|boolean',
             'user_id' => 'nullable',
             'action' => 'required|in:'.implode(",", $types),
             'coin' => 'required_without:user_id|in:'.implode(",", $coins),

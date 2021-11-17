@@ -140,10 +140,14 @@ class AdvertisementService implements  AdvertisementServiceInterface
         Advertisement $ref = null
     ) {
         # check payment window
-        $payment_window_range = $this->ConfigRepo->get(Config::ATTRIBUTE_PAYMENT_WINDOW);
-        if ((data_get($values, 'payment_window', 0) < $payment_window_range['min']) or
-            (data_get($values, 'payment_window', 0) > $payment_window_range['max'])) {
-            throw ValidationException::withMessages(['payment_window' => 'payment_window is out of range.']);
+        if ($values['is_express']) {
+            $values['payment_window'] = $this->ConfigRepo->get(Config::ATTRIBUTE_EXPRESS_PAYMENT_WINDOW);
+        } else {
+            $payment_window_range = $this->ConfigRepo->get(Config::ATTRIBUTE_PAYMENT_WINDOW);
+            if ((data_get($values, 'payment_window', 0) < $payment_window_range['min']) or
+                (data_get($values, 'payment_window', 0) > $payment_window_range['max'])) {
+                throw ValidationException::withMessages(['payment_window' => 'payment_window is out of range.']);
+            }
         }
 
         # check min amount
@@ -204,23 +208,25 @@ class AdvertisementService implements  AdvertisementServiceInterface
                 $advertisement = $this->AdvertisementRepo->createByRef($ref, $values);
             }
 
-            # Attach bank_accounts
-            $bank_account_ids = data_get($payables, Order::PAYABLE_BANK_ACCOUNT, []);
-            $filtered_bank_accounts = $this->BankAccountRepo
-                ->filterWithIds($bank_account_ids, [
-                    'currency' => $advertisement->currency,
-                    'user_id' => $user->id,
-                ]);
+            if (!$advertisement->is_express) {
+                # Attach bank_accounts
+                $bank_account_ids = data_get($payables, Order::PAYABLE_BANK_ACCOUNT, []);
+                $filtered_bank_accounts = $this->BankAccountRepo
+                    ->filterWithIds($bank_account_ids, [
+                        'currency' => $advertisement->currency,
+                        'user_id' => $user->id,
+                    ]);
 
-            if (empty($filtered_bank_accounts)) {
-                throw new BadRequestError('No valid bank_account provided.');
+                if (empty($filtered_bank_accounts)) {
+                    throw new BadRequestError('No valid bank_account provided.');
+                }
+                # Attach bank_accounts
+                $advertisement->bank_accounts()->attach($filtered_bank_accounts->pluck('id'));
+
+                # Update ad's nationality
+                $bank_accounts_nationalities = json_encode(array_unique($filtered_bank_accounts->pluck('bank.nationality')->toArray()));
+                $this->AdvertisementRepo->setAttribute($advertisement, ['nationality' => $bank_accounts_nationalities]);
             }
-            # Attach bank_accounts
-            $advertisement->bank_accounts()->attach($filtered_bank_accounts->pluck('id'));
-
-            # Update ad's nationality
-            $bank_accounts_nationalities = json_encode(array_unique($filtered_bank_accounts->pluck('bank.nationality')->toArray()));
-            $this->AdvertisementRepo->setAttribute($advertisement, ['nationality' => $bank_accounts_nationalities]);
 
             # Lock balance for sell advertisement
             if ($values['type'] === Advertisement::TYPE_SELL) {

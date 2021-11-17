@@ -20,7 +20,6 @@ interface AdvertisementRepo
         string $type,
         string $coin,
         $currency = null,
-        $nationality = null,
         int $limit,
         int $offset
     );
@@ -28,8 +27,8 @@ interface AdvertisementRepo
         User $user,
         string $type,
         array $status,
+        $is_express = false,
         $currency = null,
-        $nationality = null,
         int $limit,
         int $offset
     );
