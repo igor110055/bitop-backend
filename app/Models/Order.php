@@ -51,7 +51,7 @@ class Order extends RandomIDModel
         'amount',
         'fee',
         'currency',
-        'price',
+        'total',
         'unit_price',
         'profit',
         'coin_unit_price',

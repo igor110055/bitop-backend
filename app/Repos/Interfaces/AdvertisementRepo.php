@@ -39,4 +39,10 @@ interface AdvertisementRepo
     public function countAll();
     public function getUserAdsCount(User $user);
     public function getTransaction(Advertisement $advertisement, string $type);
+    public function getExpressAds(
+        User $user,
+        string $type,
+        string $coin,
+        string $currency
+    );
 }

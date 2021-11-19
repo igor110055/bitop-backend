@@ -223,4 +223,28 @@ class AdvertisementRepo implements \App\Repos\Interfaces\AdvertisementRepo
             ->latest()
             ->first();
     }
+
+    public function getExpressAds(
+        User $user,
+        string $type,
+        string $coin,
+        string $currency
+    ) {
+        $data = $this->ad
+            ->where('user_id', '!=', $user->id)
+            ->where('is_express', true)
+            ->where('status', Advertisement::STATUS_AVAILABLE)
+            ->where('type', $type)
+            ->where('coin', $coin)
+            ->where('currency', $currency)
+            ->when($type, function ($query, $type) {
+                if ($type === Advertisement::TYPE_BUY) {
+                    return $query->orderBy('unit_price', 'desc');
+                } elseif ($type === Advertisement::TYPE_SELL) {
+                    return $query->orderBy('unit_price', 'asc');
+                }
+            })->orderBy('created_at', 'desc')
+            ->get();
+        return $data;
+    }
 }

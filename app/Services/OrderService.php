@@ -91,13 +91,14 @@ class OrderService implements OrderServiceInterface
             throw new MinimumTradesError;
         }
 
-        # get request amount, price
-        extract(
-            $this->ExchangeService->calculateCoinPrice(
+        # get request amount, total
+        extract( # $amount, $total, $unit_price
+            $this->ExchangeService->getTotalAndAmount(
                 $advertisement->coin,
-                $amount,
+                $advertisement->currency,
                 $advertisement->unit_price,
-                $advertisement->currency
+                $amount,
+                null # total
             )
         );
         # check amount range
@@ -105,13 +106,13 @@ class OrderService implements OrderServiceInterface
             throw new BadRequestError('Requested amount exceeds the remaining amount');
         }
         # check price range
-        if (Dec::lt($price, $advertisement->min_limit) or
-            Dec::gt($price, $advertisement->max_limit)
+        if (Dec::lt($total, $advertisement->min_limit) or
+            Dec::gt($total, $advertisement->max_limit)
         ) {
             throw new ExceedMinMaxLimitError;
         }
 
-        list($order, $ad_deactivate) = DB::transaction(function () use ($user, $advertisement, $amount, $price, $payables) {
+        list($order, $ad_deactivate) = DB::transaction(function () use ($user, $advertisement, $amount, $total, $payables) {
             $origin_ad = $advertisement;
             $advertisement = $this->AdvertisementRepo->findForUpdate($advertisement->id);
             // check advertisement value
@@ -121,7 +122,7 @@ class OrderService implements OrderServiceInterface
 
             $values = $advertisement->toArray();
             $values['amount'] = $amount;
-            $values['price'] = $price;
+            $values['total'] = $total;
             $values['advertisement_id'] = $advertisement->id;
 
             if ($advertisement->type === Advertisement::TYPE_SELL) {
@@ -234,6 +235,183 @@ class OrderService implements OrderServiceInterface
 
             return [$order, $ad_deactivate];
         });
+
+        # send notificaiton
+        if ($ad_deactivate) {
+            $advertisement->owner->notify((new AdvertisementUnavailableNotification(
+                $advertisement,
+                SystemAction::class
+            ))->delay(Carbon::now()->addMinute()));
+        }
+        $action = ($advertisement->type === Advertisement::TYPE_SELL) ? 'buy' : 'sell';
+        $dst_user_notification = new DealNotification($order, 'dst_user', $action);
+        $order->dst_user->notify($dst_user_notification);
+        $src_user_notification = new DealNotification($order, 'src_user', $action);
+        $order->src_user->notify($src_user_notification);
+        FcmDealNotification::dispatch($order->dst_user, $order)->onQueue(config('services.fcm.queue_name'));
+        FcmDealNotification::dispatch($order->src_user, $order)->onQueue(config('services.fcm.queue_name'));
+
+        return $order;
+    }
+
+    public function makeExpress(
+        User $user,
+        Advertisement $advertisement,
+        $amount = null,
+        $total = null,
+        $payables = null
+    ) {
+        if (!$advertisement->is_express) {
+            throw new BadRequestError;
+        }
+        if ($advertisement->status !== Advertisement::STATUS_AVAILABLE) {
+            throw new UnavailableStatusError('Advertisemet is not available.');
+        }
+        if (Dec::lt($user->trade_number, $advertisement->min_trades)) {
+            throw new MinimumTradesError;
+        }
+
+        extract(    // $amount, $total, $unit_price
+            $this->ExchangeService->getTotalAndAmount(
+                $advertisement->coin,
+                $advertisement->currency,
+                $advertisement->unit_price,
+                $amount,
+                $total
+            )
+        );
+
+        # check amount range
+        if (Dec::gt($amount, $advertisement->remaining_amount)) {
+            throw new BadRequestError('Requested amount exceeds the remaining amount');
+        }
+        # check price range
+        if (Dec::lt($total, $advertisement->min_limit) or
+            Dec::gt($total, $advertisement->max_limit)
+        ) {
+            throw new ExceedMinMaxLimitError;
+        }
+
+        list($order, $ad_deactivate) = DB::transaction(function () use ($user, $advertisement, $amount, $total, $payables) {
+            $origin_ad = $advertisement;
+            $advertisement = $this->AdvertisementRepo->findForUpdate($advertisement->id);
+            // check advertisement value
+            if (!$this->AdvertisementRepo->checkValuesUnchanged($origin_ad, $advertisement)) {
+                throw new UnavailableStatusError;
+            }
+
+            $values = $advertisement->toArray();
+            $values['amount'] = $amount;
+            $values['total'] = $total;
+            $values['advertisement_id'] = $advertisement->id;
+
+            if ($advertisement->type === Advertisement::TYPE_SELL) {
+                $src_user = $advertisement->owner;
+                $dst_user = $user;
+            } else {
+                $src_user = $user;
+                $dst_user = $advertisement->owner;
+            }
+            $values['src_user_id'] = $src_user->id;
+            $values['dst_user_id'] = $dst_user->id;
+
+            if ($src_user->is($dst_user)) {
+                throw new BadRequestError('User can\'t buy/sell an order of his own.');
+            }
+
+            $update_ad = [];
+            if (Dec::eq($amount, $advertisement->remaining_amount)) { #ad complete
+                $update_ad['status'] = Advertisement::STATUS_COMPLETED;
+            }
+            $update_ad['remaining_amount'] = (string) Dec::sub($advertisement->remaining_amount, $amount);
+            $remaining_total = Dec::mul($update_ad['remaining_amount'], $advertisement->unit_price, config('currency')[$advertisement->currency]['decimal']);
+            if (Dec::lt($remaining_total, $advertisement->max_limit)) {
+                $update_ad['max_limit'] = (string) $remaining_total;
+            }
+
+            if ($advertisement->type === Advertisement::TYPE_SELL) {
+                # calculate sell advertisement remaining fee
+                if (Dec::eq($amount, $advertisement->remaining_amount)) { #ad complete
+                    $request_fee = $advertisement->remaining_fee;
+                } else {
+                    $request_fee = $this->AdvertisementRepo->calculateProportionFee($advertisement, $amount);
+                    if (Dec::gt($request_fee, $advertisement->remaining_fee)) {
+                        $request_fee = $advertisement->remaining_fee;
+                    }
+                }
+                $update_ad['remaining_fee'] = (string) Dec::sub($advertisement->remaining_fee, $request_fee);
+
+                # unlock locked-balance
+                $locked_amount = (string)Dec::add($amount, $request_fee);
+                $this->AccountService
+                    ->unlock(
+                        $advertisement->owner,
+                        $advertisement->coin,
+                        $locked_amount,
+                        Transaction::TYPE_MATCH_ADVERTISEMENT,
+                        $advertisement
+                    );
+                $values['fee'] = $request_fee;
+            }
+            # update advertisement
+            $this->AdvertisementRepo->setAttribute($advertisement, $update_ad);
+            $advertisement->refresh();
+            if (($ad_deactivate = $advertisement->remaining_below_limit) and
+                !Dec::eq($advertisement->remaining_amount, 0)
+            ) {
+                $this->AdvertisementService->deactivate($advertisement->owner, $advertisement);
+            }
+
+            # Calculate src_user's fee if this is a buy-advertisement
+            if ($advertisement->type === Advertisement::TYPE_BUY) {
+                $fee = $this->FeeService
+                    ->getFee(
+                        FeeSetting::TYPE_ORDER,
+                        $src_user,
+                        $advertisement->coin,
+                        $amount
+                    );
+                $values['fee'] = data_get($fee, 'amount');
+                $values['fee_setting_id'] = data_get($fee, 'fee_setting.id');
+            }
+
+            # Generate expired_at from advertisement's payment_window
+            $values['expired_at'] = Carbon::now()->addMinutes($advertisement->payment_window);
+
+            # Create the order
+            $order = $this->OrderRepo->create($values);
+
+            # Attach bank_accounts to order if this is a buy advertisement
+            if ($advertisement->type === Advertisement::TYPE_BUY) {
+                $bank_account_ids = data_get($payables, Order::PAYABLE_BANK_ACCOUNT, []);
+                $filtered_bank_accounts = $this->BankAccountRepo
+                    ->filterWithIds($bank_account_ids, [
+                        'currency' => $advertisement->currency,
+                        'user_id' => $user->id,
+                    ]);
+
+                if (empty($filtered_bank_accounts)) {
+                    throw new BadRequestError('No valid bank_account provided.');
+                }
+                $bank_account = $filtered_bank_accounts->first();
+                $order->bank_accounts()->attach($bank_account->id);
+            }
+
+            # Lock balance of src_user
+            $locked_amount = (string)Dec::add($order->amount, $order->fee);
+            $this->AccountService
+                ->lock(
+                    $src_user,
+                    $order->coin,
+                    $locked_amount,
+                    Transaction::TYPE_CREATE_ORDER,
+                    $order
+                );
+
+            return [$order, $ad_deactivate];
+        });
+
+        ## TODO: Get express bank account or payment_url
 
         # send notificaiton
         if ($ad_deactivate) {

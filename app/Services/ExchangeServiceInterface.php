@@ -8,20 +8,20 @@ use App\Models\{
 
 interface ExchangeServiceInterface
 {
-    public function calculateCoinPrice(
+    public function getTotalAndAmount(
         string $coin,
-        $amount,
+        string $currency,
         $unit_price,
-        string $currency
+        $amount = null,
+        $total = null
     );
     public function getCoinPriceMap($group = null);
-    public function getCoinPrice($coin, $currency, $price_type, $group = null);
     public function coinToCurrency(User $user, $coin, $currency, $type, $coin_amount = '1');
 
     public function coinToBaseValue($coin, $amount);
 
     # coin amount => USDT amount
-    public function coinToUSDT($coin, $amount);
+    /* public function coinToUSDT($coin, $amount); */
 
     # USDT amount => coin amount
     public function USDTToCoin($USDT_amount, $coin);

@@ -33,20 +33,25 @@ class ExchangeService implements ExchangeServiceInterface
         $this->price_types = CurrencyExchangeRate::PRICE_TYPES;
     }
 
-    public function calculateCoinPrice(
+    public function getTotalAndAmount(
         string $coin,
-        $amount,
+        string $currency,
         $unit_price,
-        string $currency
+        $amount = null,
+        $total = null
     ) {
-        $amount = Dec::create($amount)->floor(config("coin.{$coin}.decimal")); # decimal depends on each coin
         $unit_price = Dec::create($unit_price)->floor(config("core.currency.scale")); # decimal 2
-        $price = (string) Dec::mul($unit_price, $amount, config("currency.{$currency}.decimal"));
-
+        if (!is_null($amount)) {
+            $amount = trim_redundant_decimal($amount, $coin);
+            $total = (string) Dec::mul($unit_price, $amount, $this->currencies[$currency]['decimal']);
+        } else {
+            $total = currency_trim_redundant_decimal($total, $currency);
+            $amount = (string) Dec::div($total, $unit_price, $this->coins[$coin]['decimal']);
+        }
         return [
+            'total' => (string) $total,
             'amount' => (string) $amount,
             'unit_price' => (string) $unit_price,
-            'price' => $price,
         ];
     }
 
@@ -63,7 +68,7 @@ class ExchangeService implements ExchangeServiceInterface
         return $result;
     }
 
-    public function getCoinPrice(
+    protected function getCoinPrice(
         $coin,
         $currency,
         $price_type = 'mid',
@@ -161,7 +166,7 @@ class ExchangeService implements ExchangeServiceInterface
         return (string) Dec::mul($amount, $price, $this->currencies[$this->base_currency]['decimal']);
     }
 
-    public function coinToUSDT($coin, $amount)
+    /* public function coinToUSDT($coin, $amount)
     {
         if (data_get($this->coins, "{$coin}.base") === 'USDT') {
             return (string) $amount;
@@ -169,7 +174,7 @@ class ExchangeService implements ExchangeServiceInterface
         $coin_price = $this->CoinExchangeRateRepo->getLatest($coin)->price;
         $USDT_price = $this->CoinExchangeRateRepo->getLatest('USDT-ERC20')->price;
         return (string) Dec::mul($amount, $coin_price)->div($USDT_price, $this->coins['USDT-ERC20']['decimal']);
-    }
+    } */
 
     public function USDTToCoin($USDT_amount, $coin)
     {

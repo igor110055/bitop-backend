@@ -71,8 +71,8 @@ $api->version('v1', function ($api) {
     $api->group(['prefix' => 'ads'], function ($api) use ($ad) {
         $api->get('/', "{$ad}@getAds");
         $api->get('/preview', "{$ad}@preview");
-        $api->post('/', "{$ad}@create");
         $api->get('{id}', "{$ad}@getAd");
+        $api->post('/', "{$ad}@create");
         $api->put('{id}', "{$ad}@edit");
         $api->put('{id}/status', "{$ad}@updateStatus");
         $api->delete('{id}', "{$ad}@delete");
@@ -83,12 +83,13 @@ $api->version('v1', function ($api) {
     $api->group(['prefix' => 'orders'], function ($api) use ($order) {
         $api->get('/', "{$order}@index");
         $api->get('/preview', "{$order}@previewTrade");
-        $api->post('/', "{$order}@trade");
+        $api->get('/express', "{$order}@previewExpressTrade");
         $api->get('{id}', "{$order}@show");
+        $api->post('/', "{$order}@trade");
+        $api->post('{id}/confirm-verification', "{$order}@sendConfirmVerification");
         $api->put('{id}/claim', "{$order}@claim");
         $api->put('{id}/revoke', "{$order}@revoke");
         $api->put('{id}/confirm', "{$order}@confirm");
-        $api->post('{id}/confirm-verification', "{$order}@sendConfirmVerification");
         $api->delete('{id}', "{$order}@cancel");
     });
 

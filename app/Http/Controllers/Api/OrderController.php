@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use Dec\Dec;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Traits\{
     SecurityCodeTrait,
@@ -18,7 +19,11 @@ use App\Exceptions\{
     Verification\WrongCodeError,
     UnavailableStatusError,
 };
+use Illuminate\Database\{
+    Eloquent\ModelNotFoundException,
+};
 use App\Http\Resources\{
+    AdvertisementResource,
     OrderResource,
     VerificationResource,
 };
@@ -26,6 +31,7 @@ use App\Http\Requests\{
     OrderListRequest,
     ClaimOrderRequest,
     ConfirmOrderRequest,
+    PreviewExpressTradeRequest,
     PreviewTradeRequest,
     TradeRequest,
 };
@@ -78,12 +84,18 @@ class OrderController extends AuthenticatedController
         $this->OrderService = $OrderService;
         $this->FeeService = $FeeService;
         $this->ExchangeService = $ExchangeService;
+        $this->coins = config('coin');
+
+        $this->middleware(
+            'real_name.check',
+            ['only' => ['previewTrade', 'previewExpressTrade', 'trade']]
+        );
     }
 
     public function index(OrderListRequest $request)
     {
         $values = $request->validated();
-        
+
         $result = $this->OrderRepo->getUserOrders(
             auth()->user(),
             data_get($values, 'status'),
@@ -118,12 +130,12 @@ class OrderController extends AuthenticatedController
         }
         $input['amount'] = trim_redundant_decimal($input['amount'], $advertisement->coin);
 
-
-        $normalized = $this->ExchangeService->calculateCoinPrice(
+        $normalized = $this->ExchangeService->getTotalAndAmount(
             $advertisement->coin,
-            $input['amount'],
+            $advertisement->currency,
             $advertisement->unit_price,
-            $advertisement->currency
+            $input['amount'],
+            null # total
         );
 
         $result = [
@@ -131,7 +143,7 @@ class OrderController extends AuthenticatedController
             'currency' => $advertisement->currency,
             'amount' => $normalized['amount'],
             'unit_price' => $normalized['unit_price'],
-            'price' => $normalized['price'],
+            'total' => $normalized['total'],
         ];
 
         if ($advertisement->type === Advertisement::TYPE_BUY) {
@@ -164,11 +176,95 @@ class OrderController extends AuthenticatedController
                     $advertisement->amount,
                     $advertisement->unit_price,
                     $advertisement->currency,
-                    $normalized['price']
+                    $normalized['total']
                 );
             $result['profit'] = $profit['profit'];
         } */
         return $result;
+    }
+
+    public function previewExpressTrade(PreviewExpressTradeRequest $request)
+    {
+        $values = $request->validated();
+        $user = auth()->user();
+
+        $amount = data_get($values, 'amount');
+        $total = data_get($values, 'total');
+        $coin = $values['coin'];
+        $currency = $values['currency'];
+        $action = $values['action'];
+
+        if (!is_null($amount)) {
+            $amount = trim_redundant_decimal($amount, $coin);
+        } else {
+            $total = currency_trim_redundant_decimal($total, $currency);
+        }
+        $type = ($action === Advertisement::TYPE_BUY) ? Advertisement::TYPE_SELL : Advertisement::TYPE_BUY;
+
+
+        $ads = $this->AdvertisementRepo
+            ->getExpressAds(
+                $user,
+                $type,
+                $coin,
+                $currency,
+            );
+
+        foreach ($ads as $ad) {
+            if (Dec::lt($user->trade_number, $ad->min_trades)) {
+                continue;
+            }
+
+            $normalized = $this->ExchangeService->getTotalAndAmount(
+                $coin,
+                $currency,
+                $ad['unit_price'],
+                $amount,
+                $total
+            );
+            extract($normalized); // $total, $amount, $unit_price
+
+            if (Dec::gt($amount, $ad->remaining_amount)) {
+                continue;
+            }
+            if (Dec::gt($total, $ad->max_limit)) {
+                continue;
+            }
+            if (Dec::lt($total, $ad->min_limit)) {
+                continue;
+            }
+
+            $result = [
+                'ad' => new AdvertisementResource($ad),
+                'action' => $values['action'],
+                'coin' => $coin,
+                'currency' => $currency,
+                'amount' => $amount,
+                'total' => $total,
+                'unit_price' => $unit_price,
+            ];
+
+            if ($action === Advertisement::TYPE_SELL) {
+                $fee = $this->FeeService->getFee(
+                    FeeSetting::TYPE_ORDER,
+                    $user, #src_user
+                    $coin,
+                    $amount
+                );
+                $result['fee'] = $fee['amount'];
+
+                if (data_get($fee, 'fee_setting')) {
+                    if (data_get($fee, 'fee_setting.unit') !== '%') {
+                        throw new BadRequestError('Fee setting error');
+                    }
+                    $result['fee_percentage'] = trim_zeros(data_get($fee, 'fee_setting.value', '0'));
+                } else {
+                    $result['fee_percentage'] = '0';
+                }
+            }
+            return $result;
+        }
+        throw new ModelNotFoundException;
     }
 
     public function trade(TradeRequest $request)
@@ -202,6 +298,42 @@ class OrderController extends AuthenticatedController
                     data_get($input, 'payables', [])
                 );
         }
+
+        user_log(UserLog::ORDER_CREATE, ['order_id' => $order->id], request());
+        return response()->json(
+            new OrderResource($order),
+            201
+        );
+    }
+
+    public function tradeExpress(ExpressTradeRequest $request)
+    {
+        $user = auth()->user();
+        $values = $request->validated();
+        $this->checkSecurityCode($user, $input['security_code']);
+        $advertisement = $this->AdvertisementRepo->findOrFail($values['advertisement_id']);
+
+        $amount = data_get($values, 'amount');
+        $total = data_get($values, 'total');
+        $action = $values['action'];
+        if (!is_null($amount)) {
+            $amount = trim_redundant_decimal($amount, $coin);
+        } else {
+            $total = currency_trim_redundant_decimal($total, $currency);
+        }
+        $type = ($action === Advertisement::TYPE_BUY) ? Advertisement::TYPE_SELL : Advertisement::TYPE_BUY;
+        if ($advertisement->type !== $type) {
+            throw new BadRequestError;
+        }
+
+        $order = $this->OrderService
+            ->makeExpress(
+                $user,
+                $advertisement,
+                $amount,
+                $total,
+                data_get($input, 'payables', [])
+            );
 
         user_log(UserLog::ORDER_CREATE, ['order_id' => $order->id], request());
         return response()->json(

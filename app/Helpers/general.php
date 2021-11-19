@@ -63,6 +63,14 @@ if (!function_exists('hide_beta_coins')) {
     }
 }
 
+if (!function_exists('currency_trim_redundant_decimal')) {
+    function currency_trim_redundant_decimal($amount, string $currency) {
+        $default_decimal = config('core.currency.default_exp');
+        $decimal = config("currency.{$currency}.decimal") ?? $default_decimal;
+        return (string) Dec::create($amount)->floor($decimal);
+    }
+}
+
 if (!function_exists('trim_redundant_decimal')) {
     function trim_redundant_decimal($amount, string $coin) {
         $default_decimal = config('core.coin.default_exp');

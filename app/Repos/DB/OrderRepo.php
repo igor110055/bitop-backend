@@ -52,7 +52,7 @@ class OrderRepo implements \App\Repos\Interfaces\OrderRepo
             'amount' => data_get($values, 'amount'),
             'fee' => data_get($values, 'fee'),
             'currency' => data_get($values, 'currency'),
-            'price' => data_get($values, 'price'),
+            'total' => data_get($values, 'total'),
             'unit_price' => data_get($values, 'unit_price'),
             'fee_setting_id' => data_get($values, 'fee_setting_id'),
             'advertisement_id' => data_get($values, 'advertisement_id'),

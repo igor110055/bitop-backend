@@ -49,7 +49,7 @@ class ExchangeController extends AuthenticatedController
             'action' => $request->action,
             'amount' => $result['coin_amount'],
             'unit_price' => $result['unit_price'],
-            'price' => $result['currency_amount'],
+            'total' => $result['currency_amount'],
         ];
     }
 }

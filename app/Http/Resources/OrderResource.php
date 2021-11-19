@@ -46,7 +46,7 @@ class OrderResource extends JsonResource
             'amount' => $this->amount,
             'fee' => $this->when($user->is($src_user), $this->fee),
             'currency' => $this->currency,
-            'price' => $this->price,
+            'total' => $this->price,
             'unit_price' => $this->unit_price,
             'terms' => $this->terms,
             'message' => $this->message,

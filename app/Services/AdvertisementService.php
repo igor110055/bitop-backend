@@ -113,11 +113,12 @@ class AdvertisementService implements  AdvertisementServiceInterface
             }
         }
 
-        $normalized = $this->ExchangeService->calculateCoinPrice(
+        $normalized = $this->ExchangeService->getTotalAndAmount(
             $coin,
-            $amount,
+            $currency,
             $unit_price,
-            $currency
+            $amount,
+            null # total
         );
 
         return [
@@ -126,7 +127,7 @@ class AdvertisementService implements  AdvertisementServiceInterface
             'amount' => $normalized['amount'],
             'currency' => $currency,
             'unit_price' => $normalized['unit_price'],
-            'price' => $normalized['price'],
+            'total' => $normalized['total'],
             'fee' => $fee_amount,
             'fee_percentage' => $fee_percentage,
             'fulfill_amount' => $fulfill_amount,
@@ -163,21 +164,22 @@ class AdvertisementService implements  AdvertisementServiceInterface
             );
 
         # calculate price
-        $normalized = $this->ExchangeService->calculateCoinPrice(
+        $normalized = $this->ExchangeService->getTotalAndAmount(
             $values['coin'],
-            $values['amount'],
+            $values['currency'],
             $values['unit_price'],
-            $values['currency']
+            $values['amount'],
+            null # total
         );
 
         # check min_limit
-        if (Dec::lt($normalized['price'], $values['min_limit'])) {
+        if (Dec::lt($normalized['total'], $values['min_limit'])) {
             throw new AdTotalPriceBelowMinLimit;
         }
 
         # check max_limit
-        if (Dec::lt($normalized['price'], $values['max_limit'])) {
-            throw new BadRequestError('Max limit price exceed total');
+        if (Dec::lt($normalized['total'], $values['max_limit'])) {
+            throw new BadRequestError('Max limit exceed total');
         }
 
         $values = array_merge($values, $normalized);
