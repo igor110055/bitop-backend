@@ -44,7 +44,7 @@
                     <dt class="col-sm-3">單價</dt>
                     <dd class="col-sm-9">{{ $order->unit_price }}</dd>
                     <dt class="col-sm-3">價格</dt>
-                    <dd class="col-sm-9">{{ $order->price }}</dd>
+                    <dd class="col-sm-9">{{ $order->total }}</dd>
                     <dt class="col-sm-3">手續費</dt>
                     <dd class="col-sm-9">{{ formatted_coin_amount($order->fee) }}</dd>
                     <dt class="col-sm-3">利潤</dt>

@@ -602,7 +602,7 @@ class OrderService implements OrderServiceInterface
                     ->deposit(
                         $agency,
                         $order->currency,
-                        $order->price,
+                        $order->total,
                         AssetTransaction::TYPE_SELL_ORDER,
                         null,                               # unit_price: asset's unit_pirce will not be changed by order
                         $order
@@ -613,12 +613,12 @@ class OrderService implements OrderServiceInterface
             if ($order->dst_user->is_agent) {
                 # withdraw from agency's asset
                 $agency = $order->dst_user->agency;
-                if (Dec::create($order->price)->isPositive()) {
+                if (Dec::create($order->total)->isPositive()) {
                     $this->AssetService
                         ->withdraw(
                             $agency,
                             $order->currency,
-                            $order->price,
+                            $order->total,
                             AssetTransaction::TYPE_BUY_ORDER,
                             $order
                         );
@@ -638,7 +638,7 @@ class OrderService implements OrderServiceInterface
             $order->amount,
             $order->unit_price,
             $order->currency,
-            $order->price
+            $order->total
         );
     }
 
