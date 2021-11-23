@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\Advertisement;
 
-class PreviewExpressTradeRequest extends PublicRequest
+class MatchExpressAdsRequest extends PublicRequest
 {
     /**
      * Get the validation rules that apply to the request.

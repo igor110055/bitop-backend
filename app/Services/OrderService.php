@@ -41,6 +41,7 @@ use App\Repos\Interfaces\{
     OrderRepo,
     SystemActionRepo,
     UserRepo,
+    WfpaymentRepo,
 };
 use App\Jobs\Fcm\{
     DealNotification as FcmDealNotification,
@@ -62,7 +63,9 @@ class OrderService implements OrderServiceInterface
         AdvertisementServiceInterface $AdvertisementService,
         BankAccountRepo $BankAccountRepo,
         SystemActionRepo $SystemActionRepo,
-        UserRepo $UserRepo
+        UserRepo $UserRepo,
+        WfpaymentRepo $WfpaymentRepo,
+        WfpayServiceInterface $WfpayService
     ) {
         $this->AccountRepo = $AccountRepo;
         $this->AdvertisementRepo = $AdvertisementRepo;
@@ -72,9 +75,11 @@ class OrderService implements OrderServiceInterface
         $this->OrderRepo = $OrderRepo;
         $this->SystemActionRepo = $SystemActionRepo;
         $this->UserRepo = $UserRepo;
+        $this->WfpaymentRepo = $WfpaymentRepo;
         $this->AccountService = $AccountService;
         $this->FeeService = $FeeService;
         $this->AdvertisementService = $AdvertisementService;
+        $this->WfpayService = $WfpayService;
     }
 
     public function make(
@@ -300,10 +305,13 @@ class OrderService implements OrderServiceInterface
                 throw new UnavailableStatusError;
             }
 
-            $values = $advertisement->toArray();
+            $values['coin'] = $advertisement->coin;
+            $values['currency'] = $advertisement->currency;
+            $values['unit_price'] = $advertisement->unit_price;
+            $values['advertisement_id'] = $advertisement->id;
+            $values['is_express'] = true;
             $values['amount'] = $amount;
             $values['total'] = $total;
-            $values['advertisement_id'] = $advertisement->id;
 
             if ($advertisement->type === Advertisement::TYPE_SELL) {
                 $src_user = $advertisement->owner;
@@ -412,6 +420,9 @@ class OrderService implements OrderServiceInterface
         });
 
         ## TODO: Get express bank account or payment_url
+
+        $wfpayment = $this->WfpaymentRepo
+            ->createByOrder($order, 'wechat');
 
         # send notificaiton
         if ($ad_deactivate) {
@@ -797,5 +808,32 @@ class OrderService implements OrderServiceInterface
             FcmOrderCanceledNotification::dispatch($order->dst_user, $order, SystemAction::class)->onQueue(config('services.fcm.queue_name'));
         }
         return $order;
+    }
+
+    public function getWfpayment(
+        Order $order,
+        $payment_method = null,
+        $force_create = false
+    ) {
+        $order = $this->OrderRepo
+            ->findOrFail($order_id);
+
+        assert($order->is_express, true);
+
+        # TODO: check status and existing payment
+
+        if ($force_create) {
+            $wfpayment = null;
+        } else {
+            $wfpayment = $this->WfpaymentRepo
+                ->getTheLatestByOrder($order);
+        }
+
+        if (is_null($wfpayment)) {
+            $wfpayment = $this->WfpaymentRepo
+                ->createByOrder($order, $payment_method);
+        }
+
+        return $wfpayment;
     }
 }

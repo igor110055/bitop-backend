@@ -4,6 +4,10 @@ namespace App\Models;
 
 use Carbon\Carbon;
 
+use App\Exceptions\{
+    Core\InternalServerError,
+};
+
 class Withdrawal extends UuidModel
 {
     const STATUS_PROCESSING = 'processing';

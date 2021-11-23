@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\{
     WithdrawalController,
     AddressController,
     AnnouncementController,
+    WfpayController,
 };
 
 $api = app(Router::class);
@@ -83,9 +84,11 @@ $api->version('v1', function ($api) {
     $api->group(['prefix' => 'orders'], function ($api) use ($order) {
         $api->get('/', "{$order}@index");
         $api->get('/preview', "{$order}@previewTrade");
-        $api->get('/express', "{$order}@previewExpressTrade");
+        $api->get('/express-matches', "{$order}@matchExpressAds");
+        $api->get('/express-settings', "{$order}@getExpressTradeSettings");
         $api->get('{id}', "{$order}@show");
         $api->post('/', "{$order}@trade");
+        $api->post('/express', "{$order}@tradeExpress");
         $api->post('{id}/confirm-verification', "{$order}@sendConfirmVerification");
         $api->put('{id}/claim', "{$order}@claim");
         $api->put('{id}/revoke', "{$order}@revoke");
@@ -223,5 +226,11 @@ $api->version('v1', function ($api) {
     $api->group(['prefix' => 'nowhere'], function ($api) use ($info) {
         $api->get('/', "{$info}@nowhere");
         $api->post('/', "{$info}@nowhere");
+    });
+
+    # /api/wfpay/*
+    $wfpay = WfpayController::class;
+    $api->group(['prefix' => 'wfpay'], function ($api) use ($wfpay) {
+        $api->post('payment-callback/{id}', "{$wfpay}@paymentCallback");
     });
 });

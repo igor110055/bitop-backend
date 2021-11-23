@@ -146,6 +146,11 @@ class Order extends RandomIDModel
         return $this->morphMany(SystemAction::class, 'applicable');
     }
 
+    public function wfpayments()
+    {
+        return $this->hasMany(Wfpayment::class);
+    }
+
     public function getMessageAttribute()
     {
         return $this->advertisement->message;
