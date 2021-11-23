@@ -62,6 +62,7 @@ class ReposDBServiceProvider extends ServiceProvider
         Interfaces\AnnouncementReadRepo::class => DB\AnnouncementReadRepo::class,
         Interfaces\GroupApplicationRepo::class => DB\GroupApplicationRepo::class,
         Interfaces\FeeShareReportRepo::class => DB\FeeShareReportRepo::class,
+        Interfaces\WfpaymentRepo::class => DB\WfpaymentRepo::class,
     ];
 
     public function register()

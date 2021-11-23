@@ -36,6 +36,7 @@ class OrderResource extends JsonResource
 
         $order = [
             'id' => $this->id,
+            'is_express' => $this->is_express,
             'src_user_id' => $src_user->id,
             'src_username' => $src_user->username,
             'dst_user_id' => $dst_user->id,

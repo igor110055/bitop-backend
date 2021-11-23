@@ -31,9 +31,11 @@ use App\Http\Requests\{
     OrderListRequest,
     ClaimOrderRequest,
     ConfirmOrderRequest,
-    PreviewExpressTradeRequest,
+    ExpressSettingsRequest,
+    MatchExpressAdsRequest,
     PreviewTradeRequest,
     TradeRequest,
+    ExpressTradeRequest,
 };
 use App\Models\{
     Order,
@@ -41,6 +43,7 @@ use App\Models\{
     UserLog,
     Advertisement,
     FeeSetting,
+    Wfpayment,
 };
 use App\Notifications\{
     OrderConfirmation,
@@ -88,7 +91,7 @@ class OrderController extends AuthenticatedController
 
         $this->middleware(
             'real_name.check',
-            ['only' => ['previewTrade', 'previewExpressTrade', 'trade']]
+            ['only' => ['previewTrade', 'trade', 'matchExpressTrade', 'getExpressTradeSettings']]
         );
     }
 
@@ -183,10 +186,73 @@ class OrderController extends AuthenticatedController
         return $result;
     }
 
-    public function previewExpressTrade(PreviewExpressTradeRequest $request)
+    public function getExpressTradeSettings(ExpressSettingsRequest $request)
     {
         $values = $request->validated();
         $user = auth()->user();
+        $payment_limit = Wfpayment::$limits;
+        $paymeny_methods = Wfpayment::$methods;
+
+        $coin = $values['coin'];
+        $currency = $values['currency'];
+        $action = $values['action'];
+        $type = ($action === Advertisement::TYPE_BUY) ? Advertisement::TYPE_SELL : Advertisement::TYPE_BUY;
+
+        $response = [];
+
+        $ad = $this->AdvertisementRepo
+            ->getExpressAds(
+                $user,
+                $type,
+                $coin,
+                $currency,
+            )->first();
+        if (is_null($ad)) {
+            $price_result = $this->ExchangeService
+                ->coinToCurrency(
+                    $user,
+                    $coin,
+                    $currency,
+                    $action
+                );
+            $response['unit_price'] = $price_result['unit_price'];
+        } else {
+            $response['unit_price'] = $ad->unit_price;
+        }
+        $mins = [];
+        $maxs = [];
+        foreach ($paymeny_methods as $method) {
+            $mins[] = $payment_limit[$method]['min'];
+            $maxs[] = $payment_limit[$method]['max'];
+        }
+        $response['total_limit']['min'] = min($mins);
+        $response['total_limit']['max'] = max($maxs);
+
+        if ($action === Advertisement::TYPE_SELL) {
+            $fee = $this->FeeService->getFee(
+                FeeSetting::TYPE_ORDER,
+                $user, #src_user
+                $coin,
+                1
+            );
+            if (data_get($fee, 'fee_setting')) {
+                if (data_get($fee, 'fee_setting.unit') !== '%') {
+                    throw new BadRequestError('Fee setting error');
+                }
+                $response['fee_percentage'] = trim_zeros(data_get($fee, 'fee_setting.value', '0'));
+            }
+        }
+        $response['fee_percentage'] = isset($response['fee_percentage']) ? $response['fee_percentage'] : '0';
+
+        return $response;
+    }
+
+    public function matchExpressAds(MatchExpressAdsRequest $request)
+    {
+        $values = $request->validated();
+        $user = auth()->user();
+        $payment_limit = Wfpayment::$limits;
+        $paymeny_methods = Wfpayment::$methods;
 
         $amount = data_get($values, 'amount');
         $total = data_get($values, 'total');
@@ -200,7 +266,6 @@ class OrderController extends AuthenticatedController
             $total = currency_trim_redundant_decimal($total, $currency);
         }
         $type = ($action === Advertisement::TYPE_BUY) ? Advertisement::TYPE_SELL : Advertisement::TYPE_BUY;
-
 
         $ads = $this->AdvertisementRepo
             ->getExpressAds(
@@ -235,7 +300,7 @@ class OrderController extends AuthenticatedController
             }
 
             $result = [
-                'ad' => new AdvertisementResource($ad),
+                'advertisement_id' => $ad->id,
                 'action' => $values['action'],
                 'coin' => $coin,
                 'currency' => $currency,
@@ -261,6 +326,27 @@ class OrderController extends AuthenticatedController
                 } else {
                     $result['fee_percentage'] = '0';
                 }
+            }
+
+            if ($action === Advertisement::TYPE_SELL) {
+                return $result;
+            }
+
+            foreach ($paymeny_methods as $method) {
+                $result_payment_method = [
+                    'advertisement_id' => $ad->id,
+                    'amount' => $amount,
+                    'total' => $total,
+                    'unit_price' => $unit_price,
+                    'payment_method' => $method,
+                    'total_limit' => $payment_limit[$method],
+                    'is_available' => true,
+                ];
+                if (Dec::lt($result['total'], $payment_limit[$method]['min']) or Dec::gt($result['total'], $payment_limit[$method]['max'])) {
+                    $result_payment_method['is_available'] = false;
+                    $result_payment_method['error'] = 'OutOfRange';
+                }
+                $result['payment_methods'][] = $result_payment_method;
             }
             return $result;
         }
@@ -310,16 +396,16 @@ class OrderController extends AuthenticatedController
     {
         $user = auth()->user();
         $values = $request->validated();
-        $this->checkSecurityCode($user, $input['security_code']);
+        $this->checkSecurityCode($user, $values['security_code']);
         $advertisement = $this->AdvertisementRepo->findOrFail($values['advertisement_id']);
 
         $amount = data_get($values, 'amount');
         $total = data_get($values, 'total');
         $action = $values['action'];
         if (!is_null($amount)) {
-            $amount = trim_redundant_decimal($amount, $coin);
+            $amount = trim_redundant_decimal($amount, $advertisement['coin']);
         } else {
-            $total = currency_trim_redundant_decimal($total, $currency);
+            $total = currency_trim_redundant_decimal($total, $advertisement['currency']);
         }
         $type = ($action === Advertisement::TYPE_BUY) ? Advertisement::TYPE_SELL : Advertisement::TYPE_BUY;
         if ($advertisement->type !== $type) {
@@ -332,7 +418,7 @@ class OrderController extends AuthenticatedController
                 $advertisement,
                 $amount,
                 $total,
-                data_get($input, 'payables', [])
+                data_get($values, 'payables', [])
             );
 
         user_log(UserLog::ORDER_CREATE, ['order_id' => $order->id], request());

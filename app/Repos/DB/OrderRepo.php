@@ -45,6 +45,7 @@ class OrderRepo implements \App\Repos\Interfaces\OrderRepo
     public function create($values)
     {
         $values = [
+            'is_express' => data_get($values, 'is_express', false),
             'src_user_id' => data_get($values, 'src_user_id'),
             'dst_user_id' => data_get($values, 'dst_user_id'),
             'status' => ORDER::STATUS_PROCESSING,
@@ -114,7 +115,7 @@ class OrderRepo implements \App\Repos\Interfaces\OrderRepo
             ->offset($offset)
             ->limit($limit)
             ->get();
-        
+
         return [
             'total' => $total,
             'filtered' => $data->count(),

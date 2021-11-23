@@ -46,6 +46,8 @@ use App\Services\{
     CaptchaService,
     FcmServiceInterface,
     FcmService,
+    WfpayServiceInterface,
+    WfpayService,
 };
 
 class AppServiceProvider extends ServiceProvider
@@ -65,6 +67,7 @@ class AppServiceProvider extends ServiceProvider
         TwoFactorAuthServiceInterface::class => TwoFactorAuthService::class,
         CaptchaServiceInterface::class => CaptchaService::class,
         FcmServiceInterface::class => FcmService::class,
+        WfpayServiceInterface::class => WfpayService::class,
     ];
 
     /**
