@@ -88,7 +88,6 @@ class CancelExpiredOrders extends Command
 
             # add order count
             $this->UserRepo->updateOrderCount($order->dst_user, false);
-
         }
     }
 }

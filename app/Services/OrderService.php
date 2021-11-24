@@ -25,6 +25,7 @@ use App\Models\{
     User,
     AdminAction,
     SystemAction,
+    Wfpayment,
 };
 use App\Notifications\{
     ClaimNotification,
@@ -253,8 +254,8 @@ class OrderService implements OrderServiceInterface
         $order->dst_user->notify($dst_user_notification);
         $src_user_notification = new DealNotification($order, 'src_user', $action);
         $order->src_user->notify($src_user_notification);
-        FcmDealNotification::dispatch($order->dst_user, $order)->onQueue(config('services.fcm.queue_name'));
-        FcmDealNotification::dispatch($order->src_user, $order)->onQueue(config('services.fcm.queue_name'));
+        /* FcmDealNotification::dispatch($order->dst_user, $order)->onQueue(config('services.fcm.queue_name'));
+        FcmDealNotification::dispatch($order->src_user, $order)->onQueue(config('services.fcm.queue_name')); */
 
         return $order;
     }
@@ -264,6 +265,7 @@ class OrderService implements OrderServiceInterface
         Advertisement $advertisement,
         $amount = null,
         $total = null,
+        $payment_method = null,
         $payables = null
     ) {
         if (!$advertisement->is_express) {
@@ -290,14 +292,23 @@ class OrderService implements OrderServiceInterface
         if (Dec::gt($amount, $advertisement->remaining_amount)) {
             throw new BadRequestError('Requested amount exceeds the remaining amount');
         }
-        # check price range
+        # check total range
         if (Dec::lt($total, $advertisement->min_limit) or
             Dec::gt($total, $advertisement->max_limit)
         ) {
             throw new ExceedMinMaxLimitError;
         }
 
-        list($order, $ad_deactivate) = DB::transaction(function () use ($user, $advertisement, $amount, $total, $payables) {
+        if ($advertisement->type === Advertisement::TYPE_SELL) {
+            # check total range for payment method
+            if (Dec::lt($total, Wfpayment::$limits[$payment_method]['min']) or
+                Dec::gt($total, Wfpayment::$limits[$payment_method]['max'])
+            ) {
+                throw new ExceedMinMaxLimitError;
+            }
+        }
+
+        list($order, $ad_deactivate, $wfpayment) = DB::transaction(function () use ($user, $advertisement, $amount, $total, $payment_method, $payables) {
             $origin_ad = $advertisement;
             $advertisement = $this->AdvertisementRepo->findForUpdate($advertisement->id);
             // check advertisement value
@@ -416,13 +427,16 @@ class OrderService implements OrderServiceInterface
                     $order
                 );
 
-            return [$order, $ad_deactivate];
+            # Create wfpayment and get remote payment info
+            if ($advertisement->type === Advertisement::TYPE_SELL) {
+                $wfpayment = $this->WfpaymentRepo
+                    ->createByOrder($order, $payment_method);
+            } else {
+                $wfpayment = null;
+            }
+
+            return [$order, $ad_deactivate, $wfpayment];
         });
-
-        ## TODO: Get express bank account or payment_url
-
-        $wfpayment = $this->WfpaymentRepo
-            ->createByOrder($order, 'wechat');
 
         # send notificaiton
         if ($ad_deactivate) {
@@ -436,10 +450,10 @@ class OrderService implements OrderServiceInterface
         $order->dst_user->notify($dst_user_notification);
         $src_user_notification = new DealNotification($order, 'src_user', $action);
         $order->src_user->notify($src_user_notification);
-        FcmDealNotification::dispatch($order->dst_user, $order)->onQueue(config('services.fcm.queue_name'));
-        FcmDealNotification::dispatch($order->src_user, $order)->onQueue(config('services.fcm.queue_name'));
+        /* FcmDealNotification::dispatch($order->dst_user, $order)->onQueue(config('services.fcm.queue_name'));
+        FcmDealNotification::dispatch($order->src_user, $order)->onQueue(config('services.fcm.queue_name')); */
 
-        return $order;
+        return [$order, $wfpayment];
     }
 
     public function claim(

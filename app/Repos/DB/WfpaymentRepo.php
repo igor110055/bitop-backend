@@ -2,6 +2,11 @@
 
 namespace App\Repos\DB;
 
+use App\Exceptions\{
+    Core\BadRequestError,
+    VendorException,
+};
+
 use App\Models\{
     Order,
     User,
@@ -54,29 +59,59 @@ class WfpaymentRepo implements \App\Repos\Interfaces\WfpaymentRepo
     public function createWithPaymentInfo(array $values)
     {
         $wfpayment = $this->create($values);
-        $remote = $this->WfpayService
+        try {
+            $remote = $this->getPaymentInfo($wfpayment);
+        } catch (BadRequestError $e) {
+            $json = $e->getMessage();
+            $wfpayment = $this->update($wfpayment, ['response' => $json]);
+            $data = json_decode($json);
+            throw new BadRequestError(data_get($data, 'message'));
+        } catch (\Throwable $e) {
+            throw $e;
+            throw new VendorException;
+        }
+        $update = [
+            'remote_id' => data_get($remote, 'id'),
+            'status' => data_get($remote, 'status'),
+            'guest_payment_amount' => data_get($remote, 'guest_payment_amount'),
+            'payment_url' => data_get($remote, 'payment_url'),
+            'merchant_fee' => data_get($remote, 'merchant_fee'),
+            'response' => json_encode($remote),
+        ];
+        $bank_account_info = data_get($remote, 'bank_account');
+        if (!is_null($bank_account_info) && is_array($bank_account_info)) {
+            $update['payment_info'] = $bank_account_info;
+        }
+        $this->update($wfpayment, $update);
+
+        return $wfpayment->fresh();
+    }
+
+    public function getPaymentInfo(Wfpayment $wfpayment)
+    {
+        $force_matching = ($wfpayment->payment_method === Wfpayment::METHOD_BANK);
+        $result = $this->WfpayService
             ->createPayment(
                 $wfpayment->id,
                 $wfpayment->total,
                 $wfpayment->payment_method,
                 $wfpayment->real_name,
                 $wfpayment->callback_url,
-                $wfpayment->return_url
+                $wfpayment->return_url,
+                $force_matching
             );
-        $update = [
-            'remote_id' => data_get($remote, 'id'),
-            'remote_status' => data_get($remote, 'status'),
-            'guest_payment_amount' => data_get($remote, 'guest_payment_amount'),
-            'payment_url' => data_get($remote, 'payment_url'),
-            'merchant_fee' => data_get($remote, 'merchant_fee'),
-            'response' => json_encode($remote),
-        ];
-        if ($bank_account_info = data_get($remote, 'bank_account') && is_array($bank_account_info)) {
-            $update['payment_info'] = $bank_account_info;
-        }
-        $wfpayment = $this->update($wfpayment, $update);
 
-        return $wfpayment;
+        if ($force_matching) {
+            $tries = 2;
+            while ($result['status'] === Wfpayment::STATUS_PENDINT_ALLOCATION && $tries > 0) {
+                sleep(5);
+                $result = $this->WfpayService
+                    ->rematch($wfpayment->id);
+                $tries--;
+            }
+        }
+
+        return $result;
     }
 
     public function createByOrder(Order $order, $payment_method = 'bank')

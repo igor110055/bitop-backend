@@ -42,7 +42,8 @@ class WfpayService implements WfpayServiceInterface
         $payment_method = 'bank',
         $real_name,
         $notify_url,
-        $return_url
+        $return_url,
+        $force_matching = true
     ) {
         $data = [
             "account_name" => $this->account,
@@ -55,8 +56,23 @@ class WfpayService implements WfpayServiceInterface
             "guest_real_name" => $real_name,
             "payment_method" => $payment_method
         ];
+        if ($force_matching) {
+            $data['force_matching'] = true;
+        }
 
         $link = $this->link('orders/payment');
+        return $this->post($link, $data);
+    }
+
+    public function rematch($id)
+    {
+        $data = [
+            "account_name" => $this->account,
+            "merchant_order_id" => $id,
+            "timestamp" => Carbon::now()->toIso8601String(),
+        ];
+
+        $link = $this->link('orders/rematch');
         return $this->post($link, $data);
     }
 
@@ -98,7 +114,7 @@ class WfpayService implements WfpayServiceInterface
                 Log::info("Wfservice response.", $json);
                 return $json;
             }
-            Log::critical('Wfservice Invalid json response from vendor: ' . (string)$response->getBody(), $reporting_data);
+            Log::alert('Wfservice Invalid json response from vendor: ' . (string)$response->getBody(), $reporting_data);
             throw new VendorException('Invalid json response from vendor.');
         } catch (ClientException $e) { # status code 4xx
             $response = $e->getResponse();
@@ -110,25 +126,8 @@ class WfpayService implements WfpayServiceInterface
 
             $reporting_data['response_body'] = (!empty($json) and is_array($json)) ? $json : (string)$response->getBody();
 
-            /* if ($status_code === 409) {
-                Log::error("Wfservice request error. {$status_code} {$message}", $reporting_data);
-                throw new ConflictHttpException;
-            }
-            if ($status_code === 404) {
-                Log::error("Wfservice request error. {$status_code} {$message}", $reporting_data);
-                throw new ModelNotFoundException;
-            }
-
-            # for address validation api
-            if ($status_code === 422) {
-                if (data_get($reporting_data, 'response_body.code') === self::BadAddressError) {
-                    throw new WrongAddressFormatError;
-                }
-            } */
-
             Log::alert("WfpayService request error. {$status_code} {$message}", $reporting_data);
-            throw new BadRequestError($message);
-
+            throw new BadRequestError(json_encode($json));
         } catch (RequestException $e) { # status code 5xx
             if ($e->hasResponse()) {
                 $response = $e->getResponse();
@@ -165,8 +164,11 @@ class WfpayService implements WfpayServiceInterface
         }
 
         $data_json_string = json_encode($data);
-
-        $private_content = Storage::get('wfpay/private_key.pem');
+        if (config('app.env') === 'local') {
+            $private_content = Storage::get('wfpay/private_key.pem');
+        } else {
+            $private_content = Storage::disk('s3')->get('wfpay/private_key.pem');
+        }
         $private_key = openssl_pkey_get_private($private_content);
         openssl_sign($data_json_string, $signature, $private_key, OPENSSL_ALGO_SHA256);
         $signature = base64_encode($signature);

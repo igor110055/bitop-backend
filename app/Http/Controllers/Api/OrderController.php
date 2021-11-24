@@ -55,6 +55,7 @@ use App\Repos\Interfaces\{
     OrderRepo,
     VerificationRepo,
     AdvertisementRepo,
+    WfpaymentRepo,
 };
 use App\Services\{
     OrderServiceInterface,
@@ -75,6 +76,7 @@ class OrderController extends AuthenticatedController
         OrderRepo $OrderRepo,
         AdvertisementRepo $AdvertisementRepo,
         VerificationRepo $VerificationRepo,
+        WfpaymentRepo $WfpaymentRepo,
         OrderServiceInterface $OrderService,
         FeeServiceInterface $FeeService,
         ExchangeServiceInterface $ExchangeService
@@ -84,6 +86,7 @@ class OrderController extends AuthenticatedController
         $this->OrderRepo = $OrderRepo;
         $this->AdvertisementRepo = $AdvertisementRepo;
         $this->VerificationRepo = $VerificationRepo;
+        $this->WfpaymentRepo = $WfpaymentRepo;
         $this->OrderService = $OrderService;
         $this->FeeService = $FeeService;
         $this->ExchangeService = $ExchangeService;
@@ -120,6 +123,11 @@ class OrderController extends AuthenticatedController
         $order = $this->OrderRepo
             ->findOrFail($id);
         $this->checkAuthorization($order);
+        if ($order->is_express) {
+            $wfpayment = $this->WfpaymentRepo
+                ->getTheLatestByOrder($order);
+            return (new OrderResource($order))->withEvent($order->current_timeline)->withPayment($wfpayment);
+        }
         return (new OrderResource($order))->withEvent($order->current_timeline);
     }
 
@@ -219,14 +227,24 @@ class OrderController extends AuthenticatedController
         } else {
             $response['unit_price'] = $ad->unit_price;
         }
-        $mins = [];
-        $maxs = [];
-        foreach ($paymeny_methods as $method) {
-            $mins[] = $payment_limit[$method]['min'];
-            $maxs[] = $payment_limit[$method]['max'];
+        if ($action === Advertisement::TYPE_SELL) {
+            $mins = [];
+            $maxs = [];
+            foreach ($paymeny_methods as $method) {
+                $mins[] = $payment_limit[$method]['min'];
+                $maxs[] = $payment_limit[$method]['max'];
+            }
+            $response['total_limit']['min'] = min($mins);
+            $response['total_limit']['max'] = max($maxs);
+        } else {
+            if (is_null($ad)) {
+                $response['total_limit']['min'] = $payment_limit[Wfpayment::METHOD_BANK]['min'];
+                $response['total_limit']['max'] = $payment_limit[Wfpayment::METHOD_BANK]['max'];
+            } else {
+                $response['total_limit']['min'] = $ad->min_limit;
+                $response['total_limit']['max'] = $ad->max_limit;
+            }
         }
-        $response['total_limit']['min'] = min($mins);
-        $response['total_limit']['max'] = max($maxs);
 
         if ($action === Advertisement::TYPE_SELL) {
             $fee = $this->FeeService->getFee(
@@ -359,6 +377,9 @@ class OrderController extends AuthenticatedController
         $input = $request->validated();
         $this->checkSecurityCode($user, $input['security_code']);
         $advertisement = $this->AdvertisementRepo->findOrFail($input['advertisement_id']);
+        if ($advertisement->is_express) {
+            throw new ModelNotFoundException;
+        }
         $input['amount'] = trim_redundant_decimal($input['amount'], $advertisement->coin);
 
         if ($input['action'] === 'buy') {
@@ -398,10 +419,14 @@ class OrderController extends AuthenticatedController
         $values = $request->validated();
         $this->checkSecurityCode($user, $values['security_code']);
         $advertisement = $this->AdvertisementRepo->findOrFail($values['advertisement_id']);
+        if (!$advertisement->is_express) {
+            throw new BadRequestError;
+        }
 
         $amount = data_get($values, 'amount');
         $total = data_get($values, 'total');
         $action = $values['action'];
+        $payment_method = data_get($values, 'payment_method');
         if (!is_null($amount)) {
             $amount = trim_redundant_decimal($amount, $advertisement['coin']);
         } else {
@@ -412,18 +437,20 @@ class OrderController extends AuthenticatedController
             throw new BadRequestError;
         }
 
-        $order = $this->OrderService
+        list($order, $wfpayment) = $this->OrderService
             ->makeExpress(
                 $user,
                 $advertisement,
                 $amount,
                 $total,
+                $payment_method,
                 data_get($values, 'payables', [])
             );
 
         user_log(UserLog::ORDER_CREATE, ['order_id' => $order->id], request());
+
         return response()->json(
-            new OrderResource($order),
+            (new OrderResource($order))->withPayment($wfpayment),
             201
         );
     }

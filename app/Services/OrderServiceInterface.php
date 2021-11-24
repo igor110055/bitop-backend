@@ -11,6 +11,14 @@ use App\Models\{
 interface OrderServiceInterface
 {
     public function make(User $user, Advertisement $advertisement, $amount, array $payables);
+    public function makeExpress(
+        User $user,
+        Advertisement $advertisement,
+        $amount = null,
+        $total = null,
+        $payment_method = null,
+        $payables = null
+    );
     public function claim(User $user,
         $order_id,
         $payment_src_type,

@@ -54,12 +54,15 @@ class Wfpayment extends UuidModel
     ];
     public static $status = self::STATUS;
 
+    protected $casts = [
+        'payment_info' => 'array',
+    ];
+
     protected $fillable = [
         'id',
         'order_id',
         'status',
         'remote_id',
-        'remote_status',
         'total',
         'guest_payment_amount',
         'account_name',

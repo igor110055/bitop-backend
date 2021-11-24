@@ -10,6 +10,9 @@ interface WfpayServiceInterface
         $payment_method = 'bank',
         $real_name,
         $notify_url,
-        $return_url
+        $return_url,
+        $force_matching = true
     );
+
+    public function rematch($id);
 }

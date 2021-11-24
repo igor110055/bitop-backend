@@ -42,8 +42,13 @@ class Order extends RandomIDModel
         self::STATUS_CANCELED,
     ];
 
+    protected $casts = [
+        'is_express' => 'boolean',
+    ];
+
     protected $fillable = [
         'id',
+        'is_express',
         'src_user_id',
         'dst_user_id',
         'status',
