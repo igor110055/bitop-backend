@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Wfpayment;
 use App\Rules\AvailableBankAccountId;
 
 class ExpressTradeRequest extends PublicRequest
@@ -13,9 +14,12 @@ class ExpressTradeRequest extends PublicRequest
      */
     public function rules()
     {
+        $paymeny_methods = Wfpayment::$methods;
+
         return [
             'action' => 'required|string|in:buy,sell',
             'advertisement_id' => 'required|exists:advertisements,id',
+            'payment_method' => 'required_if:action,buy|in:'.implode(',', $paymeny_methods),
             'total' => 'required_without:amount|numeric|min:0',
             'amount' => 'required_without:total|numeric|min:0',
             'security_code' => "required|string|max:60",

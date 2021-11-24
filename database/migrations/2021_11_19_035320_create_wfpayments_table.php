@@ -21,7 +21,6 @@ class CreateWfpaymentsTable extends Migration
             $table->string('order_id', 36)->nullable();
             $table->string('status', 20);
             $table->uuid('remote_id')->nullable();
-            $table->string('remote_status', 20)->nullable();
             $table->decimal('total', $currency_precision, $currency_scale);
             $table->decimal('guest_payment_amount', $currency_precision, $currency_scale)->nullable();
             $table->string('account_name', 20)->nullable();

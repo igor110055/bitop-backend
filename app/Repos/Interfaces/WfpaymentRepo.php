@@ -18,6 +18,7 @@ interface WfpaymentRepo
     public function update(Wfpayment $wfpayment, array $values);
     public function create(array $values);
     public function createWithPaymentInfo(array $values);
+    public function getPaymentInfo(Wfpayment $wfpayment);
     public function createByOrder(Order $order, $payment_method = 'bank');
     public function getTheLatestByOrder(Order $order);
 }
