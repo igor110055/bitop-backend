@@ -31,7 +31,7 @@ class ExpressTradeRequest extends PublicRequest
         $this->sometimes(
             $validator, [
                 'payables' => 'required',
-                'payables.bank_account' => 'required',
+                'payables.bank_account' => 'required|array',
                 'payables.bank_account.*' => ['required', new AvailableBankAccountId(auth()->user())],
             ],
             function($input) {
