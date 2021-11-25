@@ -156,6 +156,12 @@ class Order extends RandomIDModel
         return $this->hasMany(Wfpayment::class);
     }
 
+    public function getIsAdOwnerAttribute()
+    {
+        $user = auth()->user();
+        return data_get($user, 'id') === $this->advertisement->user_id;
+    }
+
     public function getMessageAttribute()
     {
         return $this->advertisement->message;

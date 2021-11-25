@@ -28,15 +28,17 @@ class OrderResource extends JsonResource
         $user = auth()->user();
         if ($this->advertisement->type === Advertisement::TYPE_BUY) {
             return $this;
-        } else {
+        }
+        if ($this->advertisement->type === Advertisement::TYPE_SELL) {
             if ($user->is($this->src_user)) {
                 return $this;
             }
         }
-        $result = [
-            'is_valid' => false,
-        ];
-        if (is_null($wfpayment) or $this->status !== Order::STATUS_PROCESSING) {
+        if ($this->status !== Order::STATUS_PROCESSING) {
+            return $this;
+        }
+        $result = ['is_valid' => false];
+        if (is_null($wfpayment)) {
             $this->payment = $result;
             return $this;
         }
@@ -74,6 +76,7 @@ class OrderResource extends JsonResource
         $order = [
             'id' => $this->id,
             'is_express' => $this->is_express,
+            'is_ad_owner' => $this->is_ad_owner,
             'src_user_id' => $src_user->id,
             'src_username' => $src_user->username,
             'dst_user_id' => $dst_user->id,
