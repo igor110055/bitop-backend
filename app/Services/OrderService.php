@@ -10,6 +10,7 @@ use Symfony\Component\HttpKernel\Exception\{
 };
 use App\Exceptions\{
     Core\BadRequestError,
+    ServiceUnavailableError,
     UnavailableStatusError,
     MinimumTradesError,
     OrderExpiredError,
@@ -429,8 +430,12 @@ class OrderService implements OrderServiceInterface
 
             # Create wfpayment and get remote payment info
             if ($advertisement->type === Advertisement::TYPE_SELL) {
-                $wfpayment = $this->WfpaymentRepo
-                    ->createByOrder($order, $payment_method);
+                try {
+                    $wfpayment = $this->WfpaymentRepo
+                        ->createByOrder($order, $payment_method);
+                } catch (\Throwable $e) {
+                    throw new ServiceUnavailableError;
+                }
             } else {
                 $wfpayment = null;
             }

@@ -59,17 +59,7 @@ class WfpaymentRepo implements \App\Repos\Interfaces\WfpaymentRepo
     public function createWithPaymentInfo(array $values)
     {
         $wfpayment = $this->create($values);
-        try {
-            $remote = $this->getPaymentInfo($wfpayment);
-        } catch (BadRequestError $e) {
-            $json = $e->getMessage();
-            $wfpayment = $this->update($wfpayment, ['response' => $json]);
-            $data = json_decode($json);
-            throw new BadRequestError(data_get($data, 'message'));
-        } catch (\Throwable $e) {
-            throw $e;
-            throw new VendorException;
-        }
+        $remote = $this->getPaymentInfo($wfpayment);
         $update = [
             'remote_id' => data_get($remote, 'id'),
             'status' => data_get($remote, 'status'),
@@ -90,25 +80,31 @@ class WfpaymentRepo implements \App\Repos\Interfaces\WfpaymentRepo
     public function getPaymentInfo(Wfpayment $wfpayment)
     {
         $force_matching = ($wfpayment->payment_method === Wfpayment::METHOD_BANK);
-        $result = $this->WfpayService
-            ->createPayment(
-                $wfpayment->id,
-                $wfpayment->total,
-                $wfpayment->payment_method,
-                $wfpayment->real_name,
-                $wfpayment->callback_url,
-                $wfpayment->return_url,
-                $force_matching
-            );
+        try {
+            $result = $this->WfpayService
+                ->createPayment(
+                    $wfpayment->id,
+                    $wfpayment->total,
+                    $wfpayment->payment_method,
+                    $wfpayment->real_name,
+                    $wfpayment->callback_url,
+                    $wfpayment->return_url,
+                    $force_matching
+                );
 
-        if ($force_matching) {
-            $tries = 2;
-            while ($result['status'] === Wfpayment::STATUS_PENDINT_ALLOCATION && $tries > 0) {
-                sleep(5);
-                $result = $this->WfpayService
-                    ->rematch($wfpayment->id);
-                $tries--;
+            if ($force_matching) {
+                $tries = 2;
+                while ($result['status'] === Wfpayment::STATUS_PENDINT_ALLOCATION && $tries > 0) {
+                    sleep(5);
+                    $result = $this->WfpayService
+                        ->rematch($wfpayment->id);
+                    $tries--;
+                }
             }
+        } catch (BadRequestError $e) {
+            $json = $e->getMessage();
+            $wfpayment = $this->update($wfpayment, ['response' => $json]);
+            throw new BadRequestError;
         }
 
         return $result;
