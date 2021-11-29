@@ -66,7 +66,7 @@ class User extends AuthModel
         if (is_null($this->first_name) or is_null($this->last_name)) {
             return '';
         }
-        return $this->last_name.', '.$this->first_name;
+        return $this->last_name.$this->first_name;
     }
 
     public function getIsVerifiedAttribute()
