@@ -50,7 +50,11 @@ class WfpayController extends Controller
 
     public function paymentCallback(Request $request, string $id)
     {
+        $content = $request->getContent();
         Log::info("Wfpay paymentCallback request", $request->all());
+
+        $wfpayment = $this->WfpaymentRepo->findOrFail($id);
+        $this->WfpaymentRepo->update($wfpayment, ['callback_response' => $content]);
 
         $payload = $request->input('data');
         $data = data_get($payload, 'order');
