@@ -216,7 +216,9 @@ class Order extends RandomIDModel
         if ($this->status === Order::STATUS_PROCESSING) {
             $event['current'][] = $timeline[Order::TIMELINE_CREATED];
             $event['current'][] = $timeline[Order::TIMELINE_PAYMENT_AWAITING];
-            $event['next'][] = $timeline[Order::TIMELINE_CLAIMED];
+            if (!$this->is_express) {
+                $event['next'][] = $timeline[Order::TIMELINE_CLAIMED];
+            }
             $event['next'][] = $timeline[Order::TIMELINE_COMPLETED];
         } elseif ($this->status === Order::STATUS_CLAIMED) {
             $event['current'][] = $timeline[Order::TIMELINE_CREATED];
