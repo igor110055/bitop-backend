@@ -89,7 +89,7 @@ class WfpaymentRepo implements \App\Repos\Interfaces\WfpaymentRepo
         $force_matching = ($wfpayment->payment_method === Wfpayment::METHOD_BANK);
         try {
             $result = $this->WfpayService
-                ->createPayment(
+                ->createOrder(
                     $wfpayment->id,
                     $wfpayment->total,
                     $wfpayment->payment_method,

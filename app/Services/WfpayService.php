@@ -48,7 +48,7 @@ class WfpayService implements WfpayServiceInterface
         return $this->post($link, $data);
     }
 
-    public function createPayment(
+    public function createOrder(
         $id,
         $amount,
         $payment_method = 'bank',
@@ -73,6 +73,35 @@ class WfpayService implements WfpayServiceInterface
         }
 
         $link = $this->link('orders/payment');
+        return $this->post($link, $data);
+    }
+
+    public function createTranfer(
+        $id,
+        $amount,
+        $notify_url,
+        $bank_name,
+        $bank_province_name,
+        $bank_city_name,
+        $bank_account_no,
+        $bank_account_type,
+        $bank_account_name
+    ) {
+        $data = [
+            "account_name" => $this->account,
+            "merchant_order_id" => $id,
+            "total_amount" => $amount,
+            "timestamp" => Carbon::now()->toIso8601String(),
+            "notify_url" => $notify_url,
+            "bank_name" => $bank_name,
+            "bank_province_name" => $bank_province_name,
+            "bank_city_name" => $bank_city_name,
+            "bank_account_no" => $bank_account_no,
+            "bank_account_type" => $bank_account_type,
+            "bank_account_name" => $bank_account_name
+        ];
+
+        $link = $this->link('orders/payment_transfer');
         return $this->post($link, $data);
     }
 
