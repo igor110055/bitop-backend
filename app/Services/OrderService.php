@@ -20,6 +20,7 @@ use App\Models\{
     Advertisement,
     AssetTransaction,
     BankAccount,
+    Config,
     FeeSetting,
     Order,
     Transaction,
@@ -32,6 +33,9 @@ use App\Notifications\{
     ClaimNotification,
     DealNotification,
     OrderCanceledNotification,
+    OrderCompletedNotification,
+    OrderCompletedSrcNotification,
+    OrderPaymentCheckNotification,
     OrderRevokedNotification,
     AdvertisementUnavailableNotification,
 };
@@ -39,7 +43,7 @@ use App\Repos\Interfaces\{
     AccountRepo,
     AdvertisementRepo,
     BankAccountRepo,
-    CoinExchangeRateRepo,
+    ConfigRepo,
     OrderRepo,
     SystemActionRepo,
     UserRepo,
@@ -49,6 +53,8 @@ use App\Jobs\Fcm\{
     DealNotification as FcmDealNotification,
     ClaimNotification as FcmClaimNotification,
     OrderCanceledNotification as FcmOrderCanceledNotification,
+    OrderCompletedNotification as FcmOrderCompletedNotification,
+    OrderCompletedSrcNotification as FcmOrderCompletedSrcNotification,
     OrderRevokedNotification as FcmOrderRevokedNotification,
 };
 
@@ -64,6 +70,7 @@ class OrderService implements OrderServiceInterface
         AccountServiceInterface $AccountService,
         AdvertisementServiceInterface $AdvertisementService,
         BankAccountRepo $BankAccountRepo,
+        ConfigRepo $ConfigRepo,
         SystemActionRepo $SystemActionRepo,
         UserRepo $UserRepo,
         WfpaymentRepo $WfpaymentRepo,
@@ -74,6 +81,7 @@ class OrderService implements OrderServiceInterface
         $this->AssetService = $AssetService;
         $this->ExchangeService = $ExchangeService;
         $this->BankAccountRepo = $BankAccountRepo;
+        $this->ConfigRepo = $ConfigRepo;
         $this->OrderRepo = $OrderRepo;
         $this->SystemActionRepo = $SystemActionRepo;
         $this->UserRepo = $UserRepo;
@@ -255,8 +263,8 @@ class OrderService implements OrderServiceInterface
         $order->dst_user->notify($dst_user_notification);
         $src_user_notification = new DealNotification($order, 'src_user', $action);
         $order->src_user->notify($src_user_notification);
-        /* FcmDealNotification::dispatch($order->dst_user, $order)->onQueue(config('services.fcm.queue_name'));
-        FcmDealNotification::dispatch($order->src_user, $order)->onQueue(config('services.fcm.queue_name')); */
+        FcmDealNotification::dispatch($order->dst_user, $order)->onQueue(config('services.fcm.queue_name'));
+        FcmDealNotification::dispatch($order->src_user, $order)->onQueue(config('services.fcm.queue_name'));
 
         return $order;
     }
@@ -455,28 +463,23 @@ class OrderService implements OrderServiceInterface
         $order->dst_user->notify($dst_user_notification);
         $src_user_notification = new DealNotification($order, 'src_user', $action);
         $order->src_user->notify($src_user_notification);
-        /* FcmDealNotification::dispatch($order->dst_user, $order)->onQueue(config('services.fcm.queue_name'));
-        FcmDealNotification::dispatch($order->src_user, $order)->onQueue(config('services.fcm.queue_name')); */
+        FcmDealNotification::dispatch($order->dst_user, $order)->onQueue(config('services.fcm.queue_name'));
+        FcmDealNotification::dispatch($order->src_user, $order)->onQueue(config('services.fcm.queue_name'));
 
         return [$order, $wfpayment];
     }
 
     public function claim(
-        User $user,
         $order_id,
         $payment_src_type,
         $payment_src_id,
         $payment_dst_type,
         $payment_dst_id
     ) {
-        $order = DB::transaction(function () use ($user, $order_id, $payment_src_type, $payment_src_id, $payment_dst_type, $payment_dst_id) {
+        $order = DB::transaction(function () use ($order_id, $payment_src_type, $payment_src_id, $payment_dst_type, $payment_dst_id) {
 
             $order = $this->OrderRepo
                 ->findForUpdate($order_id);
-
-            if (!$user->is($order->dst_user)) {
-                throw new AccessDeniedHttpException;
-            }
 
             if ($order->is_expired) {
                 throw new OrderExpiredError;
@@ -494,6 +497,17 @@ class OrderService implements OrderServiceInterface
                 }
                 $order->payment_dst()->associate($dst_bank_account);
                 $order->save();
+            } elseif ($payment_dst_type === Order::PAYABLE_WFPAYMENT) {
+                if (!$order->is_express) {
+                    throw new BadRequestError;
+                }
+                $wfpayment = $this->WfpaymentRepo
+                    ->findOrFail($payment_dst_id);
+                if ($wfpayment->order_id !== $order_id) {
+                    throw new BadRequestError;
+                }
+                $order->payment_dst()->associate($wfpayment);
+                $order->save();
             } else {
                 throw new BadRequestError('Only bank_account is supported.');
             }
@@ -501,8 +515,8 @@ class OrderService implements OrderServiceInterface
             if ($payment_src_type === Order::PAYABLE_BANK_ACCOUNT) {
                 $src_bank_account = $this->BankAccountRepo
                     ->findOrFail($payment_src_id);
-                if (!$src_bank_account->owner->is($user)) {
-                    throw new BadRequestError('payment_src provided is not of the user');
+                if (!$src_bank_account->owner->is($order->dst_user)) {
+                    throw new BadRequestError('payment_src provided is not of dst_user');
                 }
                 if (!in_array($order->currency, $src_bank_account->currency)) {
                     throw new BadRequestError('currency of payment_src doesnt contain order currency');
@@ -510,7 +524,9 @@ class OrderService implements OrderServiceInterface
                 $order->payment_src()->associate($src_bank_account);
                 $order->save();
             } else {
-                throw new BadRequestError('Only bank_account is supported.');
+                if (!$order->is_express) {
+                    throw new BadRequestError('Only bank_account is supported.');
+                }
             }
 
             $this->OrderRepo
@@ -529,21 +545,15 @@ class OrderService implements OrderServiceInterface
         return $order;
     }
 
-    public function confirm(
-        User $user,
-        $order_id
-    ) {
-        return DB::transaction(function () use ($user, $order_id) {
+    public function confirm($order_id)
+    {
+        return DB::transaction(function () use ($order_id) {
 
             $order = $this->OrderRepo
                 ->findForUpdate($order_id);
 
-            if (!$user->is($order->src_user)) {
-                throw new AccessDeniedHttpException;
-            }
-
-            if ($order->status !== Order::STATUS_CLAIMED) {
-                throw new UnavailableStatusError('Order status is wrong.');
+            if (($order->status !== Order::STATUS_CLAIMED) and ($order->status !== Order::STATUS_PROCESSING)) {
+                throw new UnavailableStatusError("Order status is wrong. {$order->status}");
             }
             /* Agent feature is not activated now
             # Get Order Porfit and unit prices
@@ -748,6 +758,10 @@ class OrderService implements OrderServiceInterface
                 throw new UnavailableStatusError('Wrong order status');
             }
 
+            if (($action === User::class) and ($order->is_express) and ($user->is($order->ad_owner))) {
+                throw new AccessDeniedHttpException('Ad owner is unable to cancel express order');
+            }
+
             $this->OrderRepo
                 ->update($order, [
                     'status' => Order::STATUS_CANCELED,
@@ -854,5 +868,86 @@ class OrderService implements OrderServiceInterface
         }
 
         return $wfpayment;
+    }
+
+    public function updateWfpaymentAndOrder($wfpayment_id, $data)
+    {
+        $status_need_update = [
+            Wfpayment::STATUS_INIT,
+            Wfpayment::STATUS_PENDINT_ALLOCATION,
+            Wfpayment::STATUS_PENDINT_PAYMENT,
+            Wfpayment::STATUS_PENDINT_CONFIRMATION,
+            Wfpayment::STATUS_PENDINT_COMPLETED,
+        ];
+
+        $wfpayment = $this->WfpaymentRepo->findForUpdate($wfpayment_id);
+
+        if (!in_array($wfpayment->status, $status_need_update)) {
+            return;
+        }
+
+        $original_status = $wfpayment->status;
+        $new_status = data_get($data, 'status');
+
+        if (!in_array($new_status, Wfpayment::$status)) {
+            \Log::alert("updateWfpaymentAndOrder, unrecognized status received {$new_status}.");
+            throw new BadRequestError;
+        }
+
+        $update = ['status' => $new_status];
+
+        # Claim the order
+        if (($original_status !== Wfpayment::STATUS_COMPLETED) and ($new_status === Wfpayment::STATUS_COMPLETED)) {
+            # get remote data
+            $remote = $this->WfpayService->getOrder($wfpayment->id);
+            if (data_get($remote, 'status') !== Wfpayment::STATUS_COMPLETED) {
+                \Log::alert("updateWfpaymentAndOrder, remote status is not completed.", $remote);
+                throw new BadRequestError;
+            }
+            $update['completed_at'] = data_get($remote, 'completed_at');
+
+            $order = $wfpayment->order;
+            $advertisement = $order->advertisement;
+
+            if (!$order->is_express or !$advertisement->is_express) {
+                \Log::alert("updateWfpaymentAndOrder, order or ad is not express");
+                throw new BadRequestError;
+            }
+
+            if ($advertisement->type !== Advertisement::TYPE_SELL) {
+                \Log::alert("updateWfpaymentAndOrder, order is not created by sell express ad.");
+                throw new BadRequestError;
+            }
+
+            $order = $this->claim(
+                $wfpayment->order_id,
+                null,                       //payment_src_type,
+                null,                       //payment_src_id,
+                Order::PAYABLE_WFPAYMENT,   //payment_dst_type,
+                $wfpayment->id              //payment_dst_id
+            );
+
+            $limits = $this->ConfigRepo->get(Config::ATTRIBUTE_EXPRESS_AUTO_RELEASE_LIMIT);
+            if (Dec::gte($order->total, $limits['min']) and
+                Dec::lte($order->total, $limits['max'])
+            ) {
+                # complete the order
+                $order = $this->confirm($order->id);
+                $order->src_user->notify(new OrderCompletedSrcNotification($order));
+                $order->dst_user->notify(new OrderCompletedNotification($order));
+                FcmOrderCompletedSrcNotification::dispatch($order->src_user, $order)->onQueue(config('services.fcm.queue_name'));
+                FcmOrderCompletedNotification::dispatch($order->dst_user, $order)->onQueue(config('services.fcm.queue_name'));
+                $this->UserRepo->updateOrderCount($order->dst_user, true);
+                $this->UserRepo->updateOrderCount($order->src_user, true);
+            } else {
+                # notify the seller that the payment need to be checked
+                $order->src_user->notify(new OrderPaymentCheckNotification($order));
+            }
+
+        }
+        $this->WfpaymentRepo
+            ->update($wfpayment, ['status' => $new_status]);
+
+        return $order;
     }
 }

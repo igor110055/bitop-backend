@@ -36,6 +36,18 @@ class WfpayService implements WfpayServiceInterface
         $this->account = $configs['account'];
     }
 
+    public function getOrder($id)
+    {
+        $data = [
+            "account_name" => $this->account,
+            "merchant_order_id" => $id,
+            "timestamp" => Carbon::now()->toIso8601String(),
+        ];
+
+        $link = $this->link('orders/query');
+        return $this->post($link, $data);
+    }
+
     public function createPayment(
         $id,
         $amount,
@@ -179,5 +191,34 @@ class WfpayService implements WfpayServiceInterface
         ]);
 
         return new Request($method, $link, $headers, $body);
+    }
+
+    public function verifyRequest(\Illuminate\Http\Request $request, $exception = true) : bool
+    {
+        $content = $request->input("data");
+        $signature = $request->input("signature");
+        return $this->verifySignature($content, $signature, $exception);
+    }
+
+    public function verifySignature($content, $signature, $exception = false) : bool
+    {
+        if (config('app.env') === 'local') {
+            $public_content = Storage::get('wfpay/public_key.pem');
+        } else {
+            $public_content = Storage::disk('s3')->get('wfpay/public_key.pem');
+        }
+        $public_key = openssl_pkey_get_public($public_content);
+        if (openssl_verify($content, base64_decode($signature), $public_key, OPENSSL_ALGO_SHA256) == '1') {
+            return true;
+        } else {
+            Log::alert('Wfpay Service verifySignature fail', [
+                'content' => $content,
+                'signature' => $signature,
+            ]);
+            if ($exception) {
+                throw new BadRequestError;
+            }
+            return false;
+        }
     }
 }

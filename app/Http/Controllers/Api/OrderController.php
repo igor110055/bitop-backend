@@ -460,8 +460,16 @@ class OrderController extends AuthenticatedController
         $user = auth()->user();
         $input = $request->validated();
 
+        $order = $this->OrderRepo->findOrFail($id);
+        if ($order->is_express) {
+            throw new BadRequestError;
+        }
+
+        if (!$user->is($order->dst_user)) {
+            throw new AccessDeniedHttpException;
+        }
+
         $order = $this->OrderService->claim(
-            $user,
             $id,
             $input['payment_src_type'],
             $input['payment_src_id'],
@@ -476,6 +484,12 @@ class OrderController extends AuthenticatedController
     {
         $user = auth()->user();
         $this->checkSecurityCode($user, $request->input('security_code'));
+
+        $order = $this->OrderRepo->findOrFail($id);
+        if ($order->is_express) {
+            throw new BadRequestError;
+        }
+
         $order = $this->OrderService->revoke($user, $id);
         user_log(UserLog::ORDER_REVOKE, ['order_id' => $order->id], request());
         return new OrderResource($order);
@@ -488,6 +502,10 @@ class OrderController extends AuthenticatedController
         $order = $this->OrderRepo
             ->findOrFail($id);
         $this->checkAuthorization($order, 'src_user');
+
+        if ($order->is_express) {
+            throw new BadRequestError;
+        }
 
         if ($order->status !== ORDER::STATUS_CLAIMED) {
             throw new UnavailableStatusError('Order is not claimed yet.');
@@ -511,6 +529,17 @@ class OrderController extends AuthenticatedController
         # Check security_code
         $this->checkSecurityCode($user, $input['security_code']);
 
+        $order = $this->OrderRepo->findOrFail($id);
+        if (!$user->is($order->src_user)) {
+            throw new AccessDeniedHttpException;
+        }
+        if ($order->status !== Order::STATUS_CLAIMED) {
+            throw new UnavailableStatusError('Order status is wrong.');
+        }
+        if ($order->is_express) {
+            throw new BadRequestError;
+        }
+
         # check verification
         if (!$order_confirmation = $this->VerificationRepo
             ->find($input['verification_id'])
@@ -524,7 +553,7 @@ class OrderController extends AuthenticatedController
             Verification::TYPE_ORDER_CONFIRMATION
         );
         try {
-            $order = $this->OrderService->confirm($user, $id);
+            $order = $this->OrderService->confirm($id);
         } catch (\Throwable $e) {
             Log::error('Confirm order failed, '.$e);
             throw new UnknownError;

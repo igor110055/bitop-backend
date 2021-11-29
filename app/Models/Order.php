@@ -19,8 +19,10 @@ class Order extends RandomIDModel
     ];
 
     const PAYABLE_BANK_ACCOUNT = 'bank_account';
+    const PAYABLE_WFPAYMENT = 'wfpayment';
     const PAYMENT_TYPES_MAP = [
         'BankAccount' => self::PAYABLE_BANK_ACCOUNT,
+        'Wfpayment' => self::PAYABLE_WFPAYMENT,
     ];
 
     const OP_USER = 'user';
@@ -154,6 +156,11 @@ class Order extends RandomIDModel
     public function wfpayments()
     {
         return $this->hasMany(Wfpayment::class);
+    }
+
+    public function getAdOwnerAttribute()
+    {
+        return $this->advertisement->owner;
     }
 
     public function getIsAdOwnerAttribute()

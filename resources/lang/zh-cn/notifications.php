@@ -106,16 +106,22 @@ return [
                 'content' => '由于你的广告中剩余加密货币的价值已小于最小单笔限额，系统已自动将你的广告 #:advertisement_id 下架，若要继续交易，请编辑广告内容后重新上架。',
             ],
         ],
-        'order_completed_notification' => [
+        'order_completed_dst_notification' => [
             'subject' => '['.config('app.name').'] 订单完成通知 #:order_id',
             'greeting' => '订单完成通知 #:order_id',
-            'user' => [
-                'content' => '订单号 #:order_id 的卖家 :username 已确认您的付款，并已将虚拟币放行至您的帐户中。',
-            ],
-            'admin' => [
-                'content' => '管理者已经完成你的订单 #:order_id，如有任何问题，请透过客服管道联系我们。',
-            ],
+            'content' => '订单号 #:order_id 的付款已确认，虚拟货币已放行至您的帐户中。',
             'action' => '查看订单',
+        ],
+        'order_completed_src_notification' => [
+            'subject' => '['.config('app.name').'] 订单完成通知 #:order_id',
+            'greeting' => '订单完成通知 #:order_id',
+            'content' => '订单号 #:order_id 的付款已确认，虚拟货币已放行至买家的帐户中。',
+            'action' => '查看订单',
+        ],
+        'order_payment_check'=> [
+            'subject' => '['.config('app.name').'] 订单付款待确认通知 #:order_id',
+            'greeting' => '订单付款待确认通知 #:order_id',
+            'content' => '订单号 #:order_id 已收到第三方收到付款的通知，但因为付款范围在自动放行范围外，请确认收到付款后，至后台手动放行。',
         ],
         'order_canceled_notification' => [
             'subject' => '['.config('app.name').'] 订单取消通知 #:order_id',

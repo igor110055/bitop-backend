@@ -15,7 +15,7 @@ use App\Models\{
     AdminAction,
 };
 
-class OrderCompletedNotification extends Notification implements ShouldQueue
+class OrderPaymentCheckNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -45,25 +45,21 @@ class OrderCompletedNotification extends Notification implements ShouldQueue
     public function toMail($notifiable)
     {
         $locale = $notifiable->preferred_locale;
-        $path = Order::FRONTEND_DETAIL_PATH;
-        $url = url($path.$this->order->id);
 
-        $subject = __('notifications.email.order_completed_dst_notification.subject', [
+        $subject = __('notifications.email.order_payment_check.subject', [
                 'order_id' => $this->order->id,
             ], $locale);
-        $greeting = __('notifications.email.order_completed_dst_notification.greeting', [
+        $greeting = __('notifications.email.order_payment_check.greeting', [
                 'order_id' => $this->order->id,
             ], $locale);
-        $action = __('notifications.email.order_completed_dst_notification.action', [], $locale);
 
-        $content = __("notifications.email.order_completed_dst_notification.content", [
+        $content = __("notifications.email.order_payment_check.content", [
             'order_id' => $this->order->id,
         ], $locale);
 
         return (new MailMessage)
             ->subject($subject)
             ->greeting($greeting)
-            ->line($content)
-            ->action($action, $url);
+            ->line($content);
     }
 }

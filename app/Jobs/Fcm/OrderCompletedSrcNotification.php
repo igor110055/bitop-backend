@@ -14,7 +14,7 @@ use App\Models\{
     Order,
 };
 
-class OrderCompletedNotification extends ExpBackoffJob implements ShouldQueue
+class OrderCompletedSrcNotification extends ExpBackoffJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -50,11 +50,11 @@ class OrderCompletedNotification extends ExpBackoffJob implements ShouldQueue
     protected function getNotification()
     {
         $locale = $this->user->preferred_locale;
-        $subject = __('notifications.email.order_completed_dst_notification.subject', [
+        $subject = __('notifications.email.order_completed_src_notification.subject', [
             'order_id' => $this->order->id,
         ], $locale);
 
-        $content = __("notifications.email.order_completed_dst_notification.content", [
+        $content = __("notifications.email.order_completed_src_notification.content", [
             'order_id' => $this->order->id,
         ], $locale);
 

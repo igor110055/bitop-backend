@@ -26,10 +26,12 @@ use App\Services\OrderServiceInterface;
 use App\Notifications\{
     OrderCanceledNotification,
     OrderCompletedNotification,
+    OrderCompletedSrcNotification,
 };
 use App\Jobs\Fcm\{
     OrderCanceledNotification as FcmOrderCanceledNotification,
     OrderCompletedNotification as FcmOrderCompletedNotification,
+    OrderCompletedSrcNotification as FcmOrderCompletedSrcNotification,
 };
 
 class OrderController extends AdminController
@@ -98,10 +100,7 @@ class OrderController extends AdminController
 
         DB::transaction(function () use ($order, $values) {
             if ($values['action'] === AdminAction::TYPE_COMPLETE_ORDER) {
-                $this->OrderService->confirm(
-                    $order->src_user,
-                    $order->id
-                );
+                $this->OrderService->confirm($order->id);
                 $this->AdminActionRepo->createByApplicable($order, [
                     'admin_id' => \Auth::id(),
                     'type' => AdminAction::TYPE_COMPLETE_ORDER,
@@ -123,10 +122,10 @@ class OrderController extends AdminController
 
         # send notification and add order count
         if ($values['action'] === AdminAction::TYPE_COMPLETE_ORDER) {
-            $order->src_user->notify(new OrderCompletedNotification($order, AdminAction::class));
-            $order->dst_user->notify(new OrderCompletedNotification($order, AdminAction::class));
-            FcmOrderCompletedNotification::dispatch($order->src_user, $order, AdminAction::class)->onQueue(config('services.fcm.queue_name'));
-            FcmOrderCompletedNotification::dispatch($order->dst_user, $order, AdminAction::class)->onQueue(config('services.fcm.queue_name'));
+            $order->src_user->notify(new OrderCompletedSrcNotification($order));
+            $order->dst_user->notify(new OrderCompletedNotification($order));
+            FcmOrderCompletedSrcNotification::dispatch($order->src_user, $order)->onQueue(config('services.fcm.queue_name'));
+            FcmOrderCompletedNotification::dispatch($order->dst_user, $order)->onQueue(config('services.fcm.queue_name'));
             $this->UserRepo->updateOrderCount($order->dst_user, true);
             $this->UserRepo->updateOrderCount($order->src_user, false);
         } elseif ($values['action'] === AdminAction::TYPE_CANCEL_ORDER) {

@@ -34,6 +34,13 @@ class WfpaymentRepo implements \App\Repos\Interfaces\WfpaymentRepo
         return $this->wfpayment->find($id);
     }
 
+    public function findForUpdate($id)
+    {
+        return $this->wfpayment
+            ->lockForUpdate()
+            ->findOrFail($id);
+    }
+
     public function findOrFail($id)
     {
         return $this->wfpayment->findOrFail($id);

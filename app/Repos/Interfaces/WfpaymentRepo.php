@@ -13,6 +13,7 @@ use App\Models\{
 interface WfpaymentRepo
 {
     public function find($id);
+    public function findForUpdate($id);
     public function findOrFail($id);
     public function findByRemoteId(string $remote_id);
     public function update(Wfpayment $wfpayment, array $values);

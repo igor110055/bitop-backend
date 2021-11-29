@@ -19,14 +19,14 @@ interface OrderServiceInterface
         $payment_method = null,
         $payables = null
     );
-    public function claim(User $user,
+    public function claim(
         $order_id,
         $payment_src_type,
         $payment_src_id,
         $payment_dst_type,
         $payment_dst_id
     );
-    public function confirm(User $user, $order_id);
+    public function confirm($order_id);
     public function getProfitUnitPrice(Order $order);
     public function calculateProfitUnitPrice(
         $dst_user,
@@ -46,4 +46,5 @@ interface OrderServiceInterface
         User $user,
         $order_id
     );
+    public function updateWfpaymentAndOrder($wfpayment_id, $data);
 }

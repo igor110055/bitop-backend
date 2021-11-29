@@ -106,16 +106,22 @@ return [
                 'content' => '由於你的廣告中剩餘加密貨幣的價值已小於最小單筆限額，系統已自動將你的廣告 #:advertisement_id 下架，若要繼續交易，請編輯廣告內容後重新上架。',
             ],
         ],
-        'order_completed_notification' => [
+        'order_completed_dst_notification' => [
             'subject' => '['.config('app.name').'] 訂單完成通知 #:order_id',
             'greeting' => '訂單完成通知 #:order_id',
-            'user' => [
-                'content' => '訂單號 #:order_id 的賣家 :username 已確認您的付款，並已將虛擬幣放行至您的帳戶中。',
-            ],
-            'admin' => [
-                'content' => '管理者已經完成你的訂單 #:order_id，如有任何問題，請透過客服管道聯繫我們。',
-            ],
+            'content' => '訂單號 #:order_id 的付款已確認，虛擬貨幣已放行至您的帳戶中。',
             'action' => '查看訂單',
+        ],
+        'order_completed_src_notification' => [
+            'subject' => '['.config('app.name').'] 訂單完成通知 #:order_id',
+            'greeting' => '訂單完成通知 #:order_id',
+            'content' => '訂單號 #:order_id 的付款已確認，虛擬貨幣已將放行至買家的帳戶中。',
+            'action' => '查看訂單',
+        ],
+        'order_payment_check'=> [
+            'subject' => '['.config('app.name').'] 訂單付款待確認通知 #:order_id',
+            'greeting' => '訂單付款待確認通知 #:order_id',
+            'content' => '訂單號 #:order_id 已收到第三方收到付款的通知，但因為付款範圍在自動放行範圍外，請確認收到付款後，至後台手動放行。',
         ],
         'order_canceled_notification' => [
             'subject' => '['.config('app.name').'] 訂單取消通知 #:order_id',

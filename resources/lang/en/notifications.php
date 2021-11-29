@@ -107,16 +107,22 @@ return [
                 'content' => 'System has automatically pulled your advertisement #:advertisement_id from the shelf since the value of cryptocurrency remainings in your advertisement were less than the minimum buying/selling limit. Please edit and activate your advertisement in order to make it available again.',
             ],
         ],
-        'order_completed_notification' => [
+        'order_completed_dst_notification' => [
             'subject' => '['.config('app.name').'] Order Completed Notification #:order_id',
             'greeting' => 'Order Completed Notification #:order_id',
-            'user' => [
-                'content' => 'The seller of order #:order_id, :username has confirmed your payment and transferd the cryptocurrency to your account.',
-            ],
-            'admin' => [
-                'content' => 'Admin has completed your order #:order_id. Please contact us through our customer service if you have any further questions.',
-            ],
+            'content' => 'Your payment of order #:order_id has been confirmed and the cryptocurrency has been transfered to your account.',
             'action' => 'View Order',
+        ],
+        'order_completed_src_notification' => [
+            'subject' => '['.config('app.name').'] Order Completed Notification #:order_id',
+            'greeting' => 'Order Completed Notification #:order_id',
+            'content' => 'The payment of order #:order_id has been confirmed and the cryptocurrency has been transfered to the buyer\'s account.',
+            'action' => 'View Order',
+        ],
+        'order_payment_check'=> [
+            'subject' => '['.config('app.name').'] Order #:order_id payment requires your check',
+            'greeting' => 'Order #:order_id payment requires your check',
+            'content' => 'Order #:order_id \'s payment has been notified done by third party payment service, but the total is out of auto-lease range. Please check the payment and release it manually at the back stage.',
         ],
         'order_canceled_notification' => [
             'subject' => '['.config('app.name').'] Order Canceled Notification #:order_id',

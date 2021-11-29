@@ -123,6 +123,7 @@ class AppServiceProvider extends ServiceProvider
             'GroupApplication' => \App\Models\GroupApplication::class,
             'UserLock' => \App\Models\UserLock::class,
             'TwoFactorAuth' => \App\Models\TwoFactorAuth::class,
+            'Wfpayment' => \App\Models\Wfpayment::class,
         ]);
 
         #services binding

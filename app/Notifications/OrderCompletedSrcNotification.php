@@ -15,7 +15,7 @@ use App\Models\{
     AdminAction,
 };
 
-class OrderCompletedNotification extends Notification implements ShouldQueue
+class OrderCompletedSrcNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -48,15 +48,15 @@ class OrderCompletedNotification extends Notification implements ShouldQueue
         $path = Order::FRONTEND_DETAIL_PATH;
         $url = url($path.$this->order->id);
 
-        $subject = __('notifications.email.order_completed_dst_notification.subject', [
+        $subject = __('notifications.email.order_completed_src_notification.subject', [
                 'order_id' => $this->order->id,
             ], $locale);
-        $greeting = __('notifications.email.order_completed_dst_notification.greeting', [
+        $greeting = __('notifications.email.order_completed_src_notification.greeting', [
                 'order_id' => $this->order->id,
             ], $locale);
-        $action = __('notifications.email.order_completed_dst_notification.action', [], $locale);
+        $action = __('notifications.email.order_completed_src_notification.action', [], $locale);
 
-        $content = __("notifications.email.order_completed_dst_notification.content", [
+        $content = __("notifications.email.order_completed_src_notification.content", [
             'order_id' => $this->order->id,
         ], $locale);
 

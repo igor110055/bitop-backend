@@ -24,6 +24,7 @@ use App\Services\{
     WfpayServiceInterface,
 };
 use App\Models\{
+    Wfpayment,
     Limitation,
     Verification,
     UserLog,
@@ -50,20 +51,21 @@ class WfpayController extends Controller
     public function paymentCallback(Request $request, string $id)
     {
         Log::info("Wfpay paymentCallback request", $request->all());
-        # TODO: verify signature
-        # $this->WfpayService->verifyRequest($request);
 
-        $wfpayment = $this->WfpaymentRepo->findOrFail($id);
-        $values = $request->all();
-        return $wfpayment->return_url;
+        $payload = $request->input('data');
+        $data = data_get($payload, 'order');
+        $notify_type = data_get($payload, 'notify_type');
+
+        if ((data_get($data, 'status') === Wfpayment::STATUS_COMPLETED) and ($notify_type !== 'trade_completed')) {
+            Log::alert("paymentCallback. {$id} notify_type is trade_completed but status is not completed.");
+            return response(null, 400);
+        }
+
         try {
-            # TODO: check & complete order
-            //$this->WfpayService->handlePaymantCallback($values);
-            //$this->OrderService->handleWfpaymantCallback($wfpayment, $values);
-        } catch (DuplicateRecordError $e) {
-            Log::error("paymentCallback. Duplicate payment {$wfpayment->id} callback received.");
-        } catch (VendorException $e) {
-            Log::alert("paymentCallback. VendorException: ". $e->getMessage());
+            $this->WfpayService->verifyRequest($request);
+            $this->OrderService->updateWfpaymentAndOrder($id, $data);
+        } catch (\Throwable $e) {
+            Log::alert("paymentCallback. Throwable cateched: ". $e->getMessage());
             return response(null, 400);
         }
         return response(null, 200);
