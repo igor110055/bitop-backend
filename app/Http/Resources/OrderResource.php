@@ -47,6 +47,9 @@ class OrderResource extends JsonResource
             $result['is_valid'] = true;
             if ($wfpayment->payment_method === Wfpayment::METHOD_BANK && !is_null($wfpayment->payment_info)) {
                 $result['bank_account'] = $wfpayment->payment_info;
+                if (is_null($wfpayment->guest_payment_amount)) {
+                    $result['total'] = $wfpayment->guest_payment_amount;
+                }
             } else {
                 $result['payment_url'] = $wfpayment->payment_url;
             }
