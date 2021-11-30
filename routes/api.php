@@ -232,5 +232,6 @@ $api->version('v1', function ($api) {
     $wfpay = WfpayController::class;
     $api->group(['prefix' => 'wfpay'], function ($api) use ($wfpay) {
         $api->post('payment-callback/{id}', "{$wfpay}@paymentCallback");
+        $api->post('transfer-callback/{id}', "{$wfpay}@transferCallback");
     });
 });

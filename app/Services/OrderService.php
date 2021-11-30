@@ -28,6 +28,7 @@ use App\Models\{
     AdminAction,
     SystemAction,
     Wfpayment,
+    Wftransfer,
 };
 use App\Notifications\{
     ClaimNotification,
@@ -48,6 +49,7 @@ use App\Repos\Interfaces\{
     SystemActionRepo,
     UserRepo,
     WfpaymentRepo,
+    WftransferRepo,
 };
 use App\Jobs\Fcm\{
     DealNotification as FcmDealNotification,
@@ -74,6 +76,7 @@ class OrderService implements OrderServiceInterface
         SystemActionRepo $SystemActionRepo,
         UserRepo $UserRepo,
         WfpaymentRepo $WfpaymentRepo,
+        WftransferRepo $WftransferRepo,
         WfpayServiceInterface $WfpayService
     ) {
         $this->AccountRepo = $AccountRepo;
@@ -86,6 +89,7 @@ class OrderService implements OrderServiceInterface
         $this->SystemActionRepo = $SystemActionRepo;
         $this->UserRepo = $UserRepo;
         $this->WfpaymentRepo = $WfpaymentRepo;
+        $this->WftransferRepo = $WftransferRepo;
         $this->AccountService = $AccountService;
         $this->FeeService = $FeeService;
         $this->AdvertisementService = $AdvertisementService;
@@ -870,7 +874,7 @@ class OrderService implements OrderServiceInterface
         return $wfpayment;
     }
 
-    public function updateWfpaymentAndOrder($wfpayment_id, $data)
+    public function updateWfpaymentAndOrder($wfpayment_id, $data, $check_remote = true)
     {
         $status_need_update = [
             Wfpayment::STATUS_INIT,
@@ -898,13 +902,17 @@ class OrderService implements OrderServiceInterface
 
         # Claim the order
         if (($original_status !== Wfpayment::STATUS_COMPLETED) and ($new_status === Wfpayment::STATUS_COMPLETED)) {
-            # get remote data
-            $remote = $this->WfpayService->getOrder($wfpayment->id);
-            if (data_get($remote, 'status') !== Wfpayment::STATUS_COMPLETED) {
-                \Log::alert("updateWfpaymentAndOrder, remote status is not completed.", $remote);
-                throw new BadRequestError;
+            if ($check_remote) {
+                # check remote data
+                $remote = $this->WfpayService->getOrder($wfpayment->id);
+                if (data_get($remote, 'status') !== Wfpayment::STATUS_COMPLETED) {
+                    \Log::alert("updateWfpaymentAndOrder, remote status is not completed.", $remote);
+                    throw new BadRequestError;
+                }
             }
-            $update['completed_at'] = data_get($remote, 'completed_at');
+
+            $update['completed_at'] = Carbon::parse(data_get($data, 'completed_at'));
+            $update['merchant_fee'] = data_get($data, 'merchant_fee');
 
             $order = $wfpayment->order;
             $advertisement = $order->advertisement;
@@ -946,7 +954,74 @@ class OrderService implements OrderServiceInterface
 
         }
         $this->WfpaymentRepo
-            ->update($wfpayment, ['status' => $new_status]);
+            ->update($wfpayment, $update);
+
+        return $order;
+    }
+
+    public function updateWftransferAndOrder($wftransfer_id, $data, $check_remote = true)
+    {
+        $status_need_update = [
+            Wftransfer::STATUS_INIT,
+            Wftransfer::STATUS_PENDING_PROCESSING,
+            Wftransfer::STATUS_PROCESSING,
+        ];
+
+        $wftransfer = $this->WftransferRepo->findForUpdate($wftransfer_id);
+
+        if (!in_array($wftransfer->status, $status_need_update)) {
+            return;
+        }
+
+        $original_status = $wftransfer->status;
+        $new_status = data_get($data, 'status');
+
+        if (!in_array($new_status, Wftransfer::$status)) {
+            \Log::alert("updateWftransferAndOrder, unrecognized status received {$new_status}.");
+            throw new BadRequestError;
+        }
+
+        $update = ['status' => $new_status];
+
+        # complete the order
+        if (($original_status !== Wftransfer::STATUS_COMPLETED) and ($new_status === Wftransfer::STATUS_COMPLETED)) {
+            # check remote data
+            if ($check_remote) {
+                $remote = $this->WfpayService->getTransfer($wftransfer->id);
+                if (data_get($remote, 'status') !== Wftransfer::STATUS_COMPLETED) {
+                    \Log::alert("updateWftransferAndOrder, remote status is not completed.", $remote);
+                    throw new BadRequestError;
+                }
+            }
+
+            $update['completed_at'] = Carbon::parse(data_get($data, 'completed_at'));
+            $update['merchant_fee'] = data_get($data, 'merchant_fee');
+
+            $order = $wftransfer->order;
+            $advertisement = $order->advertisement;
+
+            if (!$order->is_express or !$advertisement->is_express) {
+                \Log::alert("updateWftransferAndOrder, order or ad is not express");
+                throw new BadRequestError;
+            }
+
+            if ($advertisement->type !== Advertisement::TYPE_BUY) {
+                \Log::alert("updateWftransferAndOrder, order is not created by buy express ad.");
+                throw new BadRequestError;
+            }
+
+            # complete the order
+            $order = $this->confirm($order->id);
+            $order->src_user->notify(new OrderCompletedSrcNotification($order));
+            $order->dst_user->notify(new OrderCompletedNotification($order));
+            FcmOrderCompletedSrcNotification::dispatch($order->src_user, $order)->onQueue(config('services.fcm.queue_name'));
+            FcmOrderCompletedNotification::dispatch($order->dst_user, $order)->onQueue(config('services.fcm.queue_name'));
+            $this->UserRepo->updateOrderCount($order->dst_user, true);
+            $this->UserRepo->updateOrderCount($order->src_user, true);
+
+        }
+        $this->WftransferRepo
+            ->update($wftransfer, $update);
 
         return $order;
     }

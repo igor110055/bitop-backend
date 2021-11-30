@@ -11,7 +11,6 @@ class Config extends UuidModel
     const ATTRIBUTE_PAYMENT_WINDOW = 'payment-window';
     const ATTRIBUTE_EXPRESS_PAYMENT_WINDOW = 'express-payment-window';
     const ATTRIBUTE_EXPRESS_AUTO_RELEASE_LIMIT = 'express-auto-release-limit';
-    const ATTRIBUTE_EXPRESS_AUTO_TRANSDER_LIMIT = 'express-auto-transfer-limit';
     const ATTRIBUTES = [
         self::ATTRIBUTE_WALLET,
         self::ATTRIBUTE_WITHDRAWAL_FEE_FACTOR,
@@ -31,10 +30,6 @@ class Config extends UuidModel
         self::ATTRIBUTE_EXPRESS_AUTO_RELEASE_LIMIT => [
             'min' => 0,
             'max' => 30000,
-        ],
-        self::ATTRIBUTE_EXPRESS_AUTO_TRANSDER_LIMIT => [
-            'min' => 0,
-            'max' => 50000,
         ],
     ];
 

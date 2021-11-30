@@ -14,6 +14,7 @@ interface WfpayServiceInterface
         $return_url,
         $force_matching = true
     );
+    public function getTransfer($id);
     public function createTranfer(
         $id,
         $amount,

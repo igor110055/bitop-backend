@@ -76,6 +76,18 @@ class WfpayService implements WfpayServiceInterface
         return $this->post($link, $data);
     }
 
+    public function getTransfer($id)
+    {
+        $data = [
+            "account_name" => $this->account,
+            "merchant_order_id" => $id,
+            "timestamp" => Carbon::now()->toIso8601String(),
+        ];
+
+        $link = $this->link('orders/payment_transfer_query');
+        return $this->post($link, $data);
+    }
+
     public function createTranfer(
         $id,
         $amount,

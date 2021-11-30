@@ -46,5 +46,6 @@ interface OrderServiceInterface
         User $user,
         $order_id
     );
-    public function updateWfpaymentAndOrder($wfpayment_id, $data);
+    public function updateWfpaymentAndOrder($wfpayment_id, $data, $check_remote = true);
+    public function updateWftransferAndOrder($wftransfer_id, $data, $check_remote = true);
 }

@@ -108,7 +108,12 @@ class WftransferRepo implements \App\Repos\Interfaces\WftransferRepo
                 'response' => $json,
                 'submitted_at' => millitime(),
             ]);
-            throw new BadRequestError;
+            throw $e;
+        } catch (\Throwable $e) {
+            $wftransfer = $this->update($wftransfer, [
+                'submitted_at' => millitime(),
+            ]);
+            throw $e;
         }
 
         $update = [

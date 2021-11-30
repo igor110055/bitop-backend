@@ -34,7 +34,7 @@ class Wftransfer extends UuidModel
         'merchant_fee',
         'callback_response',
         'response',
-        'expired_at',
+        'submitted_at',
         'completed_at',
     ];
 
