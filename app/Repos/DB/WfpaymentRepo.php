@@ -19,8 +19,6 @@ use App\Services\{
 
 class WfpaymentRepo implements \App\Repos\Interfaces\WfpaymentRepo
 {
-    protected $log;
-
     public function __construct(
         Wfpayment $wfpayment,
         WfpayServiceInterface $WfpayService

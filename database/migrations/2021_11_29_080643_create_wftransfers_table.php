@@ -27,7 +27,7 @@ class CreateWftransfersTable extends Migration
             $table->decimal('merchant_fee', $currency_precision, $currency_scale)->nullable();
             $table->json('callback_response')->nullable();
             $table->json('response')->nullable();
-            $table->timestamp('expired_at')->nullable();
+            $table->timestamp('submitted_at')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->timestamps();
 

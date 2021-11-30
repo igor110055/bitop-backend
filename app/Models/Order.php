@@ -20,9 +20,11 @@ class Order extends RandomIDModel
 
     const PAYABLE_BANK_ACCOUNT = 'bank_account';
     const PAYABLE_WFPAYMENT = 'wfpayment';
+    const PAYABLE_WFTRANSFER = 'wftransfer';
     const PAYMENT_TYPES_MAP = [
         'BankAccount' => self::PAYABLE_BANK_ACCOUNT,
         'Wfpayment' => self::PAYABLE_WFPAYMENT,
+        'Wftransfer' => self::PAYABLE_WFTRANSFER,
     ];
 
     const OP_USER = 'user';

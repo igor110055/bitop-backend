@@ -56,6 +56,7 @@ use App\Repos\Interfaces\{
     VerificationRepo,
     AdvertisementRepo,
     WfpaymentRepo,
+    WftransferRepo,
 };
 use App\Services\{
     OrderServiceInterface,
@@ -77,6 +78,7 @@ class OrderController extends AuthenticatedController
         AdvertisementRepo $AdvertisementRepo,
         VerificationRepo $VerificationRepo,
         WfpaymentRepo $WfpaymentRepo,
+        WftransferRepo $WftransferRepo,
         OrderServiceInterface $OrderService,
         FeeServiceInterface $FeeService,
         ExchangeServiceInterface $ExchangeService
@@ -87,6 +89,7 @@ class OrderController extends AuthenticatedController
         $this->AdvertisementRepo = $AdvertisementRepo;
         $this->VerificationRepo = $VerificationRepo;
         $this->WfpaymentRepo = $WfpaymentRepo;
+        $this->WftransferRepo = $WftransferRepo;
         $this->OrderService = $OrderService;
         $this->FeeService = $FeeService;
         $this->ExchangeService = $ExchangeService;
@@ -449,10 +452,34 @@ class OrderController extends AuthenticatedController
 
         user_log(UserLog::ORDER_CREATE, ['order_id' => $order->id], request());
 
-        return response()->json(
-            (new OrderResource($order))->withPayment($wfpayment),
-            201
-        );
+        if ($action === Advertisement::TYPE_BUY) {
+            return response()->json(
+                (new OrderResource($order))->withPayment($wfpayment),
+                201
+            );
+        } else {
+            $wftransfer = $this->WftransferRepo
+                ->createByOrder($order);
+            $bank_account = $order->bank_accounts->first();
+            $order = $this->OrderService->claim(
+                $order->id,
+                Order::PAYABLE_WFTRANSFER,      //payment_src_type,
+                $wftransfer->id,                //payment_src_id,
+                Order::PAYABLE_BANK_ACCOUNT,    //payment_dst_type,
+                data_get($bank_account, 'id')   //payment_dst_id
+            );
+            # Send the transfer
+            try {
+                $wftransfer = $this->WftransferRepo
+                    ->send($wftransfer);
+            } catch (\Throwable $e) {
+                Log::alert("Send wftransfer {$wftransfer->id} failed. ". $e->getMessage());
+            }
+            return response()->json(
+                (new OrderResource($order)),
+                201
+            );
+        }
     }
 
     public function claim(ClaimOrderRequest $request, string $id)
@@ -555,7 +582,7 @@ class OrderController extends AuthenticatedController
         try {
             $order = $this->OrderService->confirm($id);
         } catch (\Throwable $e) {
-            Log::error('Confirm order failed, '.$e);
+            Log::error('Confirm order failed, '.$e->getMessage());
             throw new UnknownError;
         }
 

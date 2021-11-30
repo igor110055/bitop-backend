@@ -10,7 +10,7 @@ use App\Models\{
     Wftransfer,
 };
 
-interface WftranferRepo
+interface WftransferRepo
 {
     public function find($id);
     public function findForUpdate($id);
@@ -19,4 +19,5 @@ interface WftranferRepo
     public function update(Wftransfer $wftransfer, array $values);
     public function createByOrder(Order $order);
     public function getTheLatestByOrder(Order $order);
+    public function send(Wftransfer $wftransfer);
 }

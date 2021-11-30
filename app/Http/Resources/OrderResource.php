@@ -113,23 +113,19 @@ class OrderResource extends JsonResource
 
         if ($this->payment_src) {
             $pay_src_type = $payment_types_map[$this->payment_src_type];
-            $order['payment_src_type'] = $pay_src_type;
-            $order['payment_src_id'] = $this->payment_src_id;
-            if ($order['payment_src_type'] === Order::PAYABLE_BANK_ACCOUNT) {
+            if ($pay_src_type === Order::PAYABLE_BANK_ACCOUNT) {
+                $order['payment_src_type'] = $pay_src_type;
+                $order['payment_src_id'] = $this->payment_src_id;
                 $order['payment_src'] = [$pay_src_type => new BankAccountResource($this->payment_src)];
-            } else {
-                $order['payment_src'] = [$pay_src_type => $this->payment_src];
             }
         }
 
         if ($this->payment_dst) {
             $pay_dst_type = $payment_types_map[$this->payment_dst_type];
-            $order['payment_dst_type'] = $pay_dst_type;
-            $order['payment_dst_id'] = $this->payment_dst_id;
-            if ($order['payment_dst_type'] === Order::PAYABLE_BANK_ACCOUNT) {
+            if ($pay_dst_type === Order::PAYABLE_BANK_ACCOUNT) {
+                $order['payment_dst_type'] = $pay_dst_type;
+                $order['payment_dst_id'] = $this->payment_dst_id;
                 $order['payment_dst'] = [$pay_dst_type => new BankAccountResource($this->payment_dst)];
-            } else {
-                $order['payment_dst'] = [$pay_dst_type => $this->payment_dst];
             }
         }
 
