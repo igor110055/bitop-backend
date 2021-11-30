@@ -42,6 +42,7 @@ class CreateWftransfersTable extends Migration
                 ->on('bank_accounts')
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
+            $table->index('status');
         });
     }
 

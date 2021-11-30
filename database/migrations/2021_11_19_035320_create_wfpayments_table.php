@@ -41,6 +41,7 @@ class CreateWfpaymentsTable extends Migration
                 ->on('orders')
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
+            $table->index('status');
         });
     }
 
