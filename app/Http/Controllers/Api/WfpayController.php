@@ -54,11 +54,19 @@ class WfpayController extends Controller
         Log::info("Wfpay paymentCallback request", $request->all());
 
         $wfpayment = $this->WfpaymentRepo->findOrFail($id);
-        $this->WfpaymentRepo->update($wfpayment, ['callback_response' => $content]);
 
         $payload = $request->input('data');
+        $payload = json_decode($payload, true);
         $data = data_get($payload, 'order');
         $notify_type = data_get($payload, 'notify_type');
+        $merchant_order_id = data_get($data, 'merchant_order_id');
+
+        if ($merchant_order_id !== $id) {
+            Log::alert("paymentCallback. Wrong id: callback of wfpayment {$id}, but {$merchant_order_id} received.");
+            return response(null, 400);
+        }
+
+        $this->WfpaymentRepo->update($wfpayment, ['callback_response' => $request->all()]);
 
         if ((data_get($data, 'status') === Wfpayment::STATUS_COMPLETED) and ($notify_type !== 'trade_completed')) {
             Log::alert("paymentCallback. {$id} notify_type is trade_completed but status is not completed.");

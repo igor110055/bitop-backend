@@ -229,7 +229,7 @@ class WfpayService implements WfpayServiceInterface
         return $this->verifySignature($content, $signature, $exception);
     }
 
-    public function verifySignature($content, $signature, $exception = false) : bool
+    public function verifySignature($content, $signature, $exception = true) : bool
     {
         if (config('app.env') === 'local') {
             $public_content = Storage::get('wfpay/public_key.pem');
