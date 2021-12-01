@@ -230,7 +230,7 @@ class OrderController extends AuthenticatedController
         } else {
             $response['unit_price'] = $ad->unit_price;
         }
-        if ($action === Advertisement::TYPE_SELL) {
+        if ($action === Advertisement::TYPE_BUY) {
             $mins = [];
             $maxs = [];
             foreach ($paymeny_methods as $method) {

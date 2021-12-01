@@ -113,8 +113,11 @@ class WfpayService implements WfpayServiceInterface
             "bank_account_name" => $bank_account_name
         ];
 
-        $link = $this->link('orders/payment_transfer');
-        return $this->post($link, $data);
+        if (data_get($this->configs, 'send_transfer', false)) {
+            $link = $this->link('orders/payment_transfer');
+            return $this->post($link, $data);
+        }
+        return $data;
     }
 
     public function rematch($id)

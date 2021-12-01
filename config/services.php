@@ -122,5 +122,6 @@ return [
         'account' => env('WFPAY_ACCOUNT'),
         'link' => env('WFPAY_URL'),
         'callback_proxy_domain' => env('WFPAY_CALLBACK_PROXY_DOMAIN'),
+        'send_transfer' => env('WFPAY_SEND_TRANSFER', false),
     ],
 ];
