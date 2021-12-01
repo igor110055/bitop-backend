@@ -22,4 +22,5 @@ interface WfpaymentRepo
     public function getPaymentInfo(Wfpayment $wfpayment);
     public function createByOrder(Order $order, $payment_method = 'bank');
     public function getTheLatestByOrder(Order $order);
+    public function getAllPending();
 }

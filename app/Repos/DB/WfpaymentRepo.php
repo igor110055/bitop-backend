@@ -135,4 +135,13 @@ class WfpaymentRepo implements \App\Repos\Interfaces\WfpaymentRepo
             ->latest()
             ->first();
     }
+
+    public function getAllPending()
+    {
+        $status = Wfpayment::$status_need_update;
+        return $this->wfpayment
+            ->whereIn('status', $status)
+            ->whereNull('closed_at')
+            ->get();
+    }
 }

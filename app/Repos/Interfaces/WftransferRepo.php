@@ -20,4 +20,5 @@ interface WftransferRepo
     public function createByOrder(Order $order);
     public function getTheLatestByOrder(Order $order);
     public function send(Wftransfer $wftransfer);
+    public function getAllPending();
 }

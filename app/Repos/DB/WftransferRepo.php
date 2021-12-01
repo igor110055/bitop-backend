@@ -127,4 +127,13 @@ class WftransferRepo implements \App\Repos\Interfaces\WftransferRepo
 
         return $wftransfer->fresh();
     }
+
+    public function getAllPending()
+    {
+        $status = Wftransfer::$status_need_update;
+        return $this->wftransfer
+            ->whereIn('status', $status)
+            ->whereNull('closed_at')
+            ->get();
+    }
 }

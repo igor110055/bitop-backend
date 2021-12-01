@@ -53,6 +53,13 @@ class Wfpayment extends UuidModel
         self::STATUS_PAYMENT_EXPIRED,
     ];
     public static $status = self::STATUS;
+    public static $status_need_update = [
+        self::STATUS_INIT,
+        self::STATUS_PENDINT_ALLOCATION,
+        self::STATUS_PENDINT_PAYMENT,
+        self::STATUS_PENDINT_CONFIRMATION,
+        self::STATUS_PENDINT_COMPLETED,
+    ];
 
     protected $casts = [
         'payment_info' => 'array',
@@ -73,7 +80,7 @@ class Wfpayment extends UuidModel
         'merchant_fee',
         'callback_response',
         'response',
-        'expired_at',
+        'closed_at',
         'completed_at',
     ];
 

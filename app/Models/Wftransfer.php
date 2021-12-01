@@ -22,6 +22,11 @@ class Wftransfer extends UuidModel
         self::STATUS_FAILED,
     ];
     public static $status = self::STATUS;
+    public static $status_need_update = [
+        self::STATUS_INIT,
+        self::STATUS_PENDING_PROCESSING,
+        self::STATUS_PROCESSING,
+    ];
 
     protected $fillable = [
         'id',
@@ -34,6 +39,7 @@ class Wftransfer extends UuidModel
         'merchant_fee',
         'callback_response',
         'response',
+        'closed_at',
         'submitted_at',
         'completed_at',
     ];

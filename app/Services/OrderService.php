@@ -876,22 +876,18 @@ class OrderService implements OrderServiceInterface
 
     public function updateWfpaymentAndOrder($wfpayment_id, $data, $check_remote = true)
     {
-        $status_need_update = [
-            Wfpayment::STATUS_INIT,
-            Wfpayment::STATUS_PENDINT_ALLOCATION,
-            Wfpayment::STATUS_PENDINT_PAYMENT,
-            Wfpayment::STATUS_PENDINT_CONFIRMATION,
-            Wfpayment::STATUS_PENDINT_COMPLETED,
-        ];
-
         $wfpayment = $this->WfpaymentRepo->findForUpdate($wfpayment_id);
 
-        if (!in_array($wfpayment->status, $status_need_update)) {
+        if (!in_array($wfpayment->status, Wfpayment::$status_need_update)) {
             return;
         }
 
         $original_status = $wfpayment->status;
         $new_status = data_get($data, 'status');
+
+        if ($new_status === $original_status) {
+            return;
+        }
 
         if (!in_array($new_status, Wfpayment::$status)) {
             \Log::alert("updateWfpaymentAndOrder, unrecognized status received {$new_status}.");
@@ -900,8 +896,13 @@ class OrderService implements OrderServiceInterface
 
         $update = ['status' => $new_status];
 
+        $order = $wfpayment->order;
+        if ($order->status === Order::STATUS_COMPLETED or $order->status === Order::STATUS_CANCELED) {
+            $update['closed_at'] = millitime();
+        }
+
         # Claim the order
-        if (($original_status !== Wfpayment::STATUS_COMPLETED) and ($new_status === Wfpayment::STATUS_COMPLETED)) {
+        if (($order->status === Order::STATUS_PROCESSING) and ($original_status !== Wfpayment::STATUS_COMPLETED) and ($new_status === Wfpayment::STATUS_COMPLETED)) {
             if ($check_remote) {
                 # check remote data
                 $remote = $this->WfpayService->getOrder($wfpayment->id);
@@ -912,9 +913,9 @@ class OrderService implements OrderServiceInterface
             }
 
             $update['completed_at'] = Carbon::parse(data_get($data, 'completed_at'));
+            $update['closed_at'] = Carbon::parse(data_get($data, 'completed_at'));
             $update['merchant_fee'] = data_get($data, 'merchant_fee');
 
-            $order = $wfpayment->order;
             $advertisement = $order->advertisement;
 
             if (!$order->is_express or !$advertisement->is_express) {
@@ -953,28 +954,24 @@ class OrderService implements OrderServiceInterface
             }
 
         }
-        $this->WfpaymentRepo
+        return $this->WfpaymentRepo
             ->update($wfpayment, $update);
-
-        return $order;
     }
 
     public function updateWftransferAndOrder($wftransfer_id, $data, $check_remote = true)
     {
-        $status_need_update = [
-            Wftransfer::STATUS_INIT,
-            Wftransfer::STATUS_PENDING_PROCESSING,
-            Wftransfer::STATUS_PROCESSING,
-        ];
-
         $wftransfer = $this->WftransferRepo->findForUpdate($wftransfer_id);
 
-        if (!in_array($wftransfer->status, $status_need_update)) {
+        if (!in_array($wftransfer->status, Wftransfer::$status_need_update)) {
             return;
         }
 
         $original_status = $wftransfer->status;
         $new_status = data_get($data, 'status');
+
+        if ($new_status === $original_status) {
+            return;
+        }
 
         if (!in_array($new_status, Wftransfer::$status)) {
             \Log::alert("updateWftransferAndOrder, unrecognized status received {$new_status}.");
@@ -983,8 +980,12 @@ class OrderService implements OrderServiceInterface
 
         $update = ['status' => $new_status];
 
-        # complete the order
-        if (($original_status !== Wftransfer::STATUS_COMPLETED) and ($new_status === Wftransfer::STATUS_COMPLETED)) {
+        $order = $wftransfer->order;
+        if ($order->status === Order::STATUS_COMPLETED or $order->status === Order::STATUS_CANCELED) {
+            $update['closed_at'] = millitime();
+        } elseif (($original_status !== Wftransfer::STATUS_COMPLETED) and ($new_status === Wftransfer::STATUS_COMPLETED)) {
+            # complete the order
+
             # check remote data
             if ($check_remote) {
                 $remote = $this->WfpayService->getTransfer($wftransfer->id);
@@ -995,9 +996,9 @@ class OrderService implements OrderServiceInterface
             }
 
             $update['completed_at'] = Carbon::parse(data_get($data, 'completed_at'));
+            $update['closed_at'] = Carbon::parse(data_get($data, 'completed_at'));
             $update['merchant_fee'] = data_get($data, 'merchant_fee');
 
-            $order = $wftransfer->order;
             $advertisement = $order->advertisement;
 
             if (!$order->is_express or !$advertisement->is_express) {
@@ -1020,9 +1021,7 @@ class OrderService implements OrderServiceInterface
             $this->UserRepo->updateOrderCount($order->src_user, true);
 
         }
-        $this->WftransferRepo
+        return $this->WftransferRepo
             ->update($wftransfer, $update);
-
-        return $order;
     }
 }

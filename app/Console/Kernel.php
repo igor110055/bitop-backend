@@ -18,6 +18,8 @@ use App\Console\Commands\{
     CancelExpiredTransfers,
     UpdateWithdrawalFeeCost,
     PruneAnnouncementReadTableCommand,
+    CheckPendingWfpayments,
+    CheckPendingWftransfers,
 };
 
 class Kernel extends ConsoleKernel
@@ -44,12 +46,6 @@ class Kernel extends ConsoleKernel
         $schedule->command(CheckBalance::class)
             ->everyTenMinutes()
             ->withoutOverLapping();
-
-        $schedule
-            ->command(DailyReport::class, ['--save-to-db'])
-            ->daily()
-            ->timezone($timezone)
-            ->withoutOverlapping();
 
         $schedule->command(CheckUserLockCommand::class)
             ->everyMinute()
@@ -83,8 +79,22 @@ class Kernel extends ConsoleKernel
             ->everyFiveMinutes()
             ->withoutOverlapping();
 
+        $schedule->command(CheckPendingWfpayments::class)
+            ->everyThreeMinutes()
+            ->withoutOverlapping();
+
+        $schedule->command(CheckPendingWftransfers::class)
+            ->everyThreeMinutes()
+            ->withoutOverlapping();
+
         $schedule
             ->command(PruneAnnouncementReadTableCommand::class)
+            ->daily()
+            ->timezone($timezone)
+            ->withoutOverlapping();
+
+        $schedule
+            ->command(DailyReport::class, ['--save-to-db'])
             ->daily()
             ->timezone($timezone)
             ->withoutOverlapping();
