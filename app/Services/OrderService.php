@@ -673,7 +673,7 @@ class OrderService implements OrderServiceInterface
         });
     }
 
-    public function getProfitUnitPrice(Order $order)
+    /* public function getProfitUnitPrice(Order $order)
     {
         return $this->calculateProfitUnitPrice(
             $order->dst_user,
@@ -734,7 +734,7 @@ class OrderService implements OrderServiceInterface
             'currency_unit_price' => $currency_unit_price,
             'new_coin_unit_price' => $new_coin_unit_price,
         ];
-    }
+    } */
 
     public function cancel(
         User $user,

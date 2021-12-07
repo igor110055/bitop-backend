@@ -105,7 +105,7 @@ class DailyReport extends Command
 
         DB::transaction(function () {
             $this->generalReport();
-            $this->assetReport();
+            //$this->assetReport();
             $this->accountReport();
             $this->orderReport();
             $this->feeReport();
@@ -144,7 +144,7 @@ class DailyReport extends Command
         # initiate
         $profit = Dec::create(0);
         $order_count = $this->orders->count();
-        foreach ($this->agencies as $agency) {
+        /* foreach ($this->agencies as $agency) {
             $agency_report[$agency->id]['agency_id'] = $agency->id;
             $agency_report[$agency->id]['orders'] = 0;
             $agency_report[$agency->id]['sell_orders'] = 0;
@@ -153,8 +153,6 @@ class DailyReport extends Command
         }
 
         foreach ($this->orders as $order) {
-            $src_group_id = $order->src_user->group_id;
-            $dst_group_id = $order->dst_user->group_id;
             $src_agency_id = $order->src_user->agency_id;
             $dst_agency_id = $order->dst_user->agency_id;
 
@@ -174,15 +172,15 @@ class DailyReport extends Command
                     $agency_report[$dst_agency_id]['profit'] = (string)Dec::add($agency_report[$dst_agency_id]['profit'], $order->profit);
                 }
             }
-        }
+        } */
 
         $this->printLine();
         $this->info('System Report');
         $this->table(['System Orders', 'System Profit'], [[$order_count, $profit]]);
         $this->printLine();
-        $this->info('Agency Report');
-        $this->table(['Agnecy ID', 'Sell Orders', 'Buy Orders', 'Profit'], $agency_report);
-        $this->printLine();
+        //$this->info('Agency Report');
+        //$this->table(['Agnecy ID', 'Sell Orders', 'Buy Orders', 'Profit'], $agency_report);
+        //$this->printLine();
 
         if ($this->save_to_db) {
             # system report
@@ -200,14 +198,14 @@ class DailyReport extends Command
             }
 
             # agency report
-            foreach ($agency_report as $report) {
+            /* foreach ($agency_report as $report) {
                 try {
                     $this->ReportRepo
                         ->create($this->date, $report);
                 } catch (DuplicateRecordError $e) {
                     $this->error("Agency Report of {$this->date} {$report['agency_id']} already exists.");
                 }
-            }
+            } */
         }
     }
 

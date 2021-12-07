@@ -30,29 +30,6 @@
         </div>
     </a>
 </div>
-<div class="content__title">
-    <h1>系統資產</h1>
-</div>
-<div class="row quick-stats">
-    @foreach ($assets_balance as $currency => $balance)
-    <a href="{{ route('admin.report.assets') }}" class="col-sm-6 col-md-3">
-        <div class="quick-stats__item
-        @if ((int)$balance < 0)
-            bg-red
-        @else
-            bg-green
-        @endif
-        ">
-            <div class="quick-stats__info">
-                <h2>{{ $balance.' '.$currency }}</h2>
-                <small>系統 {{ $currency }} 資產總額</small>
-            </div>
-
-            <div class="quick-stats__chart sparkline-bar-stats">{{ $assets_balance_history[$currency] }}</div>
-        </div>
-    </a>
-    @endforeach
-</div>
 
 <div class="content__title">
     <h1>系統內帳號虛擬幣總額</h1>
@@ -76,6 +53,7 @@
     @endforeach
 </div>
 
+@role('super-admin')
 <div class="content__title">
     <h1>系統錢包虛擬幣總額</h1>
 </div>
@@ -97,41 +75,12 @@
     </div>
     @endforeach
 </div>
+@endrole
 
 <div class="content__title">
     <h1>價格</h1>
 </div>
 <div class="row">
-        <div class="col-12 col-lg-6">
-            <div class="card card-inverse widget-past-days">
-                <div class="card-header">
-                    <h2 class="card-title">法幣報價 <small><a href="{{ route('admin.report.exchange-rates') }}" class="text-white">歷史紀錄</a></small></h2>
-                </div>
-                <div class="listview listview--inverse listview--striped">
-                    @foreach($currency_exchange_rates as $currency => $rates)
-                    <a href="{{ route('admin.report.exchange-rates') }}" class="listview__item d-block">
-                        <div class="row">
-                            <div class="widget-past-days__info col-3">
-                                <h3 class="pt-3">{{ $currency }}</h3>
-                            </div>
-                            <div class="widget-past-days__info col-3">
-                                <small>bid</small>
-                                <h3>{{ $rates['bid'] }}</h3>
-                            </div>
-                            <div class="widget-past-days__info col-3">
-                                <small>ask</small>
-                                <h3>{{ $rates['ask'] }}</h3>
-                            </div>
-                            <div class="widget-past-days__chart col-3">
-                                <div class="sparkline-bar-stats">{{ $currency_exchange_rate_history[$currency] }}</div>
-                            </div>
-                        </div>
-                    </a>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-
         <div class="col-12 col-lg-6">
             <div class="card card-inverse widget-profile">
                 <div class="card-header text-left">

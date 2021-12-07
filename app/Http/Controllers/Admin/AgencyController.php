@@ -30,6 +30,7 @@ class AgencyController extends AdminController
         $this->AgencyRepo = $AgencyRepo;
         $this->AssetRepo = $AssetRepo;
         $this->UserRepo = $UserRepo;
+        $this->middleware(['role:super-admin']);
     }
 
     public function index()

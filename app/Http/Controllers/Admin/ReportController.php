@@ -89,7 +89,7 @@ class ReportController extends AdminController
         }
         $date = $date->toDateString();
 
-        $asset_report = $this->AssetReportRepo->getAllByDate($date);
+        /* $asset_report = $this->AssetReportRepo->getAllByDate($date); */
 
         return view('admin.report', [
             'date' => $date,
@@ -98,7 +98,7 @@ class ReportController extends AdminController
             'base_currency' => $this->currency,
             'groups' => $this->groups,
             'agencies' => $this->agencies,
-            'currency_exchange_rates' => $this->CurrencyExchangeRateRepo->getAllByDate($date),
+            //'currency_exchange_rates' => $this->CurrencyExchangeRateRepo->getAllByDate($date),
             'coin_prices' => $this->CoinExchangeRateRepo->getAllByDate($date),
             'order_report' => $this->OrderReportRepo->getAllByDate($date),
             'ad_report' => $this->AdReportRepo->getAllByDate($date),
@@ -108,8 +108,8 @@ class ReportController extends AdminController
             'account_report' => $this->AccountReportRepo->getAllByDate($date),
             'wallet_balance_report' => $this->WalletBalanceReportRepo->getAllByDate($date),
             'withdrawal_deposit_report' => $this->WithdrawalDepositReportRepo->getAllByDate($date),
-            'asset_report' => $asset_report,
-            'has_multiple_agencies' => (bool)(count($asset_report['agency']) > 1)
+            //'asset_report' => $asset_report,
+            //'has_multiple_agencies' => (bool)(count($asset_report['agency']) > 1)
         ]);
     }
 
@@ -328,7 +328,7 @@ class ReportController extends AdminController
         ]);
     }
 
-    public function exchangeRates(Request $request)
+    /* public function exchangeRates(Request $request)
     {
         $values = $request->validate([
             'from' => 'string|date',
@@ -346,7 +346,7 @@ class ReportController extends AdminController
             'ticks' => date_ticks_for_chart($from, $to),
             'exchange_rates' => $data,
         ]);
-    }
+    } */
 
     public function coinPrices(Request $request)
     {
@@ -369,7 +369,7 @@ class ReportController extends AdminController
         ]);
     }
 
-    public function assets(Request $request)
+    /* public function assets(Request $request)
     {
         $values = $request->validate([
             'agency' => 'string|nullable',
@@ -397,5 +397,5 @@ class ReportController extends AdminController
             'ticks' => date_ticks_for_chart($from, $to),
             'data' => $data,
         ]);
-    }
+    } */
 }

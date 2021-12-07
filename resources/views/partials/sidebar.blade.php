@@ -89,7 +89,7 @@
                 'icon' => 'money',
             ],
             [
-                'model' => function ($user) { return $user->is_admin; },
+                'model' => function ($user) { return $user->hasRole('super-admin'); },
                 'title' => '組織管理',
                 'path' => 'agencies',
                 'icon' => 'globe',
@@ -148,107 +148,6 @@
                 'path' => 'announcements',
                 'icon' => 'notifications',
             ],
-            /*[
-                'model' => \App\Http\Controllers\Admin\ExportExchanges::class,
-                'title' => '轉出管理',
-                'path' => 'export-exchanges',
-                'icon' => 'arrow-right-top',
-            ],
-            [
-                'model' => \App\Http\Controllers\Admin\ImportExchanges::class,
-                'title' => '充值管理',
-                'path' => 'import-exchanges',
-                'icon' => 'arrow-left-bottom',
-            ],
-            [
-                'model' => \App\Models\Account::class,
-                'title' => '交易明細',
-                'path' => 'transactions',
-                'icon' => 'view-list-alt',
-            ],
-            [
-                'model' => \App\Http\Controllers\Admin\ImportExchanges::class,
-                'title' => '手動明細',
-                'path' => 'system-exchanges',
-                'icon' => 'view-list-alt',
-            ],
-            [
-                'model' => \App\Models\Channel::class,
-                'title' => '通道管理',
-                'path' => 'channels',
-                'icon' => 'square-down ',
-            ],
-            [
-                'model' => \App\Models\User::class,
-                'title' => '用戶管理',
-                'path' => 'users',
-                'icon' => 'accounts-list',
-            ],
-            [
-                'model' => \App\Models\Group::class,
-                'title' => '群組管理',
-                'path' => 'groups',
-                'icon' => 'accounts',
-            ],
-            [
-                'model' => \App\Models\ExchangeRateAdjustment::class,
-                'title' => '匯率設定',
-                'path' => 'exchange-rates',
-                'icon' => 'money ',
-            ],
-            [
-                'model' => \App\Models\FeeSetting::class,
-                'title' => '手續費設定',
-                'path' => 'fee-settings',
-                'icon' => 'money-box ',
-            ],
-            [
-                'model' => \App\Models\Limit::class,
-                'title' => '限額設定',
-                'path' => 'limits',
-                'icon' => 'money-off ',
-            ],
-            [
-                'model' => \App\Models\Stock::class,
-                'title' => '股票管理',
-                'path' => 'stocks',
-                'icon' => 'trending-up ',
-            ],
-            [
-                'model' => \App\Models\Merchant::class,
-                'title' => '商戶管理',
-                'path' => '',
-                'icon' => 'store',
-                'submenus' => [
-                    [ 'path' => 'merchants', 'title' => '商戶列表' ],
-                    [ 'path' => 'orders', 'title' => '訂單管理' ],
-                ],
-            ],
-            [
-                'model' => \App\Models\Bank::class,
-                'title' => '銀行管理',
-                'path' => 'banks',
-                'icon' => 'balance',
-            ],
-            [
-                'model' => \App\Models\AdminBankAccount::class,
-                'title' => '銀行帳戶管理',
-                'path' => 'admin-bank-accounts',
-                'icon' => 'book',
-            ],
-            [
-                'model' => \App\Models\User::class,
-                'title' => '富邦虛擬帳號',
-                'path' => 'fubon',
-                'icon' => 'account-o',
-            ],
-            [
-                'model' => \App\Models\Notification::class,
-                'title' => '公告管理',
-                'path' => 'notifications',
-                'icon' => 'notifications',
-            ],
-*/
         ];
         @endphp
         <ul class="navigation">

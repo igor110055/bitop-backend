@@ -27,7 +27,7 @@ interface OrderServiceInterface
         $payment_dst_id
     );
     public function confirm($order_id);
-    public function getProfitUnitPrice(Order $order);
+    /* public function getProfitUnitPrice(Order $order);
     public function calculateProfitUnitPrice(
         $dst_user,
         $src_user,
@@ -36,7 +36,7 @@ interface OrderServiceInterface
         $coin_unit_price,
         $currency,
         $currency_amount
-    );
+    ); */
     public function cancel(
         User $user,
         $order_id,

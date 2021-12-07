@@ -26,5 +26,5 @@ interface ExchangeServiceInterface
     # USDT amount => coin amount
     public function USDTToCoin($USDT_amount, $coin);
 
-    public function getAgencyCurrencyPrice(User $user, $currency);
+    /* public function getAgencyCurrencyPrice(User $user, $currency); */
 }
