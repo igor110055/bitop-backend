@@ -166,7 +166,7 @@ class ExchangeService implements ExchangeServiceInterface
         return (string) Dec::mul($amount, $price, $this->currencies[$this->base_currency]['decimal']);
     }
 
-    /* public function coinToUSDT($coin, $amount)
+    public function coinToUSDT($coin, $amount)
     {
         if (data_get($this->coins, "{$coin}.base") === 'USDT') {
             return (string) $amount;
@@ -174,7 +174,7 @@ class ExchangeService implements ExchangeServiceInterface
         $coin_price = $this->CoinExchangeRateRepo->getLatest($coin)->price;
         $USDT_price = $this->CoinExchangeRateRepo->getLatest('USDT-ERC20')->price;
         return (string) Dec::mul($amount, $coin_price)->div($USDT_price, $this->coins['USDT-ERC20']['decimal']);
-    } */
+    }
 
     public function USDTToCoin($USDT_amount, $coin)
     {

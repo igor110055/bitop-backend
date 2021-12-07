@@ -42,7 +42,7 @@ class LimitationController extends AuthenticatedController
         $args = $this->AccountService->getDailyWithdrawalLimitationArguments($user);
 
         if ($limitation) {
-            return (new LimitationResource($limitation))->withBaseLimit($args);
+            return (new LimitationResource($limitation))->withUSDLimit($args);
         } else {
             return [
                 'type' => $type,

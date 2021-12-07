@@ -21,7 +21,7 @@ interface ExchangeServiceInterface
     public function coinToBaseValue($coin, $amount);
 
     # coin amount => USDT amount
-    /* public function coinToUSDT($coin, $amount); */
+    public function coinToUSDT($coin, $amount);
 
     # USDT amount => coin amount
     public function USDTToCoin($USDT_amount, $coin);
