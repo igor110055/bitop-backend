@@ -55,6 +55,7 @@ use App\Repos\Interfaces\{
     OrderRepo,
     VerificationRepo,
     AdvertisementRepo,
+    BankAccountRepo,
     WfpaymentRepo,
     WftransferRepo,
 };
@@ -76,6 +77,7 @@ class OrderController extends AuthenticatedController
         UserRepo $UserRepo,
         OrderRepo $OrderRepo,
         AdvertisementRepo $AdvertisementRepo,
+        BankAccountRepo $BankAccountRepo,
         VerificationRepo $VerificationRepo,
         WfpaymentRepo $WfpaymentRepo,
         WftransferRepo $WftransferRepo,
@@ -87,6 +89,7 @@ class OrderController extends AuthenticatedController
         $this->UserRepo = $UserRepo;
         $this->OrderRepo = $OrderRepo;
         $this->AdvertisementRepo = $AdvertisementRepo;
+        $this->BankAccountRepo = $BankAccountRepo;
         $this->VerificationRepo = $VerificationRepo;
         $this->WfpaymentRepo = $WfpaymentRepo;
         $this->WftransferRepo = $WftransferRepo;
@@ -463,10 +466,8 @@ class OrderController extends AuthenticatedController
             $bank_account = $order->bank_accounts->first();
             $order = $this->OrderService->claim(
                 $order->id,
-                Order::PAYABLE_WFTRANSFER,      //payment_src_type,
-                $wftransfer->id,                //payment_src_id,
-                Order::PAYABLE_BANK_ACCOUNT,    //payment_dst_type,
-                data_get($bank_account, 'id')   //payment_dst_id
+                $wftransfer,    //payment_src
+                $bank_account   //payment_dst
             );
             # Send the transfer
             try {
@@ -496,12 +497,24 @@ class OrderController extends AuthenticatedController
             throw new AccessDeniedHttpException;
         }
 
+        if ($input['payment_src_type'] !== Order::PAYABLE_BANK_ACCOUNT) {
+            throw new BadRequestError;
+        }
+
+        if ($input['payment_dst_type'] !== Order::PAYABLE_BANK_ACCOUNT) {
+            throw new BadRequestError;
+        }
+
+        $src_bank_account = $this->BankAccountRepo
+            ->findOrFail($input['payment_src_id']);
+
+        $dst_bank_account = $this->BankAccountRepo
+            ->findOrFail($input['payment_dst_id']);
+
         $order = $this->OrderService->claim(
             $id,
-            $input['payment_src_type'],
-            $input['payment_src_id'],
-            $input['payment_dst_type'],
-            $input['payment_dst_id']
+            $src_bank_account,
+            $dst_bank_account
         );
         user_log(UserLog::ORDER_CLAIM, ['order_id' => $order->id], request());
         return new OrderResource($order);

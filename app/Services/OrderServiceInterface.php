@@ -21,10 +21,8 @@ interface OrderServiceInterface
     );
     public function claim(
         $order_id,
-        $payment_src_type,
-        $payment_src_id,
-        $payment_dst_type,
-        $payment_dst_id
+        $payment_src,
+        $payment_dst
     );
     public function confirm($order_id);
     /* public function getProfitUnitPrice(Order $order);
