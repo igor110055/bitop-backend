@@ -22,7 +22,7 @@
                     <dt class="col-sm-3">狀態</dt>
                     <dd class="col-sm-9">
                         <span class="text-{{ $order->completed_at ? 'default' : 'danger' }}">
-                            {{ $order->status }}
+                            {{ __("messages.order.status.{$order->status}") }}
                         </span>
                     </dd>
                     @if ($cancel_info)
@@ -46,9 +46,7 @@
                     <dt class="col-sm-3">價格</dt>
                     <dd class="col-sm-9">{{ $order->total }}</dd>
                     <dt class="col-sm-3">手續費</dt>
-                    <dd class="col-sm-9">{{ formatted_coin_amount($order->fee) }}</dd>
-                    <dt class="col-sm-3">利潤</dt>
-                    <dd class="col-sm-9">{{ $order->profit }}</dd>
+                    <dd class="col-sm-9">{{ formatted_coin_amount($order->fee) }} {{ $order->coin }}</dd>
                 </dl>
             </div>
         </div>
@@ -128,7 +126,8 @@
             </div>
         </div>
     </div>
-    @if ($order->status === Order::STATUS_CLAIMED)
+    @can('edit-orders')
+    @if ($order->status === Order::STATUS_PROCESSING or $order->status === Order::STATUS_CLAIMED)
     <div class="col-lg-6">
         <div class="card">
             <div class="card-header"><h3 class="card-title">管理者操作</h3></div>
@@ -145,5 +144,6 @@
         </div>
     </div>
     @endif
+    @endcan
 </div>
 @endsection

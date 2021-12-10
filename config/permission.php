@@ -7,36 +7,37 @@ return [
         'categories' => [
             'user' => [
                 'edit-users',
-                'lock-users',
+                'verify-users',
                 'edit-auth',
                 'view-auth',
             ],
             'group' => [
-                'create-groups',
                 'edit-groups',
             ],
             'fee' => [
                 'edit-fees',
             ],
             'advertisement' => [
-                'pull-advertisements',
+                'edit-advertisements',
             ],
             'order' => [
-                'force-cancel-orders',
-                'force-complete-orders',
+                'edit-orders',
             ],
             'limitation' => [
-                'create-limitations',
                 'edit-limitations',
             ],
             'announcement' => [
-                'create-announcements',
                 'edit-announcements',
             ],
             'agency' => [
-                'create-agencies',
                 'edit-agencies',
-                'create-agents',
+                'edit-agents',
+            ],
+            'config' => [
+                'edit-configs',
+            ],
+            'bank_account' => [
+                'edit-bank-accounts'
             ],
         ],
     ],

@@ -28,7 +28,7 @@ class AnnouncementRepo implements \App\Repos\Interfaces\AnnouncementRepo
         return $this->announcement->findOrFail($id);
     }
 
-    public function create(array $values, string $locale = AnnouncementContent::LOCALE_EN)
+    public function create(array $values, string $locale = AnnouncementContent::LOCALE_ZHCN)
     {
         return DB::transaction(function () use ($values, $locale) {
             $announcement = $this->announcement->create($values);
@@ -72,7 +72,7 @@ class AnnouncementRepo implements \App\Repos\Interfaces\AnnouncementRepo
     ) {
         $query = $this->announcement
             ->where('released_at', '<', Carbon::now());
-        
+
         $total = $query->count();
         $data = $query
             ->latest('released_at')

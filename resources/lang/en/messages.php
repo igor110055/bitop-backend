@@ -10,7 +10,6 @@ return [
             'unauthenticated' => 'Unauthenticated',
         ],
         'role' => [
-            'super-admin' => 'Super Admin',
             'admin' => 'Admin',
             'assistant' => 'Assistant',
             'viewer' => 'Viewer',

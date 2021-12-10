@@ -38,6 +38,13 @@ class AdvertisementController extends AdminController
         $this->AdminActionRepo = $AdminActionRepo;
         $this->AdvertisementService = $AdvertisementService;
         $this->tz = config('core.timezone.default');
+
+        $this->middleware(
+            ['can:edit-advertisements'],
+            ['only' => [
+                'update',
+            ]]
+        );
     }
 
     public function index()
@@ -52,6 +59,11 @@ class AdvertisementController extends AdminController
                 Advertisement::STATUS_UNAVAILABLE => 'Unavailable',
                 Advertisement::STATUS_COMPLETED => 'Completed',
                 Advertisement::STATUS_DELETED => 'Deleted',
+            ],
+            'express' => [
+                'all' => 'All',
+                '0' => '一般交易',
+                '1' => '快捷交易',
             ],
         ]);
     }
@@ -106,26 +118,27 @@ class AdvertisementController extends AdminController
         $values = $request->validated();
         $keyword = data_get($values, 'search.value');
         $status = data_get($values, 'status');
+        $is_express = data_get($values, 'is_express');
+
+        $condition = [];
 
         if ($status !== 'all') {
-            $condition = [['status', '=', $status]];
-        } else {
-            $condition = [];
+            $condition[] = ['status', '=', $status];
         }
-        if (!empty(data_get($values, 'from')) and !empty(data_get($values, 'to'))) {
+        if (!empty(data_get($values, 'from'))) {
             $from = Carbon::parse(data_get($values, 'from'), $this->tz);
-            $to = Carbon::parse(data_get($values, 'to'), $this->tz)->addDay();
-            if ($status !== 'all') {
-                $condition = $this->searchConditionWithTimeInterval(
-                    $condition,
-                    'created_at',
-                    $from,
-                    $to
-                );
-            } else {
-                $condition = array_merge($this->timeIntervalCondition('created_at', $from, $to), $condition);
-            }
+            $condition[] = ['created_at', '>=', $from];
         }
+        if (!empty(data_get($values, 'to'))) {
+            $to = Carbon::parse(data_get($values, 'to'), $this->tz)->addDay();
+            $condition[] = ['created_at', '<', $to];
+        }
+        if ($is_express === '1') {
+            $condition[] = ['is_express', '=', true];
+        } elseif ($is_express === '0') {
+            $condition[] = ['is_express', '=', false];
+        }
+
         $query = $this->AdvertisementRepo->queryAdvertisement($condition, $keyword);
         $total = $this->AdvertisementRepo->countAll();
         $filtered = $query->count();

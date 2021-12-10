@@ -41,6 +41,14 @@ class AccountController extends AdminController
         $this->AccountRepo = $ar;
         $this->TransactionRepo = $tr;
         $this->AccountService = $as;
+
+        $this->middleware(
+            ['role:super-admin'],
+            ['only' => [
+                'createManipulation',
+                'storeManipulation',
+            ]]
+        );
     }
 
     public function show(Account $account)

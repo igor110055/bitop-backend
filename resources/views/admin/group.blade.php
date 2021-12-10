@@ -12,6 +12,7 @@
             href="{{ route('admin.groups.users', ['group' => $group->id]) }}"
             class="btn btn-primary waves-effect"
         >成員列表</a>
+        @can('edit-groups')
         <a
             href="{{ route('admin.groups.share-settings', ['group' => $group->id]) }}"
             class="btn btn-primary waves-effect"
@@ -24,6 +25,7 @@
             href="{{ route('admin.groups.limitations', ['group' => $group->id]) }}"
             class="btn btn-primary waves-effect"
         >限額設定</a>
+        @endcan
     </div>
 </div>
 
@@ -37,8 +39,9 @@
             @include('widgets.forms.input', ['name' => 'id', 'class' => 'text-lowercase', 'value' => old('id', $group->id), 'title' => 'ID', 'disabled' => true, 'required' => true, 'placeholder' => '請輸入小寫英文、數字、dash、底線，至少 6 個字元'])
             @include('widgets.forms.input', ['name' => 'name', 'value' => old('name', $group->name), 'title' => 'Name', 'required' => true])
             @include('widgets.forms.select', ['name' => 'user_id', 'class' => 'user-search-select', 'values' => [], 'title' => 'Owner', 'required' => true])
-            <a href="/admin/groups" class="btn btn-secondary">Cancel</a>
+            @can('edit-groups')
             <button type="submit" class="btn btn-primary">Submit</button>
+            @endcan
         </div>
     </div>
 

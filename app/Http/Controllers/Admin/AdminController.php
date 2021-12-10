@@ -9,6 +9,6 @@ class AdminController extends Controller
     public function __construct()
     {
         parent::__construct();
-        \App::setLocale('zh-tw');
+        \App::setLocale('zh-cn');
     }
 }

@@ -65,11 +65,11 @@ class AuthController extends AdminController
 
                 # check user is admin
                 if (!$user->is_admin) {
-                    throw new BadRequestError("Not An Admin");
+                    throw new BadRequestError;
                 }
                 # check user activate 2fa
                 if (!$user->two_factor_auth) {
-                    throw new BadRequestError("Admin login requires 2FA activation");
+                    throw new BadRequestError;
                 }
 
                 # try login

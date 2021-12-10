@@ -30,6 +30,10 @@ class ExchangeRateController extends AdminController
         $this->CurrencyExchangeRateRepo = $CurrencyExchangeRateRepo;
         $this->GroupRepo = $GroupRepo;
         $this->ShareSettingRepo = $ShareSettingRepo;
+
+        $this->middleware(
+            ['role:super-admin']
+        );
     }
 
     public function index()

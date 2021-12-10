@@ -16,16 +16,16 @@
 </div>
 
 <div class="card">
+
+    @can('edit-announcements')
     <div class="card-header">
         <h2 class="card-title">公告發佈</h2>
-        <small class="card-subtitle" style="color:#dc1818">請先發佈英文版</small>
     </div>
-
     <div class="card-block">
         <div class="row">
             <div class="col-sm-3">
                 <div>
-                    <label>Release time</label>
+                    <label>發布時間</label>
                     <div class="input-group">
                         <span class="input-group-addon"><i class="zmdi zmdi-calendar"></i></span>
                         <div class="form-group">
@@ -35,7 +35,7 @@
                     </div>
                 </div>
                 <div style="margin-top: 20%;">
-                    <label>Stay on PIN time</label>
+                    <label>顯示為重要公告直到</label>
                     <div class="input-group">
                         <span class="input-group-addon"><i class="zmdi zmdi-calendar"></i></span>
                         <div class="form-group">
@@ -50,8 +50,9 @@
             </div>
 
             <div class="col-sm-9">
+                <small class="card-subtitle" style="color:#dc1818">請先發佈簡中版</small>
                 <div>
-                    <label>Announcement Title</label>
+                    <label>公告標題</label>
                     <input type="text" id="title" class="form-control" autocomplete="off">
                 </div>
                 <div class="row">
@@ -62,17 +63,18 @@
             </div>
         </div>
     </div>
+    @endcan
 
     <div class="card-block">
         <div class="table-responsive">
             <table id="announcements" class="table table-striped">
                 <thead class="thead-default">
                     <tr>
-                        <th>Release time</th>
-                        <th>Pin time</th>
-                        <th>Title</th>
-                        <th>Status</th>
-                        <th>Cancel</th>
+                        <th>發布時間</th>
+                        <th>顯示為重要公告直到</th>
+                        <th>標題</th>
+                        <th>狀態</th>
+                        <th>取消</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -101,9 +103,11 @@
                         @endif
                         </td>
                         <td>
+                        @can('edit-announcements')
                         @if ($announcement->deleted_at === null)
                             <button class="btn btn-primary wave-effect cancel" id="{{ $announcement->id }}">Cancel</button>
                         @endif
+                        @endcan
                         </td>
                     </tr>
                     @endforeach
@@ -121,7 +125,9 @@
 $(function(){
     let myEditor;
     ClassicEditor
-        .create( document.querySelector( '#editor' ) )
+        .create( document.querySelector( '#editor' ),{
+            toolbar: ['heading', '|',  'bold', 'italic', 'link', 'undo', 'redo', 'numberedList', 'bulletedList', '|','outdent', 'indent' ]
+        } )
         .then(editor => {
             myEditor = editor;
         })

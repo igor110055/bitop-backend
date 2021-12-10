@@ -62,15 +62,35 @@ class InitialAdminAuthorizationCommand extends Command
         $assistant= Role::create(['guard_name' => 'web', 'name' => 'assistant']);
         $viewer = Role::create(['guard_name' => 'web', 'name' => 'viewer']);
 
-        # initial permissions to roles
-        $assistant->givePermissionTo('view-auth');
+        $admin_permissions = [
+            'edit-users',
+            'verify-users',
+            'edit-auth',
+            'view-auth',
+            'edit-groups',
+            'edit-fees',
+            'edit-advertisements',
+            'edit-orders',
+            'edit-limitations',
+            'edit-announcements',
+            'edit-agencies',
+            'edit-agents',
+            'edit-configs',
+            'edit-bank-accounts',
+        ];
 
-        foreach ($permissions as $permission) {
-            if ($permission !== 'edit-auth' or
-                !in_array($permission, $this->config['agency'])
-            ) {
-                $admin->givePermissionTo($permission);
-            }
+        $assistant_permissions = [
+            'verify-users',
+            'edit-announcements',
+            'edit-bank-accounts',
+        ];
+
+        foreach ($admin_permissions as $permission) {
+            $admin->givePermissionTo($permission);
+        }
+
+        foreach ($assistant_permissions as $permission) {
+            $assistant->givePermissionTo($permission);
         }
     }
 

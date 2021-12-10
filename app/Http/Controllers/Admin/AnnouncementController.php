@@ -21,6 +21,15 @@ class AnnouncementController extends AdminController
         $this->AnnouncementRepo = $AnnouncementRepo;
         $this->UserRepo = $UserRepo;
         $this->tz = config('core.timezone.default');
+
+        $this->middleware(
+            ['can:edit-announcements'],
+            ['only' => [
+                'update',
+                'store',
+                'emailBroadcast',
+            ]]
+        );
     }
 
     public function index()
@@ -36,7 +45,7 @@ class AnnouncementController extends AdminController
         foreach($announcement->announcement_contents as $content) {
             $contents[$content->locale] = [
                 'title' => $content->title,
-                'content' => strip_tags($content->content),
+                'content' => $content->content,
             ];
         }
 
@@ -44,9 +53,9 @@ class AnnouncementController extends AdminController
             'announcement' => $announcement,
             'contents' => $contents,
             'locale' => [
-                'en' => 'EN',
-                'zh-tw' => 'ZH-TW',
                 'zh-cn' => 'ZH-CN',
+                'zh-tw' => 'ZH-TW',
+                'en' => 'EN',
             ],
         ]);
     }

@@ -50,6 +50,13 @@ class OrderController extends AdminController
         $this->UserRepo = $UserRepo;
         $this->OrderService = $OrderService;
         $this->tz = config('core.timezone.default');
+
+        $this->middleware(
+            ['can:edit-orders'],
+            ['only' => [
+                'update',
+            ]]
+        );
     }
 
     public function index()
@@ -64,6 +71,11 @@ class OrderController extends AdminController
                 Order::STATUS_CLAIMED => 'Claimed',
                 Order::STATUS_COMPLETED => 'Completed',
                 Order::STATUS_CANCELED => 'Canceled',
+            ],
+            'express' => [
+                'all' => 'All',
+                '0' => '一般交易',
+                '1' => '快捷交易',
             ],
         ]);
     }
@@ -146,17 +158,20 @@ class OrderController extends AdminController
         $status = data_get($values, 'status');
         $from = Carbon::parse(data_get($values, 'from', 'today -10 days'), $this->tz);
         $to = Carbon::parse(data_get($values, 'to', 'today'), $this->tz)->addDay();
+        $is_express = data_get($values, 'is_express');
 
+        $condition = [];
         if ($status !== 'all') {
-            $condition = $this->searchConditionWithTimeInterval(
-                [['status', '=', $status]],
-                'created_at',
-                $from,
-                $to
-            );
-        } else {
-            $condition = $this->timeIntervalCondition('created_at', $from, $to);
+            $condition[] = ['status', '=', $status];
         }
+        $condition[] = ['created_at', '>=', $from];
+        $condition[] = ['created_at', '<', $to];
+        if ($is_express === '1') {
+            $condition[] = ['is_express', '=', true];
+        } elseif ($is_express === '0') {
+            $condition[] = ['is_express', '=', false];
+        }
+
         $query = $this->OrderRepo->queryOrder($condition, $keyword);
         $total = $this->OrderRepo->getOrdersCount();
         $filtered = $query->count();

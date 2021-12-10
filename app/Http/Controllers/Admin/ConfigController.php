@@ -15,6 +15,7 @@ class ConfigController extends AdminController
         parent::__construct();
         $this->ConfigRepo = $ConfigRepo;
         $this->coins = array_keys(config('coin'));
+        $this->middleware(['can:edit-configs']);
     }
 
     public function index()

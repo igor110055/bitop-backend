@@ -12,6 +12,10 @@ class PermissionController extends AdminController
     ) {
         $this->RoleRepo = $RoleRepo;
         parent::__construct();
+
+        $this->middleware(
+            ['can:view-auth']
+        );
     }
 
     public function index()

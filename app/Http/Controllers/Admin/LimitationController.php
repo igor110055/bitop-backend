@@ -18,6 +18,14 @@ class LimitationController extends AdminController
     ) {
         parent::__construct();
         $this->LimitationRepo = $LimitationRepo;
+
+        $this->middleware(
+            ['can:edit-limitations'],
+            ['only' => [
+                'edit',
+                'store',
+            ]]
+        );
     }
 
     public function index()

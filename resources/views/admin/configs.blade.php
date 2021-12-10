@@ -23,6 +23,8 @@
         </div>
     </div>
 </form>
+
+@role('super-admin')
 <form method="post" action="{{ route('admin.configs.withdrawal-fee-factor') }}">
 {{ csrf_field() }}
 {{ method_field('POST') }}
@@ -41,6 +43,7 @@
         </div>
     </div>
 </form>
+@endrole
 <form method="post" action="{{ route('admin.configs.withdrawal-limit') }}">
 {{ csrf_field() }}
 {{ method_field('POST') }}
@@ -48,17 +51,19 @@
     <div class="card">
         <div class="card-header"><h3 class="card-title">提現限額設定</h3></div>
         <div class="card-block">
-            @include('widgets.forms.input', ['name' => "daily_limit", 'class' => 'text-lowercase', 'value' => data_get($withdrawal_limit, 'daily'), 'title' => '每日提現限額(Base currency)', 'required' => true])
+            @include('widgets.forms.input', ['name' => "daily_limit", 'class' => 'text-lowercase', 'value' => data_get($withdrawal_limit, 'daily'), 'title' => '每日提現限額 (USD)', 'required' => true])
+            <p>通過 2FA 將調整為 {{config('core.two_factor_auth.withdrawal_limit')}} 倍</p>
         </div>
         <div class="card-block">
             <button type="submit" class="btn btn-primary">Submit</button>
         </div>
     </div>
 </form>
+
+@role('super-admin')
 <form method="post" action="{{ route('admin.configs.app-version') }}">
 {{ csrf_field() }}
 {{ method_field('POST') }}
-
     <div class="card">
         <div class="card-header"><h3 class="card-title">版號設定</h3></div>
         @foreach (['web', 'ios', 'android'] as $platform)
@@ -73,4 +78,6 @@
         </div>
     </div>
 </form>
+@endrole
+
 @endsection

@@ -11,11 +11,17 @@
         <h2 class="card-title">用戶管理：{{ $user->username }}</h2>
         <!--small class="card-subtitle"></small-->
     </div>
+
     <div class="card-block">
+        @can('edit-users')
+        @if (!$is_root)
         <a
             href="{{ route('admin.users.edit', ['user' => $user->id]) }}"
             class="btn btn-primary waves-effect"
         >編輯用戶</a>
+        @endif
+        @endcan
+
         <a
             href="{{ route('admin.users.orders', ['user' => $user->id]) }}"
             class="btn btn-primary waves-effect"
@@ -28,10 +34,24 @@
             href="{{ route('admin.users.limitations', ['user' => $user->id]) }}"
             class="btn btn-primary waves-effect"
         >限額設定</a>
+
+        @can('edit-users')
+        @if (!$is_root)
         <a
             href="{{ route('admin.users.feature-lock', ['user' => $user->id]) }}"
             class="btn btn-primary waves-effect"
         >鎖定特定功能</a>
+        @else
+            @role('super-admin')
+            <a
+                href="{{ route('admin.users.feature-lock', ['user' => $user->id]) }}"
+                class="btn btn-primary waves-effect"
+            >鎖定特定功能</a>
+            @endrole
+        @endif
+        @endcan
+
+        @can('edit-auth')
         @if (!$is_root and ($user->id !== auth()->user()->id))
             @if ($user->is_admin)
             <a
@@ -45,6 +65,9 @@
             >提升為管理員</a>
             @endif
         @endif
+        @endcan
+
+        @role('super-admin')
         @if ($user->is_tester)
         <a
             href="{{ route('admin.users.admin.authorize-tester', ['user' => $user->id]) }}"
@@ -56,6 +79,8 @@
             class="btn btn-outline-info waves-effect"
         >啟用測試權限</a>
         @endif
+        @endrole
+
     </div>
 </div>
 
@@ -77,6 +102,102 @@
                         @endif
                     </dd>
                 </dl>
+            </div>
+        </div>
+
+        <div class="card pb-4">
+            <div class="card-header"><h3 class="card-title">實名認證</h3></div>
+            <div class="card-block">
+            @if($auth)
+                <dl class="row">
+                    <dt class="col-sm-3">送出時間(UTC)</dt>
+                    <dd class="col-sm-9">{{ $auth->created_at }}</dd>
+                    <dt class="col-sm-3">驗證狀態</dt>
+                    <dd class="col-sm-9">
+                        <span class="text-{{ $user->is_verified ? 'default' : 'danger' }}">
+                            {{ __("messages.user.auth_status.{$auth->status}") }}
+                        </span>
+                    </dd>
+                    <dt class="col-sm-3">姓</dt>
+                    <dd class="col-sm-9">{{ $auth->last_name }}</dd>
+                    <dt class="col-sm-3">名</dt>
+                    <dd class="col-sm-9">{{ $auth->first_name }}</dd>
+                    <dt class="col-sm-3">顯示名稱</dt>
+                    <dd class="col-sm-9">{{ $auth->username }}</dd>
+                    <dt class="col-sm-3">身分證號</dt>
+                    <dd class="col-sm-9">{{ $auth->id_number }}</dd>
+                    @if ($auth->verified_at)
+                    <dt class="col-sm-3">處理時間(UTC)</dt>
+                    <dd class="col-sm-9">{{ $auth->verified_at }}</dd>
+                    @endif
+                </dl>
+                <div class="card-block__title">檔案</div>
+                <div class="row">
+                    @if ($files)
+                        @foreach ($files as $file)
+                        <div class="col-md-6 col-lg-4">
+                            <img class="card-img-top" src="{{ $file->link }}" alt="uploaded file">
+                        </div>
+                        @endforeach
+                    @else
+                        <div class="col-12">
+                            <p>未上傳任何檔案</p>
+                        </div>
+                    @endif
+                </div>
+                <div class="mt-3">
+
+                    @can('verify-users')
+
+                    @if (($auth->status === 'processing') or ($auth->status === 'rejected'))
+                        @if ($is_username_available)
+                            <button id="btn-approve" type="submit" class="btn btn-primary">通過驗證</button>
+                        @else
+                            <button class="btn btn-primary disabled">顯示名稱已被其他用戶註冊，無法通過驗證</button>
+                        @endif
+                    @endif
+                    @if (($auth->status === 'processing') or ($auth->status === 'passed'))
+                    <button class="btn btn-danger" data-toggle="modal" data-target="#modal-reject">拒絕</button>
+                    <div class="modal fade" id="modal-reject" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title pull-left">選擇拒絕原因，將寄出通知信告知</h5>
+                                </div>
+                                <form class="authentication-form" method="post" action="{{ route('admin.users.verify', ['auth' => $auth->id]) }}">
+                                    <div class="modal-body">
+                                        {{ csrf_field() }}
+                                        {{ method_field('PUT') }}
+                                        <input type="hidden" name="action" value="reject">
+
+                                        @foreach ($reject_reasons as $key => $reason)
+                                        <label class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" name="reasons[]" value="{{ $key }}">
+                                            <span class="custom-control-indicator"></span>
+                                            <span class="custom-control-description">{{ $reason }}</span>
+                                        </label>
+                                        <div class="clearfix mb-2"></div>
+                                        @endforeach
+                                        <div class="mt-3">
+                                            @include('widgets.forms.input', ['name' => 'other_reason', 'value' => '', 'title' => '其他', 'required' => true, 'placeholder' => '請以用戶看得懂得語言，輸入其他原因'])
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" type="button" class="btn btn-primary" value="">送出</button>
+                                        <button type="button" class="btn btn-link" data-dismiss="modal">取消</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
+                    @endcan
+
+                </div>
+                @else
+                <p>未驗證</p>
+                @endif
             </div>
         </div>
     </div>
@@ -102,9 +223,7 @@
                 </table>
             </div>
         </div>
-    </div>
 
-    <div class="col-lg-6">
         <div class="card pb-4">
             <div class="card-header"><h3 class="card-title">銀行帳戶</h3></div>
              <div class="listview listview--hover">
@@ -154,12 +273,14 @@
     </div>
 
     <div class="col-lg-6">
+        @can('edit-users')
+        @if(!$is_root)
         <div class="card">
             <div class="card-header"><h3 class="card-title">鎖定使用者</h3></div>
-                <div class="card-block">
+            <div class="card-block">
                 <form action="{{ route('admin.users.admin-lock', ['user' => $user]) }}" method="post">
-                {{ csrf_field() }}
-                {{ method_field('PUT') }}
+                    {{ csrf_field() }}
+                    {{ method_field('PUT') }}
                     @include('widgets.forms.input', ['name' => 'description', 'value' => '', 'title' => 'Description', 'required' => true])
                     @if ($admin_lock->isEmpty())
                     <button type="submit" name="action" value="lock" class="btn btn-primary">鎖定</button>
@@ -167,137 +288,44 @@
                     <button type="submit" name="action" value="unlock" class="btn btn-primary">解除鎖定</button>
                     @endif
                 </form>
-                </div>
             </div>
         </div>
-    </div>
+        @endif
+        @endcan
 
-    @if ($user->two_factor_auth)
-    <div class="col-lg-6">
+        @can('edit-users')
+        @if ($user->two_factor_auth)
         <div class="card">
             <div class="card-header"><h3 class="card-title">強制關閉二次驗證</h3></div>
-                <div class="card-block">
+            <div class="card-block">
                 <form action="{{ route('admin.users.deactivate-tfa', ['user' => $user]) }}" method="post">
-                {{ csrf_field() }}
+                    {{ csrf_field() }}
                     @include('widgets.forms.input', ['name' => 'description', 'value' => '', 'title' => 'Description', 'required' => true])
                     <button type="submit" name="action" value="lock" class="btn btn-danger">強制關閉</button>
                 </form>
-                </div>
             </div>
         </div>
-    </div>
-    @endif
-
-</div>
-@if ($user->is_admin and !$is_root)
-<div class="card">
-        <form id="update-role" method="post" action="{{ route('admin.users.role.update', ['user' => $user]) }}">
-            {{ csrf_field() }}
-            {{ method_field('PUT') }}
-    <div class="card-header"><h3 class="card-title">管理者角色設定</h3></div>
-    <div class="card-block row">
-
-        <div class="col-sm-3">
-        @include('widgets.forms.select', ['name' => 'role', 'class' => 'search-control', 'title' => 'Current Role', 'value' => $role, 'values' => __("messages.user.role")])
-        </div>
-        <div class="col-sm-3">
-            <button class="btn btn-primary mt-4" id="update-role" name="submit" value="1">更動</button>
-        </div>
-    </div>
-        </form>
-</div>
-@endif
-
-
-<div class="card">
-    <div class="card-header"><h3 class="card-title">身份驗證</h3></div>
-    <div class="card-block">
-    @if($auth)
-        <dl class="row">
-            <dt class="col-sm-3">送出時間(UTC)</dt>
-            <dd class="col-sm-9">{{ $auth->created_at }}</dd>
-            <dt class="col-sm-3">驗證狀態</dt>
-            <dd class="col-sm-9">
-                <span class="text-{{ $user->is_verified ? 'default' : 'danger' }}">
-                    {{ __("messages.user.auth_status.{$auth->status}") }}
-                </span>
-            </dd>
-            <dt class="col-sm-3">姓</dt>
-            <dd class="col-sm-9">{{ $auth->last_name }}</dd>
-            <dt class="col-sm-3">名</dt>
-            <dd class="col-sm-9">{{ $auth->first_name }}</dd>
-            <dt class="col-sm-3">顯示名稱</dt>
-            <dd class="col-sm-9">{{ $auth->username }}</dd>
-            <dt class="col-sm-3">身分證號</dt>
-            <dd class="col-sm-9">{{ $auth->id_number }}</dd>
-            @if ($auth->verified_at)
-            <dt class="col-sm-3">處理時間(UTC)</dt>
-            <dd class="col-sm-9">{{ $auth->verified_at }}</dd>
-            @endif
-        </dl>
-        <div class="card-block__title">檔案</div>
-        <div class="row">
-            @if ($files)
-                @foreach ($files as $file)
-                <div class="col-md-6 col-lg-4">
-                    <img class="card-img-top" src="{{ $file->link }}" alt="uploaded file">
-                </div>
-                @endforeach
-            @else
-                <div class="col-12">
-                    <p>未上傳任何檔案</p>
-                </div>
-            @endif
-        </div>
-        <div class="mt-3">
-            @if (($auth->status === 'processing') or ($auth->status === 'rejected'))
-                @if ($is_username_available)
-                    <button id="btn-approve" type="submit" class="btn btn-primary">通過驗證</button>
-                @else
-                    <button class="btn btn-primary disabled">顯示名稱已被其他用戶註冊，無法通過驗證</button>
-                @endif
-            @endif
-            @if (($auth->status === 'processing') or ($auth->status === 'passed'))
-            <button class="btn btn-danger" data-toggle="modal" data-target="#modal-reject">拒絕</button>
-            <div class="modal fade" id="modal-reject" tabindex="-1">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title pull-left">選擇拒絕原因，將寄出通知信告知</h5>
-                        </div>
-                        <form class="authentication-form" method="post" action="{{ route('admin.users.verify', ['auth' => $auth->id]) }}">
-                            <div class="modal-body">
-                                {{ csrf_field() }}
-                                {{ method_field('PUT') }}
-                                <input type="hidden" name="action" value="reject">
-
-                                @foreach ($reject_reasons as $key => $reason)
-                                <label class="custom-control custom-checkbox">
-                                    <input type="checkbox" class="custom-control-input" name="reasons[]" value="{{ $key }}">
-                                    <span class="custom-control-indicator"></span>
-                                    <span class="custom-control-description">{{ $reason }}</span>
-                                </label>
-                                <div class="clearfix mb-2"></div>
-                                @endforeach
-                                <div class="mt-3">
-                                    @include('widgets.forms.input', ['name' => 'other_reason', 'value' => '', 'title' => '其他', 'required' => true, 'placeholder' => '請以用戶看得懂得語言，輸入其他原因'])
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="submit" type="button" class="btn btn-primary" value="">送出</button>
-                                <button type="button" class="btn btn-link" data-dismiss="modal">取消</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            @endif
-        </div>
-        @else
-        <p>未驗證</p>
         @endif
+        @endcan
+
+        @can('edit-auth')
+        @if ($user->is_admin and !$is_root)
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">管理者角色設定</h3></div>
+            <div class="card-block">
+                <form id="update-role" method="post" action="{{ route('admin.users.role.update', ['user' => $user]) }}">
+                    {{ csrf_field() }}
+                    {{ method_field('PUT') }}
+                    @include('widgets.forms.select', ['name' => 'role', 'class' => 'search-control', 'title' => 'Current Role', 'value' => $role, 'values' => __("messages.user.role")])
+                    <button class="btn btn-primary mt-4" id="update-role" name="submit" value="1">更動</button>
+                </form>
+            </div>
+        </div>
+        @endif
+        @endcan
     </div>
-</div>
+
+
 @endsection
 
 @push('scripts')

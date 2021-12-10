@@ -41,16 +41,16 @@ Route::group(
         Route::get('users/{user}/advertisements', 'UserController@advertisementList')->name('admin.users.advertisements');
         Route::get('users/{user}/advertisements/search', 'UserController@getAdvertisements')->name('admin.users.advertisements.search');
         Route::get('users/{user}/limitations', 'UserController@getLimitations')->name('admin.users.limitations');
-        Route::get('users/{user}/limitations/edit/{type}/{coin}', 'UserController@editLimitations')->name('admin.users.limitations.edit')->middleware('can:edit-limitations');
-        Route::post('users/{user}/limitations/store', 'UserController@storeLimitation')->name('admin.users.limitations.store')->middleware('can:create-limitations');
-        Route::put('users/{user}/admin-lock', 'UserController@adminLock')->name('admin.users.admin-lock')->middleware('can:lock-users');
-        Route::get('users/{user}/feature-lock', 'UserController@createFeatureLock')->name('admin.users.feature-lock')->middleware('can:lock-users');
-        Route::post('users/{user}/feature-lock', 'UserController@storeFeatureLock')->name('admin.users.feature-lock.store')->middleware('can:lock-users');
-        Route::get('users/{user}/authorize-admin', 'UserController@authorizeAdmin')->name('admin.users.admin.authorize')->middleware('can:edit-auth');
-        Route::get('users/{user}/authorize-tester', 'UserController@authorizeTester')->name('admin.users.admin.authorize-tester')->middleware('can:edit-auth');
-        Route::put('users/{user}/role', 'UserController@updateRole')->name('admin.users.role.update')->middleware('can:edit-auth');
-        Route::post('users/{user}/deactivate-tfa', 'UserController@deactivateTFA')->name('admin.users.deactivate-tfa')->middleware('can:edit-auth');
-        Route::put('users/{user}', 'UserController@update')->name('admin.users.update')->middleware('can:edit-users');
+        Route::get('users/{user}/limitations/edit/{type}/{coin}', 'UserController@editLimitations')->name('admin.users.limitations.edit');
+        Route::post('users/{user}/limitations/store', 'UserController@storeLimitation')->name('admin.users.limitations.store');
+        Route::put('users/{user}/admin-lock', 'UserController@adminLock')->name('admin.users.admin-lock');
+        Route::get('users/{user}/feature-lock', 'UserController@createFeatureLock')->name('admin.users.feature-lock');
+        Route::post('users/{user}/feature-lock', 'UserController@storeFeatureLock')->name('admin.users.feature-lock.store');
+        Route::get('users/{user}/authorize-admin', 'UserController@authorizeAdmin')->name('admin.users.admin.authorize');
+        Route::get('users/{user}/authorize-tester', 'UserController@authorizeTester')->name('admin.users.admin.authorize-tester');
+        Route::put('users/{user}/role', 'UserController@updateRole')->name('admin.users.role.update');
+        Route::post('users/{user}/deactivate-tfa', 'UserController@deactivateTFA')->name('admin.users.deactivate-tfa');
+        Route::put('users/{user}', 'UserController@update')->name('admin.users.update');
         Route::resource('users', 'UserController', ['only' => ['index', 'show', 'edit'], 'as' => 'admin']);
 
         Route::get('accounts/transactions/search/', 'AccountController@search');
@@ -66,27 +66,27 @@ Route::group(
         Route::get('groups/{group}/fee-settings', 'GroupController@getFeeSettings')->name('admin.groups.fee-settings');
         Route::get('groups/{group}/fee-settings/edit/{type}/{coin}', 'GroupController@editFeeSettings')->name('admin.groups.fee-settings.edit');
         Route::get('groups/{group}/limitations', 'GroupController@getLimitations')->name('admin.groups.limitations');
-        Route::get('groups/{group}/limitations/edit/{type}/{coin}', 'GroupController@editLimitations')->name('admin.groups.limitations.edit')->middleware('can:edit-limitations');
-        Route::post('groups/{group}/limitations/store', 'GroupController@storeLimitation')->name('admin.groups.limitations.store')->middleware('can:create-limitations');
-        Route::put('groups/{group}', 'GroupController@update')->name('admin.groups.update')->middleware('can:edit-groups');
-        Route::post('groups', 'GroupController@store')->name('admin.groups.store')->middleware('can:create-groups');
-        Route::get('groups/applications/', 'GroupController@getApplications')->name('admin.groups.applications')->middleware('can:create-groups');
-        Route::get('groups/applications/{application}', 'GroupController@getApplication')->name('admin.groups.application')->middleware('can:create-groups');
-        Route::post('groups/applications/{application}/verify', 'GroupController@verifyApplication')->name('admin.groups.application-verify')->middleware('can:create-groups');
+        Route::get('groups/{group}/limitations/edit/{type}/{coin}', 'GroupController@editLimitations')->name('admin.groups.limitations.edit');
+        Route::post('groups/{group}/limitations/store', 'GroupController@storeLimitation')->name('admin.groups.limitations.store');
+        Route::put('groups/{group}', 'GroupController@update')->name('admin.groups.update');
+        Route::post('groups', 'GroupController@store')->name('admin.groups.store');
+        Route::get('groups/applications/', 'GroupController@getApplications')->name('admin.groups.applications');
+        Route::get('groups/applications/{application}', 'GroupController@getApplication')->name('admin.groups.application');
+        Route::post('groups/applications/{application}/verify', 'GroupController@verifyApplication')->name('admin.groups.application-verify');
         Route::resource('groups', 'GroupController', ['only' => ['index', 'show', 'create'], 'as' => 'admin']);
 
         Route::get('fee-settings/data', 'FeeSettingController@data');
         Route::get('fee-settings/edit/{type}/{coin}', 'FeeSettingController@edit')->name('admin.fee-settings.edit');
-        Route::post('fee-settings', 'FeeSettingController@store')->name('admin.fee-settings.store')->middleware('can:edit-fees');
-        Route::post('fee-settings/fixed', 'FeeSettingController@storeFixed')->name('admin.fee-settings-fixed.store')->middleware('can:edit-fees');
+        Route::post('fee-settings', 'FeeSettingController@store')->name('admin.fee-settings.store');
+        Route::post('fee-settings/fixed', 'FeeSettingController@storeFixed')->name('admin.fee-settings-fixed.store');
         Route::resource('fee-settings', 'FeeSettingController', ['only' => ['index'], 'as' => 'admin']);
 
         Route::get('agencies/{agency}/agents', 'AgencyController@getAgents')->name('admin.agencies.agents');
         Route::get('agencies/{agency}/agents/create', 'AgencyController@createAgent')->name('admin.agencies.agents.create');
-        Route::post('agencies/{agency}/agents', 'AgencyController@storeAgent')->name('admin.agencies.agents.store')->middleware('can:create-agents');
+        Route::post('agencies/{agency}/agents', 'AgencyController@storeAgent')->name('admin.agencies.agents.store');
         Route::post('agencies/{agency}/agents/delete', 'AgencyController@deleteAgent')->name('admin.agencies.agents.delete');
-        Route::put('agencies/{agency}', 'AgencyController@update')->name('admin.agencies.update')->middleware('can:edit-agencies');
-        Route::post('agencies', 'AgencyController@store')->name('admin.agencies.store')->middleware('can:create-agencies');
+        Route::put('agencies/{agency}', 'AgencyController@update')->name('admin.agencies.update');
+        Route::post('agencies', 'AgencyController@store')->name('admin.agencies.store');
         Route::resource('agencies', 'AgencyController', ['only' => ['index', 'create', 'show', 'edit'], 'as' => 'admin']);
 
         Route::get('assets/transactions', 'AssetController@getTransactions')->name('admin.assets.transactions');
@@ -99,7 +99,7 @@ Route::group(
         Route::post('exchange-rates/create', 'ExchangeRateController@create');
 
         Route::get('orders/list', 'OrderController@getOrders')->name('admin.orders.list');
-        Route::put('orders/{order}', 'OrderController@update')->name('admin.orders.update')->middleware('can:force-cancel-orders|force-complete-orders');
+        Route::put('orders/{order}', 'OrderController@update')->name('admin.orders.update');
         Route::resource('orders', 'OrderController', ['only' => ['index', 'show'], 'as' => 'admin']);
 
         Route::get('limitations/edit/{type}/{coin}', 'LimitationController@edit')->name('admin.limitations.edit');
@@ -129,16 +129,16 @@ Route::group(
         Route::resource('deposits', 'DepositController', ['only' => ['index', 'show'], 'as' => 'admin']);
 
         Route::put('announcements/{announcement}/cancel', 'AnnouncementController@cancel');
-        Route::post('announcements/{announcement}/email-broadcast', 'AnnouncementController@emailBroadcast')->name('admin.announcements.email-broadcast')->middleware('can:edit-announcements');
-        Route::put('announcements/{announcement}', 'AnnouncementController@update')->name('admin.announcements.update')->middleware('can:create-announcements');
-        Route::post('announcements', 'AnnouncementController@store')->name('admin.announcements.store')->middleware('can:edit-announcements');
+        Route::post('announcements/{announcement}/email-broadcast', 'AnnouncementController@emailBroadcast')->name('admin.announcements.email-broadcast');
+        Route::put('announcements/{announcement}', 'AnnouncementController@update')->name('admin.announcements.update');
+        Route::post('announcements', 'AnnouncementController@store')->name('admin.announcements.store');
         Route::resource('announcements', 'AnnouncementController', ['only' => ['index', 'show'], 'as' => 'admin']);
 
         Route::get('advertisements/list', 'AdvertisementController@getAdvertisements')->name('admin.advertisements.list');
-        Route::put('advertisements/{advertisement}', 'AdvertisementController@update')->name('admin.advertisements.update')->middleware('can:pull-advertisements');
+        Route::put('advertisements/{advertisement}', 'AdvertisementController@update')->name('admin.advertisements.update');
         Route::resource('advertisements', 'AdvertisementController', ['only' => ['index', 'show'], 'as' => 'admin']);
 
-        Route::resource('permissions', 'PermissionController', ['only' => ['index'], 'as' => 'admin'])->middleware('can:view-auth');
+        Route::resource('permissions', 'PermissionController', ['only' => ['index'], 'as' => 'admin']);
 
         Route::post('configs/wallet-activation', 'ConfigController@storeWalletActivation')->name('admin.configs.wallet-activation');
         Route::post('configs/withdrawal-fee-factor', 'ConfigController@storeWithdrawalFeeFactor')->name('admin.configs.withdrawal-fee-factor');

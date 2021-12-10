@@ -53,7 +53,7 @@
                 'icon' => 'home',
             ],
             [
-                'model' => function ($user) { return $user->is_admin; },
+                'model' => function ($user) { return $user->can('edit-configs'); },
                 'title' => '全站設定',
                 'path' => 'configs',
                 'icon' => 'settings',
@@ -65,7 +65,7 @@
                 'icon' => 'accounts-list',
             ],
             [
-                'model' => function ($user) { return $user->is_admin; },
+                'model' => function ($user) { return $user->can('view-auth'); },
                 'title' => '權限管理',
                 'path' => 'permissions',
                 'icon' => 'shield-check',
@@ -83,7 +83,7 @@
                 'icon' => 'money-box',
             ],
             [
-                'model' => function ($user) { return $user->is_admin; },
+                'model' => function ($user) { return $user->hasRole('super-admin'); },
                 'title' => '匯率管理',
                 'path' => 'exchange-rates',
                 'icon' => 'money',
@@ -125,7 +125,7 @@
                 'icon' => 'money-off',
             ],
             [
-                'model' => function ($user) { return $user->is_admin; },
+                'model' => function ($user) { return $user->hasRole('super-admin'); },
                 'title' => '交易明細',
                 'path' => 'transactions',
                 'icon' => 'view-list-alt',
@@ -147,6 +147,12 @@
                 'title' => '公告管理',
                 'path' => 'announcements',
                 'icon' => 'notifications',
+            ],
+            [
+                'model' => function ($user) { return $user->hasRole('super-admin'); },
+                'title' => 'WalletBalance Transactons',
+                'path' => 'wallet_balances/transactions',
+                'icon' => 'money-box',
             ],
         ];
         @endphp

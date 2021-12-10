@@ -236,7 +236,7 @@ class OrderRepo implements \App\Repos\Interfaces\OrderRepo
                 });
 
             })
-            ->orderBy('id', 'desc');
+            ->orderBy('created_at', 'desc');
     }
     public function getExpiredOrders()
     {

@@ -23,7 +23,7 @@
         <div class="row">
             <div class="col-sm-3">
                 <div>
-                    <label>Release time</label>
+                    <label>發布時間</label>
                     <div class="input-group">
                         <span class="input-group-addon"><i class="zmdi zmdi-calendar"></i></span>
                         <div class="form-group">
@@ -33,7 +33,7 @@
                     </div>
                 </div>
                 <div style="margin-top: 20%;">
-                    <label>Stay on PIN time</label>
+                    <label>顯示為重要公告直到</label>
                     <div class="input-group">
                         <span class="input-group-addon"><i class="zmdi zmdi-calendar"></i></span>
                         <div class="form-group">
@@ -43,19 +43,23 @@
                     </div>
                 </div>
                 <div>
+                @can('edit-announcements')
                 <button class="btn btn-primary mt-4" id="submit" name="submit" value="1">Submit</button>
+                @endcan
                 </div>
+                @role('super-admin')
                 <div>
-                <button class="btn btn-danger mt-5" id="broadcast" name="broadcast" value="1">Broadcast</button>
+                    <button class="btn btn-danger mt-5" id="broadcast" name="broadcast" value="1">Broadcast</button>
                 </div>
+                @endrole
             </div>
 
             <div class="col-sm-9">
                 <div class="col-sm-3" style="padding:unset">
-                    @include('widgets.forms.select', ['name' => 'locale', 'class' => 'search-control', 'title' => 'Select locale', 'value' => $locale['en'], 'values' => $locale])
+                    @include('widgets.forms.select', ['name' => 'locale', 'class' => 'search-control', 'title' => '選擇語言', 'value' => $locale['zh-cn'], 'values' => $locale])
                 </div>
                 <div>
-                    <label>Announcement Title</label>
+                    <label>公告標題</label>
                     <input type="text" id="title" class="form-control" autocomplete="off" value="{{ $announcement->title }}">
                 </div>
                 <div class="row">
@@ -77,10 +81,12 @@ $(function(){
     let contents = @json($contents);
     let myEditor;
     ClassicEditor
-        .create( document.querySelector( '#editor' ) )
+        .create( document.querySelector( '#editor' ),{
+            toolbar: ['heading', '|',  'bold', 'italic', 'link', 'undo', 'redo', 'numberedList', 'bulletedList', '|','outdent', 'indent' ]
+        } )
         .then(editor => {
             myEditor = editor;
-            editor.setData(contents.en.content);
+            editor.setData(contents['zh-cn'].content);
         })
         .catch(error => {
             console.error(error);
