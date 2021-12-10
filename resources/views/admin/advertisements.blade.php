@@ -146,6 +146,7 @@ $(function () {
             url: url,
             data: {
                 status: 'all',
+                is_express: 'all',
             }
         },
         columns: col,
