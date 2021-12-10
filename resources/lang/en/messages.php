@@ -23,11 +23,6 @@ return [
             'manual-withdrawal' => '手動提領',
         ],
     ],
-    'limitation' => [
-        'types' => [
-            'withdrawal' => 'Withdrawal Limitation',
-        ],
-    ],
     'advertisement' => [
         'status' => [
             'available' => 'Available',
@@ -42,6 +37,17 @@ return [
             'completed' => 'Completed',
             'canceled' => 'Canceled',
             'claimed' => 'Claimed',
+        ],
+    ],
+    'fee_setting' => [
+        'types' => [
+            'order' => 'Transaction Fee',
+            'withdrawal' => 'Withdrawal Fee',
+        ],
+    ],
+    'limitation' => [
+        'types' => [
+            'withdrawal' => 'Withdrawal Limitation',
         ],
     ],
     'transaction' => [

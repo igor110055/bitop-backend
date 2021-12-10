@@ -502,10 +502,18 @@ class OrderService implements OrderServiceInterface
                 $order->save();
             } elseif ($payment_src instanceof Wftransfer) {
                 if (!$order->is_express) {
-                    throw new BadRequestError('Only bank_account is supported.');
+                    throw new BadRequestError;
                 }
                 $order->payment_src()->associate($payment_src);
                 $order->save();
+            } elseif ($payment_src instanceof Wfpayment) {
+                if (!$order->is_express) {
+                    throw new BadRequestError;
+                }
+                $order->payment_src()->associate($payment_src);
+                $order->save();
+            } else {
+                throw new BadRequestError('unsupported payment_src.');
             }
 
             if ($payment_dst instanceof BankAccount) {
@@ -514,14 +522,6 @@ class OrderService implements OrderServiceInterface
                 }
                 $order->payment_dst()->associate($payment_dst);
                 $order->save();
-            } elseif ($payment_dst instanceof Wfpayment) {
-                if (!$order->is_express) {
-                    throw new BadRequestError;
-                }
-                $order->payment_dst()->associate($payment_dst);
-                $order->save();
-            } else {
-                throw new BadRequestError('unsupported payment_dst.');
             }
 
             $this->OrderRepo
@@ -921,8 +921,8 @@ class OrderService implements OrderServiceInterface
 
             $order = $this->claim(
                 $wfpayment->order_id,
-                null,                       //payment_src,
-                $wfpayment                  //payment_dst
+                $wfpayment,           //payment_src,
+                null                  //payment_dst
             );
 
             $limits = $this->ConfigRepo->get(Config::ATTRIBUTE_EXPRESS_AUTO_RELEASE_LIMIT);
