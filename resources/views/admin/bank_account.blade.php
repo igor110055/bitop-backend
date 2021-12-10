@@ -20,8 +20,9 @@
                 @endif
             @endif
         </h2>
-        <!--small class="card-subtitle"></small-->
     </div>
+
+    @can('edit-bank-accounts')
     <div class="card-block">
         @if (!$bank_account->deleted_at)
             @if ($bank_account->is_verified)
@@ -64,6 +65,7 @@
             </div>
         @endif
     </div>
+    @endif
 </div>
 
 <div class="row">

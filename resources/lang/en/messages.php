@@ -10,7 +10,6 @@ return [
             'unauthenticated' => 'Unauthenticated',
         ],
         'role' => [
-            'super-admin' => 'Super Admin',
             'admin' => 'Admin',
             'assistant' => 'Assistant',
             'viewer' => 'Viewer',
@@ -22,11 +21,6 @@ return [
             'buy-order' => '購買',
             'manual-deposit' => '手動充值',
             'manual-withdrawal' => '手動提領',
-        ],
-    ],
-    'limitation' => [
-        'types' => [
-            'withdrawal' => 'Withdrawal Limitation',
         ],
     ],
     'advertisement' => [
@@ -43,6 +37,17 @@ return [
             'completed' => 'Completed',
             'canceled' => 'Canceled',
             'claimed' => 'Claimed',
+        ],
+    ],
+    'fee_setting' => [
+        'types' => [
+            'order' => 'Transaction Fee',
+            'withdrawal' => 'Withdrawal Fee',
+        ],
+    ],
+    'limitation' => [
+        'types' => [
+            'withdrawal' => 'Withdrawal Limitation',
         ],
     ],
     'transaction' => [

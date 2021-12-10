@@ -41,6 +41,7 @@ class AssetController extends AdminController
         $this->AssetService = $AssetService;
         $this->currency = "TWD";
         $this->tz = config('core.timezone.default');
+        $this->middleware(['role:super-admin']);
     }
 
     public function show(Asset $asset)

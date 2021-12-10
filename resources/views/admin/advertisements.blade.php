@@ -20,10 +20,13 @@
         <div class="col-sm-3">
         @include('widgets.forms.input', ['name' => 'to', 'class' => 'search-control', 'title' => 'To', 'value' => $to, 'type' => 'date'])
         </div>
-        <div class="col-sm-3">
+        <div class="col-sm-2">
         @include('widgets.forms.select', ['name' => 'status', 'class' => 'search-control', 'title' => 'Advertisement Status', 'value' => '', 'values' => $status])
         </div>
-        <div class="col-sm-3">
+        <div class="col-sm-2">
+        @include('widgets.forms.select', ['name' => 'is_express', 'class' => 'search-control', 'title' => '快捷/一般', 'value' => '', 'values' => $express])
+        </div>
+        <div class="col-sm-2">
             <button class="btn btn-primary mt-4" id="search-submit" name="submit" value="1">Submit</button>
         </div>
     </div>
@@ -34,6 +37,7 @@
                 <thead class="thead-default">
                     <tr>
                         <th>生成時間</th>
+                        <th>快捷</th>
                         <th>廣告ID</th>
                         @if (!isset($user))
                         <th>發佈者</th>
@@ -72,6 +76,15 @@ $(function () {
             render: function (data, type, row, meta) {
                 return moment(data).utcOffset(timezoneUtcOffset).format('YYYY-MM-DD HH:mm');
             }
+        },
+        {
+            data: 'is_express',
+            render: function (data, type, row, meta) {
+                if (data) {
+                    return '<i class="zmdi zmdi-check"></i>'
+                }
+                return '';
+            },
         },
         {
             data: 'id',
@@ -143,6 +156,7 @@ $(function () {
             status: $('[name="status"]').val(),
             from: $('[name="from"]').val(),
             to: $('[name="to"]').val(),
+            is_express: $('[name="is_express"]').val(),
         };
         if (moment(param.to).diff(moment(param.from), 'months') > 2) {
             swal({

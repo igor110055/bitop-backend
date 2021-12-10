@@ -36,6 +36,21 @@ class FeeSettingController extends AdminController
         $this->GroupRepo = $GroupRepo;
         $this->ConfigRepo = $ConfigRepo;
         $this->coins = array_keys(config('coin'));
+
+        $this->middleware(
+            ['can:edit-fees'],
+            ['only' => [
+                'edit',
+                'store',
+            ]]
+        );
+
+        $this->middleware(
+            ['role:super-admin'],
+            ['only' => [
+                'storeFixed',
+            ]]
+        );
     }
 
     public function index()

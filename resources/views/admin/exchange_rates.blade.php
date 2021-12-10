@@ -5,9 +5,9 @@
     <div class="card-header">
         <h2 class="card-title">
             @isset($group)
-            群組 <a href="{{ route('admin.groups.show', ['group' => $group->id]) }}">{{ $group->name }}</a> 匯率設定
+            群組 <a href="{{ route('admin.groups.show', ['group' => $group->id]) }}">{{ $group->name }}</a> 匯率管理
             @else
-            匯率設定
+            匯率管理
             @endisset
         </h2>
         <!--small class="card-subtitle"></small-->

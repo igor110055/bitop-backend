@@ -13,6 +13,7 @@ class AdvertisementSearchRequest extends AdminRequest
             'from' => 'date|nullable',
             'to' => 'date|nullable',
             'search.value' => 'string|nullable',
+            'is_express' => 'required|in:0,1,all',
         ];
     }
 }

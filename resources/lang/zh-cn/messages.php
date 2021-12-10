@@ -9,6 +9,11 @@ return [
             'rejected' => '拒绝',
             'unauthenticated' => '未验证',
         ],
+        'role' => [
+            'admin' => 'Admin',
+            'assistant' => 'Assistant',
+            'viewer' => 'Viewer',
+        ],
     ],
     'asset_transaction' => [
         'types' => [
@@ -23,7 +28,7 @@ return [
             'available' => '上架中',
             'completed' => '已完成',
             'unavailable' => '下架中',
-            'deleted' => '已刪除',
+            'deleted' => '已删除',
         ],
     ],
     'order' => [
@@ -31,13 +36,13 @@ return [
             'processing' => '进行中',
             'completed' => '已完成',
             'canceled' => '已取消',
-            'claimed' => '付款待确认',
+            'claimed' => '待确认',
         ],
     ],
     'fee_setting' => [
         'types' => [
             'order' => '订单出售手续费',
-            'withdraw' => '提领手续费',
+            'withdrawal' => '提领手续费',
         ],
     ],
     'limitation' => [
@@ -61,7 +66,7 @@ return [
         ],
         'des_prefix' => [
             'transfer-in' => '划转自 ',
-            'transfer-out' => '划转自 ',
+            'transfer-out' => '划转给 ',
             'sell-order' => '售出，订单：',
             'buy-order' => '购入，订单：',
             'order-fee' => '订单手续费，订单：',
@@ -73,6 +78,32 @@ return [
             'withdrawal-fee' => '提领手续费，自帐号：',
         ],
     ],
+    'wallet_balance_transaction' => [
+        'types' => [
+            'deposit' => 'deposit',
+            'withdrawal' => 'withdrawal',
+            'payin' => 'payin',
+            'payout' => 'payout',
+            'approvement' => 'approvement',
+            'manual-correction' => 'manual correction',
+            'manual-deposit' => 'manual deposit',
+            'manual-withdrawal' => 'manual withdrawal',
+            'wallet-fee' => 'wallet fee',
+            'wallet-fee-correction' => 'wallet fee correction',
+        ],
+        'des_prefix' => [
+            'deposit' => 'Deposit by ',
+            'withdrawal' => 'Withdrawal by ',
+            'payin' => 'wallet internal payin',
+            'payout' => 'wallet internal payout',
+            'approvement' => 'wallet internal approvement',
+            'manual-correction' => 'Manual correction by ',
+            'manual-deposit' => 'External deposit',
+            'manual-withdrawal' => 'External withdrawal',
+            'wallet-fee' => 'fee for blockchain',
+            'wallet-fee-correction' => 'fee correction',
+        ],
+    ],
     'authentication' => [
         'reject_reasons' => [
             App\Models\Authentication::REASON_ID_FILE_MISSING => '缺少身份验证档案',
@@ -81,7 +112,7 @@ return [
             App\Models\Authentication::REASON_ID_NOT_MATCHED => '身分证号与档案不符合',
             App\Models\Authentication::REASON_NAME_NOT_MATCHED => '姓名与档案不符合',
             App\Models\Authentication::REASON_INVALID_NAMES => '无效的姓名',
-            App\Models\Authentication::REASON_INVALID_USERNAME => '无效的显示名称',
+            App\Models\Authentication::REASON_INVALID_USERNAME => '不符规定的显示名称',
             App\Models\Authentication::REASON_USERNAME_EXISTED => '显示名称已被其他用户注册',
         ],
     ],
@@ -107,3 +138,4 @@ return [
         ],
     ],
 ];
+

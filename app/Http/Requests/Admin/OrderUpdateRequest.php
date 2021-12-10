@@ -16,6 +16,7 @@ class OrderUpdateRequest extends AdminRequest
         $actions = [
             AdminAction::TYPE_CANCEL_ORDER,
             AdminAction::TYPE_COMPLETE_ORDER,
+            AdminAction::TYPE_NEW_ORDER_TRANSFER,
         ];
         return [
             'action' => 'required|in:'.implode(",", $actions),

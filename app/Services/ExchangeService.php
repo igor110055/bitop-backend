@@ -139,7 +139,7 @@ class ExchangeService implements ExchangeServiceInterface
         ];
     }
 
-    public function getAgencyCurrencyPrice(
+    /* public function getAgencyCurrencyPrice(
         User $user,
         $currency
     ) {
@@ -158,7 +158,7 @@ class ExchangeService implements ExchangeServiceInterface
             return data_get($asset, 'unit_price');
         }
         return null;
-    }
+    } */
 
     public function coinToBaseValue($coin, $amount)
     {

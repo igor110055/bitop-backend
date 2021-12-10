@@ -30,6 +30,13 @@ class BankAccountController extends AdminController
         $this->BankAccountRepo = $BankAccountRepo;
         $this->AdminActionRepo = $AdminActionRepo;
         $this->coins = array_keys(config('coin'));
+
+        $this->middleware(
+            ['can:edit-bank-accounts'],
+            ['only' => [
+                'verify',
+            ]]
+        );
     }
 
     public function index(Request $request)

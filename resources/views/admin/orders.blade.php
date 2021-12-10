@@ -20,10 +20,13 @@
         <div class="col-sm-3">
         @include('widgets.forms.input', ['name' => 'to', 'class' => 'search-control', 'title' => 'To', 'value' => $to, 'type' => 'date'])
         </div>
-        <div class="col-sm-3">
+        <div class="col-sm-2">
         @include('widgets.forms.select', ['name' => 'status', 'class' => 'search-control', 'title' => 'Order Status', 'value' => '', 'values' => $status])
         </div>
-        <div class="col-sm-3">
+        <div class="col-sm-2">
+        @include('widgets.forms.select', ['name' => 'is_express', 'class' => 'search-control', 'title' => '快捷/一般', 'value' => '', 'values' => $express])
+        </div>
+        <div class="col-sm-2">
             <button class="btn btn-primary mt-4" id="search-submit" name="submit" value="1">Submit</button>
         </div>
     </div>
@@ -35,16 +38,14 @@
                     <tr>
                         <th>生成時間</th>
                         <th>訂單號</th>
+                        <th>快捷</th>
                         <th>賣家</th>
                         <th>買家</th>
                         <th>幣別</th>
                         <th>數量</th>
                         <th>法幣</th>
                         <th>單價</th>
-                        <th>手續費</th>
-                        <th>利潤</th>
                         <th>狀態</th>
-                        <th>完成時間</th>
                     </tr>
                 </thead>
             </table>
@@ -68,6 +69,7 @@ $(function () {
             url: '/admin/orders/list',
             data: {
                 status: 'all',
+                is_express: 'all',
             }
         },
         columns: [
@@ -84,6 +86,15 @@ $(function () {
                         .text(data)
                         .attr('href', '/admin/orders/' + data)
                         .prop('outerHTML');
+                },
+            },
+            {
+                data: 'is_express',
+                render: function (data, type, row, meta) {
+                    if (data) {
+                        return '<i class="zmdi zmdi-check"></i>'
+                    }
+                    return '';
                 },
             },
             {
@@ -117,12 +128,6 @@ $(function () {
                 data: 'unit_price',
             },
             {
-                data: 'fee',
-            },
-            {
-                data: 'profit',
-            },
-            {
                 data: 'status',
                 render: function (data, type, row) {
                     var info = {
@@ -138,15 +143,6 @@ $(function () {
                         .prop('outerHTML');
                 }
             },
-            {
-                data: 'completed_at',
-                render: function (data, type, row, meta) {
-                    if (data == null) {
-                        return null;
-                    }
-                    return moment(data).utcOffset(timezoneUtcOffset).format('YYYY-MM-DD HH:mm');
-                }
-            },
         ],
     });
 
@@ -155,19 +151,13 @@ $(function () {
             status: $('[name="status"]').val(),
             from: $('[name="from"]').val(),
             to: $('[name="to"]').val(),
+            is_express: $('[name="is_express"]').val(),
         };
-        if (moment(param.to).diff(moment(param.from), 'months') > 2) {
-            swal({
-                type: 'warning',
-                title: '查詢範圍不可超過 3 個月',
-            });
-        } else {
-            table.settings()[0].ajax.data = param;
-            table
-                .ajax
-                .url('{{ route('admin.orders.list') }}')
-                .load(null, false);
-        }
+        table.settings()[0].ajax.data = param;
+        table
+            .ajax
+            .url('{{ route('admin.orders.list') }}')
+            .load(null, false);
     });
 
 });

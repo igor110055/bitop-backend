@@ -475,12 +475,10 @@ class OrderService implements OrderServiceInterface
 
     public function claim(
         $order_id,
-        $payment_src_type,
-        $payment_src_id,
-        $payment_dst_type,
-        $payment_dst_id
+        $payment_src,
+        $payment_dst
     ) {
-        $order = DB::transaction(function () use ($order_id, $payment_src_type, $payment_src_id, $payment_dst_type, $payment_dst_id) {
+        $order = DB::transaction(function () use ($order_id, $payment_src, $payment_dst) {
 
             $order = $this->OrderRepo
                 ->findForUpdate($order_id);
@@ -493,44 +491,37 @@ class OrderService implements OrderServiceInterface
                 throw new UnavailableStatusError('Order status is wrong.');
             }
 
-            if ($payment_dst_type === Order::PAYABLE_BANK_ACCOUNT) {
-                $dst_bank_account = $this->BankAccountRepo
-                    ->findOrFail($payment_dst_id);
-                if (!$order->bank_accounts->contains($dst_bank_account)) {
-                    throw new BadRequestError('bank_account provided is not in the list');
-                }
-                $order->payment_dst()->associate($dst_bank_account);
-                $order->save();
-            } elseif ($payment_dst_type === Order::PAYABLE_WFPAYMENT) {
-                if (!$order->is_express) {
-                    throw new BadRequestError;
-                }
-                $wfpayment = $this->WfpaymentRepo
-                    ->findOrFail($payment_dst_id);
-                if ($wfpayment->order_id !== $order_id) {
-                    throw new BadRequestError;
-                }
-                $order->payment_dst()->associate($wfpayment);
-                $order->save();
-            } else {
-                throw new BadRequestError('Only bank_account is supported.');
-            }
-
-            if ($payment_src_type === Order::PAYABLE_BANK_ACCOUNT) {
-                $src_bank_account = $this->BankAccountRepo
-                    ->findOrFail($payment_src_id);
-                if (!$src_bank_account->owner->is($order->dst_user)) {
+            if ($payment_src instanceof BankAccount) {
+                if (!$payment_src->owner->is($order->dst_user)) {
                     throw new BadRequestError('payment_src provided is not of dst_user');
                 }
-                if (!in_array($order->currency, $src_bank_account->currency)) {
+                if (!in_array($order->currency, $payment_src->currency)) {
                     throw new BadRequestError('currency of payment_src doesnt contain order currency');
                 }
-                $order->payment_src()->associate($src_bank_account);
+                $order->payment_src()->associate($payment_src);
+                $order->save();
+            } elseif ($payment_src instanceof Wftransfer) {
+                if (!$order->is_express) {
+                    throw new BadRequestError;
+                }
+                $order->payment_src()->associate($payment_src);
+                $order->save();
+            } elseif ($payment_src instanceof Wfpayment) {
+                if (!$order->is_express) {
+                    throw new BadRequestError;
+                }
+                $order->payment_src()->associate($payment_src);
                 $order->save();
             } else {
-                if (!$order->is_express) {
-                    throw new BadRequestError('Only bank_account is supported.');
+                throw new BadRequestError('unsupported payment_src.');
+            }
+
+            if ($payment_dst instanceof BankAccount) {
+                if (!$order->bank_accounts->contains($payment_dst)) {
+                    throw new BadRequestError('bank_account provided is not in the list');
                 }
+                $order->payment_dst()->associate($payment_dst);
+                $order->save();
             }
 
             $this->OrderRepo
@@ -673,7 +664,7 @@ class OrderService implements OrderServiceInterface
         });
     }
 
-    public function getProfitUnitPrice(Order $order)
+    /* public function getProfitUnitPrice(Order $order)
     {
         return $this->calculateProfitUnitPrice(
             $order->dst_user,
@@ -734,7 +725,7 @@ class OrderService implements OrderServiceInterface
             'currency_unit_price' => $currency_unit_price,
             'new_coin_unit_price' => $new_coin_unit_price,
         ];
-    }
+    } */
 
     public function cancel(
         User $user,
@@ -930,10 +921,8 @@ class OrderService implements OrderServiceInterface
 
             $order = $this->claim(
                 $wfpayment->order_id,
-                null,                       //payment_src_type,
-                null,                       //payment_src_id,
-                Order::PAYABLE_WFPAYMENT,   //payment_dst_type,
-                $wfpayment->id              //payment_dst_id
+                $wfpayment,           //payment_src,
+                null                  //payment_dst
             );
 
             $limits = $this->ConfigRepo->get(Config::ATTRIBUTE_EXPRESS_AUTO_RELEASE_LIMIT);

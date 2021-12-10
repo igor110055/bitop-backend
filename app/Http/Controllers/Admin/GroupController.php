@@ -56,6 +56,30 @@ class GroupController extends AdminController
         $this->GroupApplicationRepo = $GroupApplicationRepo;
         $this->AdminActionRepo = $AdminActionRepo;
         $this->coins = array_keys(config('coin'));
+
+        $this->middleware(
+            ['can:edit-groups'],
+            ['only' => [
+                'update',
+                'create',
+                'store',
+                'createShareSetting',
+                'storeShareSetting',
+                'destoryShareSetting',
+                'editFeeSettings',
+                'editLimitations',
+                'storeLimitation',
+                'verifyApplication',
+            ]]
+        );
+
+        $this->middleware(
+            ['can:edit-limitations'],
+            ['only' => [
+                'editLimitations',
+                'storeLimitation',
+            ]]
+        );
     }
 
     public function index()

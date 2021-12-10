@@ -9,6 +9,11 @@ return [
             'rejected' => '拒絕',
             'unauthenticated' => '未驗證',
         ],
+        'role' => [
+            'admin' => 'Admin',
+            'assistant' => 'Assistant',
+            'viewer' => 'Viewer',
+        ],
     ],
     'asset_transaction' => [
         'types' => [
@@ -31,7 +36,7 @@ return [
             'processing' => '進行中',
             'completed' => '已完成',
             'canceled' => '已取消',
-            'claimed' => '付款待確認',
+            'claimed' => '待確認',
         ],
     ],
     'fee_setting' => [
@@ -71,6 +76,32 @@ return [
             'wallet-deposit' => '充值，帳號：',
             'wallet-withdrawal' => '提領，帳號：',
             'withdrawal-fee' => '提領手續費，自帳號：',
+        ],
+    ],
+    'wallet_balance_transaction' => [
+        'types' => [
+            'deposit' => 'deposit',
+            'withdrawal' => 'withdrawal',
+            'payin' => 'payin',
+            'payout' => 'payout',
+            'approvement' => 'approvement',
+            'manual-correction' => 'manual correction',
+            'manual-deposit' => 'manual deposit',
+            'manual-withdrawal' => 'manual withdrawal',
+            'wallet-fee' => 'wallet fee',
+            'wallet-fee-correction' => 'wallet fee correction',
+        ],
+        'des_prefix' => [
+            'deposit' => 'Deposit by ',
+            'withdrawal' => 'Withdrawal by ',
+            'payin' => 'wallet internal payin',
+            'payout' => 'wallet internal payout',
+            'approvement' => 'wallet internal approvement',
+            'manual-correction' => 'Manual correction by ',
+            'manual-deposit' => 'External deposit',
+            'manual-withdrawal' => 'External withdrawal',
+            'wallet-fee' => 'fee for blockchain',
+            'wallet-fee-correction' => 'fee correction',
         ],
     ],
     'authentication' => [

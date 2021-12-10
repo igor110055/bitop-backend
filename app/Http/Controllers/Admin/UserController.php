@@ -65,6 +65,50 @@ class UserController extends AdminController
         $this->RoleRepo = $RoleRepo;
         $this->TwoFactorAuthService = $TwoFactorAuthService;
         $this->tz = config('core.timezone.default');
+
+        $this->middleware(
+            ['can:edit-users'],
+            ['only' => [
+                'edit',
+                'update',
+                'adminLock',
+                'editLimitations',
+                'storeLimitation',
+                'createFeatureLock',
+                'storeFeatureLock',
+                'deactivateTFA',
+            ]]
+        );
+
+        $this->middleware(
+            ['can:verify-users'],
+            ['only' => [
+                'verify',
+            ]]
+        );
+
+        $this->middleware(
+            ['can:edit-limitations'],
+            ['only' => [
+                'editLimitations',
+                'storeLimitation',
+            ]]
+        );
+
+        $this->middleware(
+            ['can:edit-auth'],
+            ['only' => [
+                'authorizeAdmin',
+                'updateRole',
+            ]]
+        );
+
+        $this->middleware(
+            ['role:super-admin'],
+            ['only' => [
+                'authorizeTester',
+            ]]
+        );
     }
 
     public function index(Request $request)
@@ -156,6 +200,9 @@ class UserController extends AdminController
         $action = $request->input('action');
         $user = $this->UserRepo->findOrFail($user->id);
         if ($action === 'lock') {
+            if ($user->is_root) {
+                return redirect()->route('admin.users.show', ['user' => $user]);
+            }
             if ($this->UserRepo->getUserLocks($user, UserLock::ADMIN)->isEmpty()) {
                 $this->UserRepo->createUserLock($user, UserLock::ADMIN);
                 $AdminActionRepo->createByApplicable($user, [
@@ -407,6 +454,10 @@ class UserController extends AdminController
         ]);
         $expired_time = Carbon::parse($values['expired_time'], $this->tz);
 
+        if ($user->is_root) {
+            return redirect()->route('admin.users.show', ['user' => $user->id]);
+        }
+
         # store
         DB::transaction(function () use ($values, $user, $expired_time) {
             if ($lock = $this->UserRepo->getUserLock($user, $values['type'])) {
@@ -435,8 +486,10 @@ class UserController extends AdminController
     public function authorizeAdmin(User $user)
     {
         if ($user->is_admin) {
-            $this->UserRepo->update($user, ['is_admin' => false]);
-            $user->syncroles([]);
+            if (!$user->is_root) {
+                $this->UserRepo->update($user, ['is_admin' => false]);
+                $user->syncroles([]);
+            }
         } else {
             $this->UserRepo->update($user, ['is_admin' => true]);
             $user->syncroles(['viewer']);
@@ -457,12 +510,18 @@ class UserController extends AdminController
     public function updateRole(User $user, Request $request)
     {
         $role = $request->input('role');
+        if ($user->is_root or $role === 'super-admin') {
+            return redirect()->route('admin.users.show', ['user' => $user->id]);
+        }
         $user->syncRoles([$role]);
         return redirect()->route('admin.users.show', ['user' => $user])->with('flash_message', ['message' => '權限設定完成']);
     }
 
     public function deactivateTFA(User $user, Request $request)
     {
+        if ($user->is_root and !auth()->user()->is_root) {
+            return redirect()->route('admin.users.show', ['user' => $user])->with('flash_message');
+        }
         $this->TwoFactorAuthService->deactivateWithoutVerify($user, $request->input('description'));
         return redirect()->route('admin.users.show', ['user' => $user])->with('flash_message', ['message' => '強制關閉二次驗證完成']);
     }

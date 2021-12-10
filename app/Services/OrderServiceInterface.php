@@ -21,13 +21,11 @@ interface OrderServiceInterface
     );
     public function claim(
         $order_id,
-        $payment_src_type,
-        $payment_src_id,
-        $payment_dst_type,
-        $payment_dst_id
+        $payment_src,
+        $payment_dst
     );
     public function confirm($order_id);
-    public function getProfitUnitPrice(Order $order);
+    /* public function getProfitUnitPrice(Order $order);
     public function calculateProfitUnitPrice(
         $dst_user,
         $src_user,
@@ -36,7 +34,7 @@ interface OrderServiceInterface
         $coin_unit_price,
         $currency,
         $currency_amount
-    );
+    ); */
     public function cancel(
         User $user,
         $order_id,

@@ -54,6 +54,11 @@ class Wftransfer extends UuidModel
         return $this->belongsTo(BankAccount::class, 'bank_account_id');
     }
 
+    public function admin_actions()
+    {
+        return $this->morphMany(AdminAction::class, 'applicable');
+    }
+
     public function getCallbackUrlAttribute()
     {
         if (config('app.env') === 'local') {

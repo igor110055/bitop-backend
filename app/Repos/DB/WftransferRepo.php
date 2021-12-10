@@ -118,7 +118,7 @@ class WftransferRepo implements \App\Repos\Interfaces\WftransferRepo
 
         $update = [
             'remote_id' => data_get($result, 'id'),
-            'status' => data_get($result, 'status'),
+            'status' => data_get($result, 'status', 'init'),
             'merchant_fee' => data_get($result, 'merchant_fee'),
             'response' => json_encode($result),
             'submitted_at' => millitime(),

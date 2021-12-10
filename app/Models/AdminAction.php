@@ -6,6 +6,7 @@ class AdminAction extends UuidModel
 {
     const TYPE_CANCEL_ORDER = 'cancel-order';
     const TYPE_COMPLETE_ORDER = 'complete-order';
+    const TYPE_NEW_ORDER_TRANSFER = 'new-order-transfer';
     const TYPE_USER_LOCK = 'user-lock';
     const TYPE_USER_UNLOCK = 'user-unlock';
     const TYPE_UNAVAILABLE_ADVERTISEMENT = 'unavailable-advertisement';

@@ -39,13 +39,15 @@
                             <th>{{ data_get($limitation, 'min') }}</th>
                             <th>{{ data_get($limitation, 'max') }}</th>
                             <th>
-                            @if (isset($group))
-                            <a href="{{ route('admin.groups.limitations.edit', ['group' => $group, 'type' => $type, 'coin' => $coin]) }}">設定</a>
-                            @elseif (isset($user))
-                            <a href="{{ route('admin.users.limitations.edit', ['user' => $user, 'type' => $type, 'coin' => $coin]) }}">設定</a>
-                            @else
-                            <a href="{{ route('admin.limitations.edit', ['type' => $type, 'coin' => $coin]) }}">設定</a>
-                            @endif
+                                @can('edit-limitations')
+                                @if (isset($group))
+                                <a href="{{ route('admin.groups.limitations.edit', ['group' => $group, 'type' => $type, 'coin' => $coin]) }}">設定</a>
+                                @elseif (isset($user))
+                                <a href="{{ route('admin.users.limitations.edit', ['user' => $user, 'type' => $type, 'coin' => $coin]) }}">設定</a>
+                                @else
+                                <a href="{{ route('admin.limitations.edit', ['type' => $type, 'coin' => $coin]) }}">設定</a>
+                                @endif
+                                @endcan
                             </th>
                         </tr>
                         @endforeach

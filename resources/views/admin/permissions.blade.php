@@ -18,22 +18,18 @@
                 </thead>
                 <tbody>
                     @foreach($roles as $role)
+                    @if ($role->name !== 'super-admin')
                     <tr>
                         <td>{{ $role->name }}</td>
                         <td>
-                            @if ($role->name === 'super-admin')
-                                <ul class="list list--check">
-                                    <li>ALL</li>
-                                </ul>
-                            @else
-                                <ul class="list list--check">
-                                @foreach ($role->permissions as $permission)
-                                    <li>{{ $permission->name }}</li>
-                                @endforeach
-                                </ul>
-                            @endif
+                            <ul class="list list--check">
+                            @foreach ($role->permissions as $permission)
+                                <li>{{ $permission->name }}</li>
+                            @endforeach
+                            </ul>
                         </td>
                     </tr>
+                    @endif
                     @endforeach
                 </tbody>
             </table>

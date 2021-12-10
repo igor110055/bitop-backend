@@ -74,6 +74,9 @@ class Kernel extends HttpKernel
         'real_name.check' => RealNameVerificationCheck::class,
         'locale' => Locale::class,
         'userlock' => CheckUserLock::class,
+        'role' => \Spatie\Permission\Middlewares\RoleMiddleware::class,
+        'permission' => \Spatie\Permission\Middlewares\PermissionMiddleware::class,
+        'role_or_permission' => \Spatie\Permission\Middlewares\RoleOrPermissionMiddleware::class,
     ];
 
     /**

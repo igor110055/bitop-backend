@@ -160,6 +160,11 @@ class Order extends RandomIDModel
         return $this->hasMany(Wfpayment::class);
     }
 
+    public function wftransfers()
+    {
+        return $this->hasMany(Wftransfer::class);
+    }
+
     public function getAdOwnerAttribute()
     {
         return $this->advertisement->owner;

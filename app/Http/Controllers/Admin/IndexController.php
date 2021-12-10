@@ -68,29 +68,6 @@ class IndexController extends AdminController
         $from = $to->copy()->subDays(9);
         $dates = date_ticks($from->toDateString(), $to->toDateString());
 
-        foreach ($this->currencies as $currency) {
-            $assets_balance[$currency] = formatted_price($this->AssetRepo
-                ->getBalancesSum($currency));
-            $currency_assets_reports = $this->AssetReportRepo
-                ->getByDates($currency, $dates, null);
-            $assets_balance_history[$currency] = collect($currency_assets_reports)->map(function($item, $key) {
-                return data_get($item, 'balance', '0.00');
-            })->values()->toArray();
-            $assets_balance_history[$currency] = implode(',', $assets_balance_history[$currency]);
-        }
-
-        foreach ($this->currencies as $currency) {
-            $currency_exchange_rates[$currency] = $this->CurrencyExchangeRateRepo
-                ->getLatest($currency, null, null)
-                ->toArray();
-            $dates_exchange_rate = $this->CurrencyExchangeRateRepo
-                ->getByDates($currency, $dates, null);
-            $currency_exchange_rate_history[$currency] = collect($dates_exchange_rate)->map(function($item, $key) {
-                return data_get($item, 'mid', '0.00');
-            })->values()->toArray();
-            $currency_exchange_rate_history[$currency] = implode(',', $currency_exchange_rate_history[$currency]);
-        }
-
         foreach ($this->coins as $coin) {
             $coin_prices[$coin] = $this->CoinExchangeRateRepo
                 ->getLatest($coin, null)
@@ -115,10 +92,6 @@ class IndexController extends AdminController
             'from' => $from,
             'to' => $to,
             'ticks' => date_ticks_for_chart($from, $to),
-            'assets_balance' => $assets_balance,
-            'assets_balance_history' => $assets_balance_history,
-            'currency_exchange_rates' => $currency_exchange_rates,
-            'currency_exchange_rate_history' => $currency_exchange_rate_history,
             'coin_prices' => $coin_prices,
             'coin_price_history' => $coin_price_history,
             'coin_balances' => $coin_balances,

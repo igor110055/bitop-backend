@@ -100,18 +100,11 @@ $(function () {
             from: $('[name="from"]').val(),
             to: $('[name="to"]').val(),
         };
-        if (moment(param.to).diff(moment(param.from), 'days') > 10) {
-            swal({
-                type: 'warning',
-                title: '查詢範圍不可超過 10 天',
-            });
-        } else {
-            table.settings()[0].ajax.data = param;
-            table
-                .ajax
-                .url('{{ route('admin.transactions.search') }}')
-                .load(null, false);
-        }
+        table.settings()[0].ajax.data = param;
+        table
+            .ajax
+            .url('{{ route('admin.transactions.search') }}')
+            .load(null, false);
     });
 });
 </script>

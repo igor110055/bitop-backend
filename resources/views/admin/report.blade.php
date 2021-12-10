@@ -33,42 +33,9 @@
 <div class="row">
     <div class="col-12">
         <div class="card">
-            <div class="card-header"><h2 class="card-title">當日最後法幣報價</h2></div>
-            <div class="card-block">
-                <table id="assets" class="table">
-                    <thead>
-                        <tr>
-                            <th>幣別</th>
-                            <th>買入價</th>
-                            <th>賣出價</th>
-                            <th>中間價</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($currency_exchange_rates as $currency => $rates)
-                            @if(!empty($rates))
-                            <tr>
-                                <td>{{ $currency }}</td>
-                                <td>{{ data_get($rates, 'bid') }}</td>
-                                <td>{{ data_get($rates, 'ask') }}</td>
-                                <td>{{ data_get($rates, 'mid') }}</td>
-                            </tr>
-                            @endif
-                        @endforeach
-                    </tbody>
-                </table>
-                <a href="{{ route('admin.report.exchange-rates') }}">歷史記錄</a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-12">
-        <div class="card">
             <div class="card-header"><h2 class="card-title">當日最後虛擬幣報價 (Base currency)</h2></div>
             <div class="card-block">
-                <table id="assets" class="table">
+                <table class="table">
                     <thead>
                         <tr>
                             <th>幣別</th>
@@ -99,7 +66,7 @@
             <div class="card-block">
                 @foreach ($groups as $group)
                 <div class="card-block__title">{{ $group }}</div>
-                <table id="assets" class="table">
+                <table class="table">
                     <thead>
                         <tr>
                             <th>幣別</th>
@@ -128,12 +95,13 @@
     </div>
 </div>
 
+@role('super-admin')
 <div class="row">
     <div class="col-12">
         <div class="card">
             <div class="card-header"><h2 class="card-title">系統錢包內虛擬幣數量統計</h2></div>
             <div class="card-block">
-                <table id="assets" class="table">
+                <table class="table">
                     <thead>
                         <tr>
                             <th>幣別</th>
@@ -160,6 +128,7 @@
         </div>
     </div>
 </div>
+@endrole
 
 <div class="row">
     <div class="col-12">
@@ -168,7 +137,7 @@
             <div class="card-block">
                 @foreach ($groups as $group)
                 <div class="card-block__title">{{ $group }}</div>
-                <table id="assets" class="table">
+                <table class="table">
                     <thead>
                         <tr>
                             <th>幣別</th>
@@ -212,7 +181,7 @@
             <div class="card-block">
                 @foreach ($groups as $group)
                 <div class="card-block__title">{{ $group }}</div>
-                <table id="assets" class="table">
+                <table class="table">
                     <thead>
                         <tr>
                             <th>幣別</th>
@@ -256,7 +225,7 @@
             <div class="card-block">
                 @foreach ($groups as $group)
                 <div class="card-block__title">{{ $group }}</div>
-                <table id="assets" class="table">
+                <table class="table">
                     <thead>
                         <tr>
                             <th>幣別</th>
@@ -292,7 +261,7 @@
             <div class="card-block">
                 @foreach ($groups as $group)
                 <div class="card-block__title">{{ $group }}</div>
-                <table id="assets" class="table">
+                <table class="table">
                     <thead>
                         <tr>
                             <th>幣別</th>
@@ -336,7 +305,7 @@
             <div class="card-block">
                 @foreach ($groups as $group)
                 <div class="card-block__title">{{ $group }}</div>
-                <table id="assets" class="table">
+                <table class="table">
                     <thead>
                         <tr>
                             <th>幣別</th>
@@ -382,7 +351,7 @@
             <div class="card-block">
                 @foreach ($groups as $group)
                 <div class="card-block__title">{{ $group }}</div>
-                <table id="assets" class="table">
+                <table class="table">
                     <thead>
                         <tr>
                             <th>幣別</th>
@@ -408,84 +377,6 @@
                 </table>
                 @endforeach
                 <a href="{{ route('admin.report.transfers') }}">歷史記錄</a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header"><h2 class="card-title">法幣資產</h2></div>
-            <div class="card-block">
-                <div class="card-block__title">System</div>
-                <table id="assets" class="table">
-                    <thead>
-                        <tr>
-                            <th>幣別</th>
-                            <th>餘額</th>
-                            <th>單價</th>
-                            <th>收入</th>
-                            <th>支出</th>
-                            <th>手動充值</th>
-                            <th>手動提領</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($asset_report['system'] as $currency => $report)
-                            @if(!empty($report))
-                            <tr>
-                                <td>{{ $currency }}</td>
-                                <td>{{ $report['balance'] }}</td>
-                                <td>{{ $report['unit_price'] }}</td>
-                                <td>{{ $report['deposit_amount'] }}</td>
-                                <td>{{ $report['withdraw_amount'] }}</td>
-                                <td>{{ $report['manual_deposit_amount'] }}</td>
-                                <td>{{ $report['manual_withdraw_amount'] }}</td>
-                            </tr>
-                            @endif
-                        @endforeach
-                    </tbody>
-                </table>
-                <a href="{{ route('admin.report.assets') }}">歷史記錄</a>
-
-                @if ($has_multiple_agencies)
-                    @foreach($asset_report['agency'] as $agency_id => $reports)
-                        @if(!empty($reports))
-                        <hr>
-                        <div class="card-block__title">{{ $agencies[$agency_id]['name'] }}</div>
-                        <table id="assets" class="table">
-                            <thead>
-                                <tr>
-                                    <th>幣別</th>
-                                    <th>餘額</th>
-                                    <th>單價</th>
-                                    <th>收入</th>
-                                    <th>支出</th>
-                                    <th>手動充值</th>
-                                    <th>手動提領</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($reports as $currency => $report)
-                                    @if(!empty($report))
-                                    <tr>
-                                        <td>{{ $currency }}</td>
-                                        <td>{{ $report['balance'] }}</td>
-                                        <td>{{ $report['unit_price'] }}</td>
-                                        <td>{{ $report['deposit_amount'] }}</td>
-                                        <td>{{ $report['withdraw_amount'] }}</td>
-                                        <td>{{ $report['manual_deposit_amount'] }}</td>
-                                        <td>{{ $report['manual_withdraw_amount'] }}</td>
-                                    </tr>
-                                    @endif
-                                @endforeach
-                            </tbody>
-                        </table>
-                        <a href="{{ route('admin.report.assets').'?agency='.$agency_id }}">歷史記錄</a>
-                        @endif
-                    @endforeach
-                @endif
             </div>
         </div>
     </div>

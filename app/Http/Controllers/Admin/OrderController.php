@@ -16,11 +16,13 @@ use App\Http\Requests\Admin\{
 use App\Models\{
     Order,
     AdminAction,
+    Advertisement,
 };
 use App\Repos\Interfaces\{
     OrderRepo,
     AdminActionRepo,
     UserRepo,
+    WftransferRepo,
 };
 use App\Services\OrderServiceInterface;
 use App\Notifications\{
@@ -42,14 +44,23 @@ class OrderController extends AdminController
         OrderRepo $OrderRepo,
         AdminActionRepo $AdminActionRepo,
         UserRepo $UserRepo,
+        WftransferRepo $WftransferRepo,
         OrderServiceInterface $OrderService
     ) {
         parent::__construct();
         $this->OrderRepo = $OrderRepo;
         $this->AdminActionRepo = $AdminActionRepo;
         $this->UserRepo = $UserRepo;
+        $this->WftransferRepo = $WftransferRepo;
         $this->OrderService = $OrderService;
         $this->tz = config('core.timezone.default');
+
+        $this->middleware(
+            ['can:edit-orders'],
+            ['only' => [
+                'update',
+            ]]
+        );
     }
 
     public function index()
@@ -64,6 +75,11 @@ class OrderController extends AdminController
                 Order::STATUS_CLAIMED => 'Claimed',
                 Order::STATUS_COMPLETED => 'Completed',
                 Order::STATUS_CANCELED => 'Canceled',
+            ],
+            'express' => [
+                'all' => 'All',
+                '0' => '一般交易',
+                '1' => '快捷交易',
             ],
         ]);
     }
@@ -84,12 +100,32 @@ class OrderController extends AdminController
             }
         }
 
+        if ($order->is_express) {
+            if ($order->advertisement->type === Advertisement::TYPE_SELL) {
+                $action = 'express-buy';
+            } else {
+                $action = 'express-sell';
+            }
+        } else {
+            if ($order->advertisement->type === Advertisement::TYPE_SELL) {
+                $action = 'buy';
+            } else {
+                $action = 'sell';
+            }
+        }
+
         return view('admin.order', [
             'order' => $order,
+            'action' => $action,
             'src_user' => $order->src_user,
             'dst_user' => $order->dst_user,
+            'ad' => $order->advertisement,
+            'ad_owner' => $order->advertisement->owner,
             'bank_accounts' => $order->bank_accounts,
-            'payment' => $order->payment,
+            'wfpayments' => $order->wfpayments,
+            'wftransfers' => $order->wftransfers,
+            'payment_dst' => $order->payment_dst,
+            'payment_src' => $order->payment_src,
             'cancel_info' => $info ?? null,
         ]);
     }
@@ -117,6 +153,26 @@ class OrderController extends AdminController
                     'type' => AdminAction::TYPE_CANCEL_ORDER,
                     'description' => $values['description'],
                 ]);
+            } elseif ($values['action'] === AdminAction::TYPE_NEW_ORDER_TRANSFER) {
+                if (!$order->is_express) {
+                    throw new BadRequestError;
+                }
+                $wftransfer = $this->WftransferRepo
+                    ->createByOrder($order);
+                $order->payment_src()->associate($wftransfer);
+                $order->save();
+                # Send the transfer
+                try {
+                    $wftransfer = $this->WftransferRepo
+                        ->send($wftransfer);
+                } catch (\Throwable $e) {
+                    \Log::alert("Send wftransfer {$wftransfer->id} failed. ". $e->getMessage());
+                }
+                $this->AdminActionRepo->createByApplicable($wftransfer, [
+                    'admin_id' => \Auth::id(),
+                    'type' => AdminAction::TYPE_NEW_ORDER_TRANSFER,
+                    'description' => $values['description'],
+                ]);
             }
         });
 
@@ -136,7 +192,7 @@ class OrderController extends AdminController
             $this->UserRepo->updateOrderCount($order->dst_user, false);
         }
 
-        return redirect()->route('admin.orders.index')->with('flash_message', ['message' => '訂單資料操作成功']);
+        return redirect()->route('admin.orders.show', ['order' => $order])->with('flash_message', ['message' => '訂單資料操作成功']);
     }
 
     public function getOrders(OrderSearchRequest $request)
@@ -146,17 +202,20 @@ class OrderController extends AdminController
         $status = data_get($values, 'status');
         $from = Carbon::parse(data_get($values, 'from', 'today -10 days'), $this->tz);
         $to = Carbon::parse(data_get($values, 'to', 'today'), $this->tz)->addDay();
+        $is_express = data_get($values, 'is_express');
 
+        $condition = [];
         if ($status !== 'all') {
-            $condition = $this->searchConditionWithTimeInterval(
-                [['status', '=', $status]],
-                'created_at',
-                $from,
-                $to
-            );
-        } else {
-            $condition = $this->timeIntervalCondition('created_at', $from, $to);
+            $condition[] = ['status', '=', $status];
         }
+        $condition[] = ['created_at', '>=', $from];
+        $condition[] = ['created_at', '<', $to];
+        if ($is_express === '1') {
+            $condition[] = ['is_express', '=', true];
+        } elseif ($is_express === '0') {
+            $condition[] = ['is_express', '=', false];
+        }
+
         $query = $this->OrderRepo->queryOrder($condition, $keyword);
         $total = $this->OrderRepo->getOrdersCount();
         $filtered = $query->count();

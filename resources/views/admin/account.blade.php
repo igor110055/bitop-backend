@@ -11,12 +11,14 @@
         </h2>
         <!--small class="card-subtitle"></small-->
     </div>
+    @role('super-admin')
     <div class="card-block">
         <a
             href="{{ route('admin.accounts.manipulations.create', ['account' => $account->id]) }}"
             class="btn btn-primary waves-effect"
         >手動帳戶操作</a>
     </div>
+    @endrole
     <div class="card-block row pb-0 pt-0">
         <div class="col-sm-4">
             <label class="mb-0">Account Balance</label>
