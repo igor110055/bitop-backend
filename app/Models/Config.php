@@ -19,6 +19,7 @@ class Config extends UuidModel
         self::ATTRIBUTE_INVITATION_REQUIRED,
         self::ATTRIBUTE_PAYMENT_WINDOW,
         self::ATTRIBUTE_EXPRESS_PAYMENT_WINDOW,
+        self::ATTRIBUTE_EXPRESS_AUTO_RELEASE_LIMIT,
     ];
     const DEFAULT = [
         self::ATTRIBUTE_INVITATION_REQUIRED => true,

@@ -60,6 +60,22 @@
     </div>
 </form>
 
+<form method="post" action="{{ route('admin.configs.express-auto-release') }}">
+    {{ csrf_field() }}
+    {{ method_field('POST') }}
+
+    <div class="card">
+        <div class="card-header"><h3 class="card-title">快捷交易自動放行範圍</h3></div>
+        <div class="card-block">
+            @include('widgets.forms.input', ['name' => "min", 'value' => data_get($express_auto_release_limit, 'min'), 'title' => '自動放行下限 (CNY)', 'required' => true])
+            @include('widgets.forms.input', ['name' => "max", 'value' => data_get($express_auto_release_limit, 'max'), 'title' => '自動放行上限 (CNY)', 'required' => true])
+        </div>
+        <div class="card-block">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </div>
+</form>
+
 @role('super-admin')
 <form method="post" action="{{ route('admin.configs.app-version') }}">
 {{ csrf_field() }}
