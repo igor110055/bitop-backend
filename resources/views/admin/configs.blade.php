@@ -9,6 +9,8 @@
     </div>
 </div>
 
+@role('super-admin')
+
 <form method="post" action="{{ route('admin.configs.wallet-activation') }}">
 {{ csrf_field() }}
 {{ method_field('POST') }}
@@ -24,7 +26,6 @@
     </div>
 </form>
 
-@role('super-admin')
 <form method="post" action="{{ route('admin.configs.withdrawal-fee-factor') }}">
 {{ csrf_field() }}
 {{ method_field('POST') }}
@@ -43,6 +44,22 @@
         </div>
     </div>
 </form>
+
+<form method="post" action="{{ route('admin.configs.wfpay-activation') }}">
+    {{ csrf_field() }}
+    {{ method_field('POST') }}
+
+    <div class="card">
+        <div class="card-header"><h3 class="card-title">Wfpay 設定</h3></div>
+        <div class="card-block">
+            @include('widgets.forms.select', ['name' => 'wfpay[deactivated]', 'value' => ((data_get($wfpay_configs, 'deactivated') === true) ? 1 : 0), 'title' => '停用 Wfpay 功能', 'values' => [1 => '是', 0 => '否'], 'required' => true])
+        </div>
+        <div class="card-block">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </div>
+</form>
+
 @endrole
 <form method="post" action="{{ route('admin.configs.withdrawal-limit') }}">
 {{ csrf_field() }}

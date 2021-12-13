@@ -11,6 +11,7 @@ class Config extends UuidModel
     const ATTRIBUTE_PAYMENT_WINDOW = 'payment-window';
     const ATTRIBUTE_EXPRESS_PAYMENT_WINDOW = 'express-payment-window';
     const ATTRIBUTE_EXPRESS_AUTO_RELEASE_LIMIT = 'express-auto-release-limit';
+    const ATTRIBUTE_WFPAY = 'wfpay';
     const ATTRIBUTES = [
         self::ATTRIBUTE_WALLET,
         self::ATTRIBUTE_WITHDRAWAL_FEE_FACTOR,
@@ -20,6 +21,7 @@ class Config extends UuidModel
         self::ATTRIBUTE_PAYMENT_WINDOW,
         self::ATTRIBUTE_EXPRESS_PAYMENT_WINDOW,
         self::ATTRIBUTE_EXPRESS_AUTO_RELEASE_LIMIT,
+        self::ATTRIBUTE_WFPAY,
     ];
     const DEFAULT = [
         self::ATTRIBUTE_INVITATION_REQUIRED => true,
@@ -31,6 +33,9 @@ class Config extends UuidModel
         self::ATTRIBUTE_EXPRESS_AUTO_RELEASE_LIMIT => [
             'min' => 0,
             'max' => 30000,
+        ],
+        self::ATTRIBUTE_WFPAY => [
+            'deactivated' => false,
         ],
     ];
 

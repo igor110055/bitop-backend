@@ -25,11 +25,19 @@ use Illuminate\Support\Facades\Log;
 
 use App\Models\{
     Wfpayment,
+    Config,
+};
+
+use App\Repos\Interfaces\{
+    ConfigRepo,
 };
 
 class WfpayService implements WfpayServiceInterface
 {
-    public function __construct() {
+    public function __construct(
+        ConfigRepo $ConfigRepo
+    ) {
+        $this->ConfigRepo = $ConfigRepo;
         $configs = config('services.wfpay');
         $this->configs = $configs;
         $this->url = $configs['link'];
@@ -70,6 +78,27 @@ class WfpayService implements WfpayServiceInterface
         ];
         if ($force_matching) {
             $data['force_matching'] = true;
+        }
+
+        $config = $this->ConfigRepo->get(Config::ATTRIBUTE_WFPAY);
+        if (data_get($config, 'deactivated')) {
+            if ($payment_method === 'bank') {
+                return [
+                    'status' => 'init',
+                    'bank_account' => [
+                        'name' => 'Example Name',
+                        'bank_name' => 'Some Bank Name',
+                        'account_name' => '012345678901234',
+                        'bank_branch_name' => 'Some Bank Banch Name',
+                    ],
+                ];
+            } else {
+                return [
+                    'status' => 'init',
+                    'payment_url' => 'https://www.baidu.com/',
+                ];
+            }
+            return $data;
         }
 
         $link = $this->link('orders/payment');
@@ -113,11 +142,13 @@ class WfpayService implements WfpayServiceInterface
             "bank_account_name" => $bank_account_name
         ];
 
-        if (data_get($this->configs, 'send_transfer', false)) {
-            $link = $this->link('orders/payment_transfer');
-            return $this->post($link, $data);
+        $config = $this->ConfigRepo->get(Config::ATTRIBUTE_WFPAY);
+        if (data_get($config, 'deactivated')) {
+            return $data;
         }
-        return $data;
+
+        $link = $this->link('orders/payment_transfer');
+        return $this->post($link, $data);
     }
 
     public function rematch($id)
