@@ -143,7 +143,9 @@ Route::group(
         Route::post('configs/wallet-activation', 'ConfigController@storeWalletActivation')->name('admin.configs.wallet-activation');
         Route::post('configs/withdrawal-fee-factor', 'ConfigController@storeWithdrawalFeeFactor')->name('admin.configs.withdrawal-fee-factor');
         Route::post('configs/withdrawal-limit', 'ConfigController@storeWithdrawalLimit')->name('admin.configs.withdrawal-limit');
+        Route::post('configs/wfpay-activation', 'ConfigController@storeWfpayActivation')->name('admin.configs.wfpay-activation');
         Route::post('configs/app-version', 'ConfigController@storeAppVersionSetting')->name('admin.configs.app-version');
+        Route::post('configs/express-auto-release', 'ConfigController@storeExpressAutoReleaseLimit')->name('admin.configs.express-auto-release');
         Route::resource('configs', 'ConfigController', ['only' => ['index'], 'as' => 'admin']);
 
         Route::get('wallet_balances/transactions', 'WalletBalanceController@getTransactions')->name('admin.wallet-balances.transactions');

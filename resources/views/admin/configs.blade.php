@@ -9,6 +9,8 @@
     </div>
 </div>
 
+@role('super-admin')
+
 <form method="post" action="{{ route('admin.configs.wallet-activation') }}">
 {{ csrf_field() }}
 {{ method_field('POST') }}
@@ -24,7 +26,6 @@
     </div>
 </form>
 
-@role('super-admin')
 <form method="post" action="{{ route('admin.configs.withdrawal-fee-factor') }}">
 {{ csrf_field() }}
 {{ method_field('POST') }}
@@ -43,6 +44,22 @@
         </div>
     </div>
 </form>
+
+<form method="post" action="{{ route('admin.configs.wfpay-activation') }}">
+    {{ csrf_field() }}
+    {{ method_field('POST') }}
+
+    <div class="card">
+        <div class="card-header"><h3 class="card-title">Wfpay 設定</h3></div>
+        <div class="card-block">
+            @include('widgets.forms.select', ['name' => 'wfpay[deactivated]', 'value' => ((data_get($wfpay_configs, 'deactivated') === true) ? 1 : 0), 'title' => '停用 Wfpay 功能', 'values' => [1 => '是', 0 => '否'], 'required' => true])
+        </div>
+        <div class="card-block">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </div>
+</form>
+
 @endrole
 <form method="post" action="{{ route('admin.configs.withdrawal-limit') }}">
 {{ csrf_field() }}
@@ -53,6 +70,22 @@
         <div class="card-block">
             @include('widgets.forms.input', ['name' => "daily_limit", 'class' => 'text-lowercase', 'value' => data_get($withdrawal_limit, 'daily'), 'title' => '每日提現限額 (USD)', 'required' => true])
             <p>通過 2FA 將調整為 {{config('core.two_factor_auth.withdrawal_limit')}} 倍</p>
+        </div>
+        <div class="card-block">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </div>
+</form>
+
+<form method="post" action="{{ route('admin.configs.express-auto-release') }}">
+    {{ csrf_field() }}
+    {{ method_field('POST') }}
+
+    <div class="card">
+        <div class="card-header"><h3 class="card-title">快捷交易自動放行範圍</h3></div>
+        <div class="card-block">
+            @include('widgets.forms.input', ['name' => "min", 'value' => data_get($express_auto_release_limit, 'min'), 'title' => '自動放行下限 (CNY)', 'required' => true])
+            @include('widgets.forms.input', ['name' => "max", 'value' => data_get($express_auto_release_limit, 'max'), 'title' => '自動放行上限 (CNY)', 'required' => true])
         </div>
         <div class="card-block">
             <button type="submit" class="btn btn-primary">Submit</button>
