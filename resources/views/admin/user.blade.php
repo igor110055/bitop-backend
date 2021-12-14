@@ -35,6 +35,13 @@
             class="btn btn-primary waves-effect"
         >限額設定</a>
 
+        @can('edit-accounts')
+        <a
+            href="{{ route('admin.users.transfers.create', ['user' => $user->id]) }}"
+            class="btn btn-primary waves-effect"
+        >手動資產移轉</a>
+        @endcan
+
         @can('edit-users')
         @if (!$is_root)
         <a

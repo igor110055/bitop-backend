@@ -11,6 +11,9 @@ return [
                 'edit-auth',
                 'view-auth',
             ],
+            'account' => [
+                'edit-accounts',
+            ],
             'group' => [
                 'edit-groups',
             ],

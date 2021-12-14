@@ -59,7 +59,21 @@ class User extends AuthModel
         'remember_token',
     ];
 
-    protected $appends = ['name'];
+    protected $visible = [
+        'id',
+        'email',
+        'mobile',
+        'username',
+        'group_id',
+        'nationality',
+        'is_admin',
+        'is_merchant',
+        'authentication_status',
+        'name',
+        'is_verified',
+    ];
+
+    protected $appends = ['name', 'is_verified'];
 
     public function getNameAttribute()
     {

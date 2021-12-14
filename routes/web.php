@@ -50,6 +50,8 @@ Route::group(
         Route::get('users/{user}/authorize-tester', 'UserController@authorizeTester')->name('admin.users.admin.authorize-tester');
         Route::put('users/{user}/role', 'UserController@updateRole')->name('admin.users.role.update');
         Route::post('users/{user}/deactivate-tfa', 'UserController@deactivateTFA')->name('admin.users.deactivate-tfa');
+        Route::get('users/{user}/transfers', 'UserController@createTransfer')->name('admin.users.transfers.create');
+        Route::post('users/{user}/transfers', 'UserController@storeTransfer')->name('admin.users.transfers.store');
         Route::put('users/{user}', 'UserController@update')->name('admin.users.update');
         Route::resource('users', 'UserController', ['only' => ['index', 'show', 'edit'], 'as' => 'admin']);
 

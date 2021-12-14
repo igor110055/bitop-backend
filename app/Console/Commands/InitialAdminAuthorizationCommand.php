@@ -64,6 +64,7 @@ class InitialAdminAuthorizationCommand extends Command
 
         $admin_permissions = [
             'edit-users',
+            'edit-accounts',
             'verify-users',
             'edit-auth',
             'view-auth',
