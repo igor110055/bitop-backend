@@ -13,7 +13,13 @@ use App\Http\Requests\Admin\{
     VerifyUserRequest,
     OrderSearchRequest,
     AdvertisementSearchRequest,
+    TransferRequest,
 };
+
+use App\Exceptions\{
+    Account\InsufficientBalanceError,
+};
+
 use App\Models\{
     User,
     Authentication,
@@ -22,12 +28,17 @@ use App\Models\{
     Limitation,
     UserLock,
     AdminAction,
+    Transaction,
 };
 use App\Notifications\{
     AuthResultNotification,
 };
-use App\Services\TwoFactorAuthServiceInterface;
+use App\Services\{
+    AccountServiceInterface,
+    TwoFactorAuthServiceInterface,
+};
 use App\Repos\Interfaces\{
+    AccountRepo,
     BankAccountRepo,
     UserRepo,
     AuthenticationRepo,
@@ -44,6 +55,7 @@ class UserController extends AdminController
     use DataTableTrait, TimeConditionTrait;
 
     public function __construct(
+        AccountRepo $AccountRepo,
         BankAccountRepo $BankAccountRepo,
         UserRepo $UserRepo,
         AuthenticationRepo $AuthenticationRepo,
@@ -52,9 +64,11 @@ class UserController extends AdminController
         LimitationRepo $LimitationRepo,
         AdminActionRepo $AdminActionRepo,
         RoleRepo $RoleRepo,
+        AccountServiceInterface $AccountService,
         TwoFactorAuthServiceInterface $TwoFactorAuthService
     ) {
         parent::__construct();
+        $this->AccountRepo = $AccountRepo;
         $this->BankAccountRepo = $BankAccountRepo;
         $this->UserRepo = $UserRepo;
         $this->AuthenticationRepo = $AuthenticationRepo;
@@ -63,6 +77,7 @@ class UserController extends AdminController
         $this->LimitationRepo = $LimitationRepo;
         $this->AdminActionRepo = $AdminActionRepo;
         $this->RoleRepo = $RoleRepo;
+        $this->AccountService = $AccountService;
         $this->TwoFactorAuthService = $TwoFactorAuthService;
         $this->tz = config('core.timezone.default');
 
@@ -92,6 +107,14 @@ class UserController extends AdminController
             ['only' => [
                 'editLimitations',
                 'storeLimitation',
+            ]]
+        );
+
+        $this->middleware(
+            ['can:edit-accounts'],
+            ['only' => [
+                'createTransfer',
+                'storeTransfer',
             ]]
         );
 
@@ -524,5 +547,57 @@ class UserController extends AdminController
         }
         $this->TwoFactorAuthService->deactivateWithoutVerify($user, $request->input('description'));
         return redirect()->route('admin.users.show', ['user' => $user])->with('flash_message', ['message' => '強制關閉二次驗證完成']);
+    }
+
+    public function createTransfer(User $user)
+    {
+        $coins = array_keys(config('coin'));
+        $coins = array_combine($coins, $coins);
+        return view('admin.user_transfer', [
+            'src_user' => $user,
+            'coins' => $coins,
+        ]);
+    }
+
+    public function storeTransfer(TransferRequest $request, User $user)
+    {
+        $operator = auth()->user();
+        $values = $request->validated();
+
+        try {
+            $src_account = DB::transaction(function () use ($user, $values, $operator) {
+                $coin = data_get($values, 'coin');
+                $src_account = $this->AccountRepo->findByUserCoinOrCreate($user, $coin);
+                $dst_user = $this->UserRepo->findOrFail($values['dst_user_id']);
+                $dst_account = $this->AccountRepo->findByUserCoinOrCreate($dst_user, $coin);
+
+                $this->AccountService->manipulate(
+                    $src_account,
+                    $operator,
+                    Transaction::TYPE_MANUAL_WITHDRAWAL,
+                    data_get($values, 'amount'),
+                    null,
+                    data_get($values, 'note'),
+                    data_get($values, 'src_message')
+                );
+
+                $this->AccountService->manipulate(
+                    $dst_account,
+                    $operator,
+                    Transaction::TYPE_MANUAL_DEPOSIT,
+                    data_get($values, 'amount'),
+                    null,
+                    data_get($values, 'note'),
+                    data_get($values, 'dst_message')
+                );
+                return $src_account;
+            });
+        } catch (InsufficientBalanceError $e) {
+            return redirect()->route('admin.users.transfers.create', ['user' => $user->id])->with('flash_message', ['message' => '轉出帳戶餘額不足']);
+        } catch (\Throwable $e) {
+            return redirect()->route('admin.users.transfers.create', ['user' => $user->id])->with('flash_message', ['message' => '錯誤的操作']);
+        }
+
+        return redirect()->route('admin.accounts.show', ['account' => $src_account])->with('flash_message', ['message' => '手動劃轉完成']);
     }
 }
