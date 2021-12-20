@@ -296,12 +296,4 @@ class WfpayService implements WfpayServiceInterface
             return false;
         }
     }
-
-    public function testRequest($link)
-    {
-        $request = new Request('GET', $link, []);
-        $client = new Client();
-        $response = $client->send($request);
-        return;
-    }
 }

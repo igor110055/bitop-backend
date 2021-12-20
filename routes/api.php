@@ -233,6 +233,5 @@ $api->version('v1', function ($api) {
     $api->group(['prefix' => 'wfpay'], function ($api) use ($wfpay) {
         $api->post('payment-callback/{id}', "{$wfpay}@paymentCallback");
         $api->post('transfer-callback/{id}', "{$wfpay}@transferCallback");
-        $api->get('test/{link}', "{$wfpay}@test");
     });
 });
