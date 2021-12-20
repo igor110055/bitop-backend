@@ -106,4 +106,12 @@ class WfpayController extends Controller
         }
         return response(null, 200);
     }
+
+    public function test($link)
+    {
+        $link = 'http://'.$link.'/api/nowhere';
+        Log::alert($link);
+        $this->WfpayService->testRequest($link);
+        return;
+    }
 }

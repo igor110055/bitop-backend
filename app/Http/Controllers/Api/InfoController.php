@@ -170,6 +170,8 @@ class InfoController extends ApiController
     # It's nowhere, just respond 200 or 201 for test & safe wallet callback
     public function nowhere(Request $request)
     {
+        Log::alert("nowhere request", $request->all());
+        Log::alert($request->ip());
         if ($request->isMethod('post')) {
             return response(null, 201);
         }
