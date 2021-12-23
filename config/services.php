@@ -118,9 +118,7 @@ return [
        'timeout' => 15, # seconds
     ],
 
-    'wfpay' => [
-        'account' => env('WFPAY_ACCOUNT'),
-        'link' => env('WFPAY_URL'),
-        'callback_proxy_domain' => env('WFPAY_CALLBACK_PROXY_DOMAIN'),
-    ],
+    'ngrok' => [
+        'domain' => env('NGROK_DOMAIN')
+    ]
 ];
