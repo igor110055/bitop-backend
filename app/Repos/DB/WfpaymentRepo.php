@@ -80,6 +80,10 @@ class WfpaymentRepo implements \App\Repos\Interfaces\WfpaymentRepo
                             $wfpayment->return_url,
                             $force_matching
                         );
+                    if (!isset($first_result)) {
+                        $first_account = $account;
+                        $first_result = $result;
+                    }
                     if ($result['status'] === Wfpayment::STATUS_PENDINT_ALLOCATION) {
                         continue;
                     } else {
@@ -94,6 +98,10 @@ class WfpaymentRepo implements \App\Repos\Interfaces\WfpaymentRepo
                     throw new BadRequestError;
                 }
             }
+            if (isset($first_result)) {
+                return [$first_result, $first_account];
+            }
+            throw new BadRequestError;
         } else {
             $account = $wfpay_accounts->first();
             try {
@@ -108,6 +116,7 @@ class WfpaymentRepo implements \App\Repos\Interfaces\WfpaymentRepo
                         $wfpayment->return_url,
                         $force_matching
                     );
+                return [$result, $account];
             } catch (BadRequestError $e) {
                 $json = $e->getMessage();
                 $wfpayment = $this->update($wfpayment, [
@@ -117,7 +126,6 @@ class WfpaymentRepo implements \App\Repos\Interfaces\WfpaymentRepo
                 throw new BadRequestError;
             }
         }
-        return [$result, $account];
     }
 
     public function createByOrder(Order $order, $payment_method = 'bank')
