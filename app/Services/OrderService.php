@@ -838,33 +838,6 @@ class OrderService implements OrderServiceInterface
         return $order;
     }
 
-    public function getWfpayment(
-        Order $order,
-        $payment_method = null,
-        $force_create = false
-    ) {
-        $order = $this->OrderRepo
-            ->findOrFail($order_id);
-
-        assert($order->is_express, true);
-
-        # TODO: check status and existing payment
-
-        if ($force_create) {
-            $wfpayment = null;
-        } else {
-            $wfpayment = $this->WfpaymentRepo
-                ->getTheLatestByOrder($order);
-        }
-
-        if (is_null($wfpayment)) {
-            $wfpayment = $this->WfpaymentRepo
-                ->createByOrder($order, $payment_method);
-        }
-
-        return $wfpayment;
-    }
-
     public function updateWfpaymentAndOrder($wfpayment_id, $data, $check_remote = true)
     {
         $wfpayment = $this->WfpaymentRepo->findForUpdate($wfpayment_id);
@@ -896,7 +869,7 @@ class OrderService implements OrderServiceInterface
         if (($order->status === Order::STATUS_PROCESSING) and ($original_status !== Wfpayment::STATUS_COMPLETED) and ($new_status === Wfpayment::STATUS_COMPLETED)) {
             if ($check_remote) {
                 # check remote data
-                $remote = $this->WfpayService->getOrder($wfpayment->id);
+                $remote = $this->WfpayService->getOrder($wfpayment);
                 if (data_get($remote, 'status') !== Wfpayment::STATUS_COMPLETED) {
                     \Log::alert("updateWfpaymentAndOrder, remote status is not completed.", $remote);
                     throw new BadRequestError;
@@ -977,7 +950,7 @@ class OrderService implements OrderServiceInterface
 
             # check remote data
             if ($check_remote) {
-                $remote = $this->WfpayService->getTransfer($wftransfer->id);
+                $remote = $this->WfpayService->getTransfer($wftransfer);
                 if (data_get($remote, 'status') !== Wftransfer::STATUS_COMPLETED) {
                     \Log::alert("updateWftransferAndOrder, remote status is not completed.", $remote);
                     throw new BadRequestError;

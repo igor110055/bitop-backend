@@ -2,11 +2,8 @@
 
 namespace App\Repos\Interfaces;
 
-use DateTimeInterface;
-use Carbon\Carbon;
 use App\Models\{
     Order,
-    User,
     Wftransfer,
 };
 

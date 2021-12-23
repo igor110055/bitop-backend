@@ -63,7 +63,7 @@ class WfpayController extends Controller
         }
 
         try {
-            $this->WfpayService->verifyRequest($request);
+            $this->WfpayService->verifyRequest($wfpayment->wfpay_account, $request);
             $this->OrderService->updateWfpaymentAndOrder($id, $data);
         } catch (\Throwable $e) {
             Log::alert("paymentCallback. Throwable cateched: ". $e->getMessage());
@@ -98,7 +98,7 @@ class WfpayController extends Controller
         }
 
         try {
-            $this->WfpayService->verifyRequest($request);
+            $this->WfpayService->verifyRequest($wftransfer->wfpay_account, $request);
             $this->OrderService->updateWftransferAndOrder($id, $data);
         } catch (\Throwable $e) {
             Log::alert("transferCallback. Throwable cateched: ". $e->getMessage());

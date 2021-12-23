@@ -5,12 +5,10 @@ namespace App\Repos\DB;
 use App\Exceptions\{
     Core\BadRequestError,
     UnavailableStatusError,
-    VendorException,
 };
 
 use App\Models\{
     Order,
-    User,
     Wftransfer,
 };
 
@@ -70,7 +68,7 @@ class WftransferRepo implements \App\Repos\Interfaces\WftransferRepo
             'bank_account_id' => data_get($bank_account, 'id'),
             'status' => Wftransfer::STATUS_INIT,
             'total' => $order->total,
-            'account_name' => config('services.wfpay.account'),
+            'wfpay_account_id' => config('services.wfpay.account'),
         ];
         return $this->create($data);
     }
@@ -89,9 +87,15 @@ class WftransferRepo implements \App\Repos\Interfaces\WftransferRepo
         if (is_null($bank_account)) {
             throw new UnavailableStatusError;
         }
+
+        $WfpayAccountRepo = app()->make(WfpayAccountRepo::class);
+        $wfpay_account = $WfpayAccountRepo->getByUsedAt()->first();
+        $WfpayAccountRepo->update($wfpay_account, ['used_at' => millitime()]);
+
         try {
             $result = $this->WfpayService
-                ->createTranfer(
+                ->createTransfer(
+                    $wfpay_account,
                     $wftransfer->id,
                     $wftransfer->total,
                     $wftransfer->callback_url,
@@ -105,18 +109,21 @@ class WftransferRepo implements \App\Repos\Interfaces\WftransferRepo
         } catch (BadRequestError $e) {
             $json = $e->getMessage();
             $wftransfer = $this->update($wftransfer, [
+                'wfpay_account_id' => $wfpay_account->id,
                 'response' => $json,
                 'submitted_at' => millitime(),
             ]);
             throw $e;
         } catch (\Throwable $e) {
             $wftransfer = $this->update($wftransfer, [
+                'wfpay_account_id' => $wfpay_account->id,
                 'submitted_at' => millitime(),
             ]);
             throw $e;
         }
 
         $update = [
+            'wfpay_account_id' => $wfpay_account->id,
             'remote_id' => data_get($result, 'id'),
             'status' => data_get($result, 'status', 'init'),
             'merchant_fee' => data_get($result, 'merchant_fee'),

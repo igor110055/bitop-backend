@@ -63,6 +63,8 @@
             <hr>
             <div class="card-block pb-1">
                 <dl class="row">
+                    <dt class="col-sm-3">三方帳號</dt>
+                    <dd class="col-sm-9"><a href="{!! $wfpayment->wfpay_account->backstage_url !!}" target="_blank">{{ $wfpayment->wfpay_account_id }}</a></dd>
                     <dt class="col-sm-3">訂單號</dt>
                     <dd class="col-sm-9">{{ $wfpayment->id }}</dd>
                     <dt class="col-sm-3">生成時間</dt>
@@ -91,11 +93,13 @@
         @endif
         @if ($action === 'express-sell')
         <div class="card">
-            <div class="card-header"><h3 class="card-title">三方支付下發資訊</h3></div>
+            <div class="card-header"><h3 class="card-title">三方支付代付資訊</h3></div>
             @foreach ($wftransfers as $wftransfer)
             <hr>
             <div class="card-block pb-1">
                 <dl class="row">
+                    <dt class="col-sm-3">三方帳號</dt>
+                    <dd class="col-sm-9"><a href="{!! $wftransfer->wfpay_account->backstage_url !!}" target="_blank">{{ $wftransfer->wfpay_account_id }}</a></dd>
                     <dt class="col-sm-3">訂單號</dt>
                     <dd class="col-sm-9">{{ $wftransfer->id }}</dd>
                     <dt class="col-sm-3">生成時間</dt>

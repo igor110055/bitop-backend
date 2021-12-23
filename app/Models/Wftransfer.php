@@ -35,7 +35,7 @@ class Wftransfer extends UuidModel
         'bank_account_id',
         'remote_id',
         'total',
-        'account_name',
+        'wfpay_account_id',
         'merchant_fee',
         'callback_response',
         'response',
@@ -47,6 +47,11 @@ class Wftransfer extends UuidModel
     public function order()
     {
         return $this->belongsTo(Order::class, 'order_id');
+    }
+
+    public function wfpay_account()
+    {
+        return $this->belongsTo(WfpayAccount::class, 'wfpay_account_id');
     }
 
     public function bank_account()
@@ -62,10 +67,10 @@ class Wftransfer extends UuidModel
     public function getCallbackUrlAttribute()
     {
         if (config('app.env') === 'local') {
-            if (is_null(config('services.wfpay.callback_proxy_domain'))) {
-                throw new InternalServerError('Must set WFPAY_CALLBACK_PROXY_DOMAIN in .env file for wfpay callback');
+            if (is_null(config('services.ngrok.domain'))) {
+                throw new InternalServerError('Must set NGROK_DOMAIN in .env file for wfpay callback');
             }
-            return config('services.wfpay.callback_proxy_domain')."/api/wfpay/transfer-callback/{$this->id}";
+            return config('services.ngrok.domain')."/api/wfpay/transfer-callback/{$this->id}";
         }
         return config('app.url')."/api/wfpay/transfer-callback/{$this->id}";
     }

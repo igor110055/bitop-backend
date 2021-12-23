@@ -24,8 +24,10 @@ use Storage;
 use Illuminate\Support\Facades\Log;
 
 use App\Models\{
-    Wfpayment,
     Config,
+    WfpayAccount,
+    Wfpayment,
+    Wftransfer
 };
 
 use App\Repos\Interfaces\{
@@ -38,17 +40,29 @@ class WfpayService implements WfpayServiceInterface
         ConfigRepo $ConfigRepo
     ) {
         $this->ConfigRepo = $ConfigRepo;
-        $configs = config('services.wfpay');
+        /* $configs = config('services.wfpay');
         $this->configs = $configs;
         $this->url = $configs['link'];
-        $this->account = $configs['account'];
+        $this->account = $configs['account']; */
     }
 
-    public function getOrder($id)
+    public function setAccount(WfpayAccount $wf_pay_account)
     {
+        $this->wf_pay_account = $wf_pay_account;
+        $this->url = $wf_pay_account['api_url'];
+        $this->account = $wf_pay_account['id'];
+        $this->private_key = $wf_pay_account['private_key'];
+        $this->public_key = $wf_pay_account['public_key'];
+    }
+
+    public function getOrder(Wfpayment $wfpayment)
+    {
+        $wfpay_account = $wfpayment->wfpay_account;
+        $this->setAccount($wfpay_account);
+
         $data = [
-            "account_name" => $this->account,
-            "merchant_order_id" => $id,
+            "account_name" => $wfpay_account->id,
+            "merchant_order_id" => $wfpayment->id,
             "timestamp" => Carbon::now()->toIso8601String(),
         ];
 
@@ -57,6 +71,7 @@ class WfpayService implements WfpayServiceInterface
     }
 
     public function createOrder(
+        WfpayAccount $wfpay_account,
         $id,
         $amount,
         $payment_method = 'bank',
@@ -65,6 +80,7 @@ class WfpayService implements WfpayServiceInterface
         $return_url,
         $force_matching = true
     ) {
+        $this->setAccount($wfpay_account);
         $data = [
             "account_name" => $this->account,
             "merchant_order_id" => $id,
@@ -105,11 +121,13 @@ class WfpayService implements WfpayServiceInterface
         return $this->post($link, $data);
     }
 
-    public function getTransfer($id)
+    public function getTransfer(Wftransfer $wftransfer)
     {
+        $wfpay_account = $wftransfer->wfpay_account;
+        $this->setAccount($wfpay_account);
         $data = [
-            "account_name" => $this->account,
-            "merchant_order_id" => $id,
+            "account_name" => $wfpay_account->id,
+            "merchant_order_id" => $wftransfer->id,
             "timestamp" => Carbon::now()->toIso8601String(),
         ];
 
@@ -117,7 +135,8 @@ class WfpayService implements WfpayServiceInterface
         return $this->post($link, $data);
     }
 
-    public function createTranfer(
+    public function createTransfer(
+        WfpayAccount $wfpay_account,
         $id,
         $amount,
         $notify_url,
@@ -128,6 +147,7 @@ class WfpayService implements WfpayServiceInterface
         $bank_account_type,
         $bank_account_name
     ) {
+        $this->setAccount($wfpay_account);
         $data = [
             "account_name" => $this->account,
             "merchant_order_id" => $id,
@@ -251,12 +271,7 @@ class WfpayService implements WfpayServiceInterface
         }
 
         $data_json_string = json_encode($data);
-        if (config('app.env') === 'local') {
-            $private_content = Storage::get('wfpay/private_key.pem');
-        } else {
-            $private_content = Storage::disk('s3')->get('wfpay/private_key.pem');
-        }
-        $private_key = openssl_pkey_get_private($private_content);
+        $private_key = openssl_pkey_get_private($this->private_key);
         openssl_sign($data_json_string, $signature, $private_key, OPENSSL_ALGO_SHA256);
         $signature = base64_encode($signature);
 
@@ -268,8 +283,9 @@ class WfpayService implements WfpayServiceInterface
         return new Request($method, $link, $headers, $body);
     }
 
-    public function verifyRequest(\Illuminate\Http\Request $request, $exception = true) : bool
+    public function verifyRequest(WfpayAccount $wfpay_account, \Illuminate\Http\Request $request, $exception = true) : bool
     {
+        $this->setAccount($wfpay_account);
         $content = $request->input("data");
         $signature = $request->input("signature");
         return $this->verifySignature($content, $signature, $exception);
@@ -277,12 +293,7 @@ class WfpayService implements WfpayServiceInterface
 
     public function verifySignature($content, $signature, $exception = true) : bool
     {
-        if (config('app.env') === 'local') {
-            $public_content = Storage::get('wfpay/public_key.pem');
-        } else {
-            $public_content = Storage::disk('s3')->get('wfpay/public_key.pem');
-        }
-        $public_key = openssl_pkey_get_public($public_content);
+        $public_key = openssl_pkey_get_public($this->public_key);
         if (openssl_verify($content, base64_decode($signature), $public_key, OPENSSL_ALGO_SHA256) == '1') {
             return true;
         } else {

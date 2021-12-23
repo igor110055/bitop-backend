@@ -72,7 +72,7 @@ class Wfpayment extends UuidModel
         'remote_id',
         'total',
         'guest_payment_amount',
-        'account_name',
+        'wfpay_account_id',
         'real_name',
         'payment_method',
         'payment_url',
@@ -89,13 +89,18 @@ class Wfpayment extends UuidModel
         return $this->belongsTo(Order::class, 'order_id');
     }
 
+    public function wfpay_account()
+    {
+        return $this->belongsTo(WfpayAccount::class, 'wfpay_account_id');
+    }
+
     public function getCallbackUrlAttribute()
     {
         if (config('app.env') === 'local') {
-            if (is_null(config('services.wfpay.callback_proxy_domain'))) {
-                throw new InternalServerError('Must set WFPAY_CALLBACK_PROXY_DOMAIN in .env file for wfpay callback');
+            if (is_null(config('services.ngrok.domain'))) {
+                throw new InternalServerError('Must set NGROK_DOMAIN in .env file for wfpay callback');
             }
-            return config('services.wfpay.callback_proxy_domain')."/api/wfpay/payment-callback/{$this->id}";
+            return config('services.ngrok.domain')."/api/wfpay/payment-callback/{$this->id}";
         }
         return config('app.url')."/api/wfpay/payment-callback/{$this->id}";
     }

@@ -2,10 +2,18 @@
 
 namespace App\Services;
 
+use App\Models\{
+    WfpayAccount,
+    Wfpayment,
+    Wftransfer,
+};
+
 interface WfpayServiceInterface
 {
-    public function getOrder($id);
+    public function setAccount(WfpayAccount $wf_pay_account);
+    public function getOrder(Wfpayment $wfpayment);
     public function createOrder(
+        WfpayAccount $wfpay_account,
         $id,
         $amount,
         $payment_method = 'bank',
@@ -14,8 +22,9 @@ interface WfpayServiceInterface
         $return_url,
         $force_matching = true
     );
-    public function getTransfer($id);
-    public function createTranfer(
+    public function getTransfer(Wftransfer $wftransfer);
+    public function createTransfer(
+        WfpayAccount $wfpay_account,
         $id,
         $amount,
         $notify_url,
@@ -27,6 +36,6 @@ interface WfpayServiceInterface
         $bank_account_name
     );
     public function rematch($id);
-    public function verifyRequest(\Illuminate\Http\Request $request, $exception = true) : bool;
+    public function verifyRequest(WfpayAccount $wfpay_account, \Illuminate\Http\Request $request, $exception = true) : bool;
     public function verifySignature($content, $signature, $exception = false) : bool;
 }

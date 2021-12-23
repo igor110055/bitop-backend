@@ -4,7 +4,6 @@ namespace App\Repos\DB;
 
 use App\Exceptions\{
     Core\BadRequestError,
-    VendorException,
 };
 
 use App\Models\{
@@ -61,11 +60,80 @@ class WfpaymentRepo implements \App\Repos\Interfaces\WfpaymentRepo
         return $this->wfpayment->create($values);
     }
 
-    public function createWithPaymentInfo(array $values)
+    public function createRemote(Wfpayment $wfpayment)
     {
-        $wfpayment = $this->create($values);
-        $remote = $this->getPaymentInfo($wfpayment);
+        $WfpayAccountRepo = app()->make(WfpayAccountRepo::class);
+        $wfpay_accounts = $WfpayAccountRepo->getByRank();
+        $force_matching = ($wfpayment->payment_method === Wfpayment::METHOD_BANK);
+
+        if ($force_matching) {
+            foreach ($wfpay_accounts as $account) {
+                try {
+                    $result = $this->WfpayService
+                        ->createOrder(
+                            $account,
+                            $wfpayment->id,
+                            $wfpayment->total,
+                            $wfpayment->payment_method,
+                            $wfpayment->real_name,
+                            $wfpayment->callback_url,
+                            $wfpayment->return_url,
+                            $force_matching
+                        );
+                    if ($result['status'] === Wfpayment::STATUS_PENDINT_ALLOCATION) {
+                        continue;
+                    } else {
+                        return [$result, $account];
+                    }
+                } catch (BadRequestError $e) {
+                    $json = $e->getMessage();
+                    $wfpayment = $this->update($wfpayment, [
+                        'wfpay_account_id' => $account->id,
+                        'response' => $json
+                    ]);
+                    throw new BadRequestError;
+                }
+            }
+        } else {
+            $account = $wfpay_accounts->first();
+            try {
+                $result = $this->WfpayService
+                    ->createOrder(
+                        $account,
+                        $wfpayment->id,
+                        $wfpayment->total,
+                        $wfpayment->payment_method,
+                        $wfpayment->real_name,
+                        $wfpayment->callback_url,
+                        $wfpayment->return_url,
+                        $force_matching
+                    );
+            } catch (BadRequestError $e) {
+                $json = $e->getMessage();
+                $wfpayment = $this->update($wfpayment, [
+                    'wfpay_account_id' => $account->id,
+                    'response' => $json
+                ]);
+                throw new BadRequestError;
+            }
+        }
+        return [$result, $account];
+    }
+
+    public function createByOrder(Order $order, $payment_method = 'bank')
+    {
+        $data = [
+            'order_id' => $order->id,
+            'status' => Wfpayment::STATUS_INIT,
+            'total' => $order->total,
+            'payment_method' => $payment_method,
+            'real_name' => $order->dst_user->name,
+        ];
+
+        $wfpayment = $this->create($data);
+        list($remote, $wfpay_account) = $this->createRemote($wfpayment);
         $update = [
+            'wfpay_account_id' => $wfpay_account->id,
             'remote_id' => data_get($remote, 'id'),
             'status' => data_get($remote, 'status'),
             'guest_payment_amount' => data_get($remote, 'guest_payment_amount'),
@@ -80,52 +148,6 @@ class WfpaymentRepo implements \App\Repos\Interfaces\WfpaymentRepo
         $this->update($wfpayment, $update);
 
         return $wfpayment->fresh();
-    }
-
-    public function getPaymentInfo(Wfpayment $wfpayment)
-    {
-        $force_matching = ($wfpayment->payment_method === Wfpayment::METHOD_BANK);
-        try {
-            $result = $this->WfpayService
-                ->createOrder(
-                    $wfpayment->id,
-                    $wfpayment->total,
-                    $wfpayment->payment_method,
-                    $wfpayment->real_name,
-                    $wfpayment->callback_url,
-                    $wfpayment->return_url,
-                    $force_matching
-                );
-
-            if ($force_matching) {
-                $tries = 2;
-                while ($result['status'] === Wfpayment::STATUS_PENDINT_ALLOCATION && $tries > 0) {
-                    sleep(5);
-                    $result = $this->WfpayService
-                        ->rematch($wfpayment->id);
-                    $tries--;
-                }
-            }
-        } catch (BadRequestError $e) {
-            $json = $e->getMessage();
-            $wfpayment = $this->update($wfpayment, ['response' => $json]);
-            throw new BadRequestError;
-        }
-
-        return $result;
-    }
-
-    public function createByOrder(Order $order, $payment_method = 'bank')
-    {
-        $data = [
-            'order_id' => $order->id,
-            'status' => Wfpayment::STATUS_INIT,
-            'total' => $order->total,
-            'payment_method' => $payment_method,
-            'real_name' => $order->dst_user->name,
-            'account_name' => config('services.wfpay.account'),
-        ];
-        return $this->createWithPaymentInfo($data);
     }
 
     public function getTheLatestByOrder(Order $order)

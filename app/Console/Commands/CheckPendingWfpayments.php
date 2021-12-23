@@ -54,7 +54,7 @@ class CheckPendingWfpayments extends Command
 
         foreach ($wfpayments as $wfpayment) {
             try {
-                $remote = $this->WfpayService->getOrder($wfpayment->id);
+                $remote = $this->WfpayService->getOrder($wfpayment);
                 $this->line($wfpayment->id);
                 $this->OrderService->updateWfpaymentAndOrder($wfpayment->id, $remote, false);
             } catch (\Throwable $e) {

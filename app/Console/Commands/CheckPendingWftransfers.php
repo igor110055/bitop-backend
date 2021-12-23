@@ -54,7 +54,7 @@ class CheckPendingWftransfers extends Command
 
         foreach ($wftransfers as $wftransfer) {
             try {
-                $remote = $this->WfpayService->getTransfer($wftransfer->id);
+                $remote = $this->WfpayService->getTransfer($wftransfer);
                 $this->line($wftransfer->id);
                 $this->OrderService->updateWftransferAndOrder($wftransfer->id, $remote, false);
             } catch (\Throwable $e) {
