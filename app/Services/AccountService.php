@@ -830,7 +830,7 @@ class AccountService implements  AccountServiceInterface
             throw new VendorException;
         }
 
-        $account = $this->AccountRepo->findByUserCoinOrFail($user, $coin);
+        $account = $this->AccountRepo->findByUserCoinOrCreate($user, $coin);
 
         if (strtolower(data_get($values, 'address')) !== strtolower($account->address)) {
             Log::alert("createDeposit, Deposit callback address inconsistency.", [
@@ -898,13 +898,14 @@ class AccountService implements  AccountServiceInterface
     {
         $account = $this->AccountRepo->findByUserCoinOrCreate($user, $coin);
         try {
+            $callback = [
+                'deposit' => $user->wallet_deposit_callback,
+                'payin' => $user->wallet_payin_callback,
+                'payout' => $user->wallet_payout_callback,
+                'approvement' => $user->wallet_approvement_callback,
+            ];
+
             if (is_null($account->address)) {
-                $callback = [
-                    'deposit' => $user->wallet_deposit_callback,
-                    'payin' => $user->wallet_payin_callback,
-                    'payout' => $user->wallet_payout_callback,
-                    'approvement' => $user->wallet_approvement_callback,
-                ];
                 $new_address = $this->WalletService->createAddress($coin, $user->id, $callback);
                 $this->AccountRepo->assignAddrTag(
                     $user,
@@ -915,6 +916,19 @@ class AccountService implements  AccountServiceInterface
                 $account = $account->fresh();
             }
             $result = $this->WalletService->getAddress($account->coin, $account->address, $account->tag);
+
+            if ($main_coin = data_get($this->coins[$coin], 'fee_coin')) {
+                $main_coin_account = $this->AccountRepo->findByUserCoinOrCreate($user, $main_coin);
+                if (is_null($main_coin_account->address)) {
+                    $new_address = $this->WalletService->createAddress($main_coin, $user->id, $callback);
+                    $this->AccountRepo->assignAddrTag(
+                        $user,
+                        $main_coin,
+                        data_get($new_address, 'address'),
+                        data_get($new_address, 'tag')
+                    );
+                }
+            }
         } catch (\Throwable $e) {
             throw new ServiceUnavailableError;
         }
