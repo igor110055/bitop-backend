@@ -287,7 +287,11 @@ class OrderController extends AuthenticatedController
         if (!is_null($amount)) {
             $amount = trim_redundant_decimal($amount, $coin);
         } else {
-            $total = currency_trim_redundant_decimal($total, $currency);
+            if ($action === Advertisement::TYPE_SELL) {
+                $total = (string) Dec::create($total)->floor(0);
+            } else {
+                $total = currency_trim_redundant_decimal($total, $currency);
+            }
         }
         $type = ($action === Advertisement::TYPE_BUY) ? Advertisement::TYPE_SELL : Advertisement::TYPE_BUY;
 
@@ -312,6 +316,10 @@ class OrderController extends AuthenticatedController
                 $total
             );
             extract($normalized); // $total, $amount, $unit_price
+
+            if ($action === Advertisement::TYPE_SELL) {
+                $total = (string) Dec::create($total)->floor(0);
+            }
 
             if (Dec::gt($amount, $ad->remaining_amount)) {
                 continue;
