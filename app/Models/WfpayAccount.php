@@ -10,6 +10,7 @@ class WfpayAccount extends Model
 {
     protected $casts = [
         'is_active' => 'boolean',
+        'configs' => 'array',
     ];
 
     protected $fillable = [
@@ -20,6 +21,7 @@ class WfpayAccount extends Model
         'private_key',
         'is_active',
         'rank',
+        'configs',
         'used_at',
     ];
 

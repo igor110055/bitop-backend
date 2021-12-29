@@ -68,6 +68,10 @@ class WfpaymentRepo implements \App\Repos\Interfaces\WfpaymentRepo
 
         if ($force_matching) {
             foreach ($wfpay_accounts as $account) {
+                $supported_payment_methods = data_get($account, 'configs.payment_methods', []);
+                if (!in_array($wfpayment->payment_method, $supported_payment_methods)) {
+                    continue;
+                }
                 try {
                     $result = $this->WfpayService
                         ->createOrder(
@@ -103,27 +107,32 @@ class WfpaymentRepo implements \App\Repos\Interfaces\WfpaymentRepo
             }
             throw new BadRequestError;
         } else {
-            $account = $wfpay_accounts->first();
-            try {
-                $result = $this->WfpayService
-                    ->createOrder(
-                        $account,
-                        $wfpayment->id,
-                        $wfpayment->total,
-                        $wfpayment->payment_method,
-                        $wfpayment->real_name,
-                        $wfpayment->callback_url,
-                        $wfpayment->return_url,
-                        $force_matching
-                    );
-                return [$result, $account];
-            } catch (BadRequestError $e) {
-                $json = $e->getMessage();
-                $wfpayment = $this->update($wfpayment, [
-                    'wfpay_account_id' => $account->id,
-                    'response' => $json
-                ]);
-                throw new BadRequestError;
+            foreach ($wfpay_accounts as $account) {
+                $supported_payment_methods = data_get($account, 'configs.payment_methods', []);
+                if (!in_array($wfpayment->payment_method, $supported_payment_methods)) {
+                    continue;
+                }
+                try {
+                    $result = $this->WfpayService
+                        ->createOrder(
+                            $account,
+                            $wfpayment->id,
+                            $wfpayment->total,
+                            $wfpayment->payment_method,
+                            $wfpayment->real_name,
+                            $wfpayment->callback_url,
+                            $wfpayment->return_url,
+                            $force_matching
+                        );
+                    return [$result, $account];
+                } catch (BadRequestError $e) {
+                    $json = $e->getMessage();
+                    $wfpayment = $this->update($wfpayment, [
+                        'wfpay_account_id' => $account->id,
+                        'response' => $json
+                    ]);
+                    throw new BadRequestError;
+                }
             }
         }
     }

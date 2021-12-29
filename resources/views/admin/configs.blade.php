@@ -7,6 +7,12 @@
         <h2 class="card-title">全站設定</h2>
         <!--small class="card-subtitle"></small-->
     </div>
+    <div class="card-block">
+        <a
+            href="{{ route('admin.wfpays.index') }}"
+            class="btn btn-primary waves-effect"
+        >Wfpay 帳號設定</a>
+    </div>
 </div>
 
 @role('super-admin')

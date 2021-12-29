@@ -152,5 +152,7 @@ Route::group(
 
         Route::get('wallet_balances/transactions', 'WalletBalanceController@getTransactions')->name('admin.wallet-balances.transactions');
         Route::get('wallet_balances/transactions/search', 'WalletBalanceController@transactionSearch')->name('admin.wallet-balances.transactions.search');
+
+        Route::resource('wfpays', 'WfpayController', ['only' => ['index', 'store'], 'as' => 'admin']);
     }
 );

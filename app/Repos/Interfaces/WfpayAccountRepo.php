@@ -2,7 +2,6 @@
 
 namespace App\Repos\Interfaces;
 
-use DateTimeInterface;
 use App\Models\{
     WfpayAccount,
 };
