@@ -41,6 +41,9 @@ class DealNotification extends Notification implements ShouldQueue
      */
     public function via($notifiable)
     {
+        if ($this->order->is_express) {
+            return ['mail'];
+        }
         if (($this->action === 'buy') && $notifiable->is($this->order->src_user)) {
             return ['mail', 'sms'];
         } elseif(($this->action === 'sell') && $notifiable->is($this->order->dst_user)) {

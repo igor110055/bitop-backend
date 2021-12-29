@@ -533,9 +533,11 @@ class OrderService implements OrderServiceInterface
             return $order->fresh();
         });
 
-        # send notification
-        $order->src_user->notify(new ClaimNotification($order));
-        FcmClaimNotification::dispatch($order->src_user, $order)->onQueue(config('services.fcm.queue_name'));
+        if (!$order->is_express) {
+            # send notification
+            $order->src_user->notify(new ClaimNotification($order));
+            FcmClaimNotification::dispatch($order->src_user, $order)->onQueue(config('services.fcm.queue_name'));
+        }
 
         return $order;
     }
