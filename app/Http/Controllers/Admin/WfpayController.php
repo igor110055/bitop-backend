@@ -19,7 +19,7 @@ class WfpayController extends AdminController
 
     public function index()
     {
-        $accounts = $this->WfpayAccountRepo->getByRank(false);
+        $accounts = $this->WfpayAccountRepo->get(false);
         $methods = Wfpayment::$methods;
         return view('admin.wfpay_accounts', [
             'accounts' => $accounts,
@@ -35,6 +35,7 @@ class WfpayController extends AdminController
         $update = [
             'is_active' => data_get($input, 'is_active') === '1',
             'rank' => data_get($input, 'rank'),
+            'transfer_rank' => data_get($input, 'transfer_rank'),
             'configs' => [
                 'payment_methods' => data_get($input, 'methods', []),
             ]

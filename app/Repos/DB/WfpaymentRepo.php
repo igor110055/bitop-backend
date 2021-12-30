@@ -95,7 +95,7 @@ class WfpaymentRepo implements \App\Repos\Interfaces\WfpaymentRepo
                     }
                 } catch (BadRequestError $e) {
                     $json = $e->getMessage();
-                    $wfpayment = $this->update($wfpayment, [
+                    $this->update($wfpayment, [
                         'wfpay_account_id' => $account->id,
                         'response' => $json
                     ]);
@@ -127,7 +127,7 @@ class WfpaymentRepo implements \App\Repos\Interfaces\WfpaymentRepo
                     return [$result, $account];
                 } catch (BadRequestError $e) {
                     $json = $e->getMessage();
-                    $wfpayment = $this->update($wfpayment, [
+                    $this->update($wfpayment, [
                         'wfpay_account_id' => $account->id,
                         'response' => $json
                     ]);

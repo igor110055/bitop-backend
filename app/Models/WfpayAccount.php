@@ -21,6 +21,7 @@ class WfpayAccount extends Model
         'private_key',
         'is_active',
         'rank',
+        'transfer_rank',
         'configs',
         'used_at',
     ];

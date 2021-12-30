@@ -17,7 +17,8 @@
         <div class="card-block">
             <input type="hidden" name="id" value="{{ $account->id }}">
             @include('widgets.forms.select', ['name' => 'is_active', 'value' => ((data_get($account, 'is_active') === true) ? 1 : 0), 'title' => '啟用/停用', 'values' => [1 => '啟用', 0 => '停用'], 'required' => true])
-            @include('widgets.forms.input', ['name' => "rank", 'type'=>"number", 'value' => data_get($account, 'rank'), 'title' => '優先度', 'required' => true, 'help' => '數字越大，優先度越高'])
+            @include('widgets.forms.input', ['name' => "rank", 'type'=>"number", 'value' => data_get($account, 'rank'), 'title' => '收款優先度', 'required' => true, 'help' => '數字越大，優先度越高'])
+            @include('widgets.forms.input', ['name' => "transfer_rank", 'type'=>"number", 'value' => data_get($account, 'transfer_rank'), 'title' => '代付優先度', 'required' => true, 'help' => '數字越大，優先度越高'])
 
             <div class="mb-2">可用支付方式</div>
             @foreach ($methods as $method)

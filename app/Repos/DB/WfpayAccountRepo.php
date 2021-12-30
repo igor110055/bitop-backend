@@ -41,6 +41,15 @@ class WfpayAccountRepo implements \App\Repos\Interfaces\WfpayAccountRepo
         return $this->wfpay_account->create($values);
     }
 
+    public function get($active_only = true)
+    {
+        return $this->wfpay_account
+            ->when($active_only, function($query, $active_only){
+                return $query->where('is_active', true);
+            })
+            ->get();
+    }
+
     public function getByRank($active_only = true)
     {
         return $this->wfpay_account
@@ -48,7 +57,16 @@ class WfpayAccountRepo implements \App\Repos\Interfaces\WfpayAccountRepo
                 return $query->where('is_active', true);
             })
             ->orderBy('rank', 'desc')
-            ->orderBy('used_at', 'asc')
+            ->get();
+    }
+
+    public function getByTransferRank($active_only = true)
+    {
+        return $this->wfpay_account
+            ->when($active_only, function($query, $active_only){
+                return $query->where('is_active', true);
+            })
+            ->orderBy('transfer_rank', 'desc')
             ->get();
     }
 

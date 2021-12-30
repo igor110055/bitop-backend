@@ -111,7 +111,7 @@ $(function () {
                 render: function (data, type, row) {
                     return $('<a/>')
                         .text(data)
-                        .attr('href', '/admin/users/' + row.src_user_id)
+                        .attr('href', '/admin/users/' + row.dst_user_id)
                         .prop('outerHTML');
                 },
             },

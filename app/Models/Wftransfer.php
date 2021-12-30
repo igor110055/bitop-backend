@@ -28,6 +28,10 @@ class Wftransfer extends UuidModel
         self::STATUS_PROCESSING,
     ];
 
+    protected $casts = [
+        'errors' => 'array',
+    ];
+
     protected $fillable = [
         'id',
         'order_id',
@@ -39,6 +43,7 @@ class Wftransfer extends UuidModel
         'merchant_fee',
         'callback_response',
         'response',
+        'errors',
         'closed_at',
         'submitted_at',
         'completed_at',

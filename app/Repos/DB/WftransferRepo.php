@@ -4,6 +4,7 @@ namespace App\Repos\DB;
 
 use App\Exceptions\{
     Core\BadRequestError,
+    ServiceUnavailableError,
     UnavailableStatusError,
 };
 
@@ -89,37 +90,65 @@ class WftransferRepo implements \App\Repos\Interfaces\WftransferRepo
         }
 
         $WfpayAccountRepo = app()->make(WfpayAccountRepo::class);
-        $wfpay_account = $WfpayAccountRepo->getByUsedAt()->first();
-        $WfpayAccountRepo->update($wfpay_account, ['used_at' => millitime()]);
+        $wfpay_accounts = $WfpayAccountRepo->getByTransferRank();
 
-        try {
-            $result = $this->WfpayService
-                ->createTransfer(
-                    $wfpay_account,
-                    $wftransfer->id,
-                    $wftransfer->total,
-                    $wftransfer->callback_url,
-                    $bank_account->bank_name,
-                    $bank_account->bank_province_name,
-                    $bank_account->bank_city_name,
-                    $bank_account->account,
-                    $bank_account->type,
-                    $bank_account->name
-                );
-        } catch (BadRequestError $e) {
-            $json = $e->getMessage();
-            $wftransfer = $this->update($wftransfer, [
-                'wfpay_account_id' => $wfpay_account->id,
-                'response' => $json,
-                'submitted_at' => millitime(),
-            ]);
-            throw $e;
-        } catch (\Throwable $e) {
-            $wftransfer = $this->update($wftransfer, [
-                'wfpay_account_id' => $wfpay_account->id,
-                'submitted_at' => millitime(),
-            ]);
-            throw $e;
+        foreach ($wfpay_accounts as $wfpay_account) {
+            try {
+                $result = $this->WfpayService
+                    ->createTransfer(
+                        $wfpay_account,
+                        $wftransfer->id,
+                        $wftransfer->total,
+                        $wftransfer->callback_url,
+                        $bank_account->bank_name,
+                        $bank_account->bank_province_name,
+                        $bank_account->bank_city_name,
+                        $bank_account->account,
+                        $bank_account->type,
+                        $bank_account->name
+                    );
+                break;
+            } catch (BadRequestError $e) {
+                # Todo: create logs.
+                $json = $e->getMessage();
+                $array = json_decode($json, true);
+                if (!is_array($array)) {
+                    $array = ['response' => $json];
+                }
+                $array['wfpay_account_id'] = $wfpay_account->id;
+                $errors = data_get($wftransfer, 'errors', []);
+                $errors[] = $array;
+                $this->update($wftransfer, [
+                    'wfpay_account_id' => $wfpay_account->id,
+                    'errors' => $errors,
+                    'submitted_at' => millitime(),
+                ]);
+                $wftransfer->fresh();
+                # Check remote if transfer exists.
+                try {
+                    $remote = $this->WfpayService->getTransfer($wftransfer);
+                } catch (\Throwable $e) {
+                    $msg = $e->getMessage();
+                    $msg = json_decode($msg, true);
+                    if (data_get($msg, 'error_key') === 'order_not_found') {
+                        # transfer doesn't exist, try next account
+                        continue;
+                    } else {
+                        throw $e;
+                    }
+                }
+            } catch (\Throwable $e) {
+                $this->update($wftransfer, [
+                    'wfpay_account_id' => $wfpay_account->id,
+                    'submitted_at' => millitime(),
+                ]);
+                throw $e;
+            }
+        }
+
+        if (!isset($result)) {
+            # TODO: notify admins
+            throw new ServiceUnavailableError("Send wftransfer {$wftransfer->id} failed with all accounts");
         }
 
         $update = [
