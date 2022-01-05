@@ -398,9 +398,6 @@ class AuthController extends ApiController
         if (!$email_verification = $this->VerificationRepo->find(data_get($validated, 'email_verification_id'))) {
             throw new BadRequestError('email verification not found');
         }
-        if (!$mobile_verification = $this->VerificationRepo->find(data_get($validated, 'mobile_verification_id'))) {
-            throw new BadRequestError('mobile verification not found');
-        }
 
         try {
             $this->VerificationRepo->verify(
@@ -411,22 +408,6 @@ class AuthController extends ApiController
             );
         } catch (WrongCodeError $e) {
             throw new WrongEmailCodeError;
-        }
-
-        $validated['mobile'] = $this->checkMobile($validated['mobile']);
-        try {
-            $this->VerificationRepo->verify(
-                $mobile_verification,
-                data_get($validated, 'mobile_verification_code'),
-                data_get($validated, 'mobile'),
-                Verification::TYPE_MOBILE
-            );
-        } catch (WrongCodeError $e) {
-            $this->VerificationRepo->unverify($email_verification); # Set unverified
-            throw new WrongMobileCodeError;
-        } catch (Throwable $e) {
-            $this->VerificationRepo->unverify($email_verification); # Set unverified
-            throw $e;
         }
 
         $validated['password'] = \Hash::make(data_get($validated, 'password'));
@@ -456,7 +437,7 @@ class AuthController extends ApiController
         }
 
         try {
-            $user = $this->UserRepo->create($validated, $email_verification, $mobile_verification);
+            $user = $this->UserRepo->create($validated, $email_verification);
         } catch (Throwable $e) {
             throw new ConflictDataError;
         }
@@ -467,7 +448,6 @@ class AuthController extends ApiController
         }
 
         $email_verification->verificable()->associate($user)->save();
-        $mobile_verification->verificable()->associate($user)->save();
 
         $access_token = auth()->login($user);
         $this->linkDeviceToken($request);

@@ -28,7 +28,6 @@
                         <th>UserName</th>
                         <th>Name</th>
                         <th>Email</th>
-                        <th>Mobile</th>
                         <th>Group</th>
                         <th></th>
                     </tr>
@@ -40,7 +39,6 @@
                         <td><a href="{{ route('admin.users.show', ['user' => $agent->id]) }}">{{ $agent->username }}</a></td>
                         <td><a href="{{ route('admin.users.show', ['user' => $agent->id]) }}">{{ $agent->name }}</a></td>
                         <td><a href="{{ route('admin.users.show', ['user' => $agent->id]) }}">{{ $agent->email }}</a></td>
-                        <td><a href="{{ route('admin.users.show', ['user' => $agent->id]) }}">{{ $agent->mobile }}</a></td>
                         <td><a href="{{ route('admin.groups.show', ['group' => $agent->group->id]) }}">{{ $agent->group->name }}</a></td>
                         <td><a class="delete" data-user-id="{{ $agent->id }}" href="#">刪除</a></td>
                     </tr>
@@ -52,7 +50,6 @@
                         <th>UserName</th>
                         <th>Name</th>
                         <th>Email</th>
-                        <th>Mobile</th>
                         <th>Group</th>
                     </tr>
                 </tfoot>

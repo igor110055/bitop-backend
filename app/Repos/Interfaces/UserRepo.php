@@ -17,7 +17,7 @@ interface UserRepo
     public function findByEmailOrFail(string $email);
     public function findByMobile(string $mobile);
     public function findByMobileOrFail(string $mobile);
-    public function create(array $values, Verification $email_verification, Verification $mobile_verification);
+    public function create(array $values, Verification $email_verification, $mobile_verification);
     public function setPassword(User $user, string $password);
     public function setSecurityCode(User $user, string $security_code);
     public function getRecentLogin(User $user);

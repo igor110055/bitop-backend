@@ -10,8 +10,6 @@
             <dd class="col-sm-9">{{ $user->username }}</dd>
             <dt class="col-sm-3">Email</dt>
             <dd class="col-sm-9">{{ $user->email }}</dd>
-            <dt class="col-sm-3">Mobile</dt>
-            <dd class="col-sm-9">{{ $user->mobile }}</dd>
             <dt class="col-sm-3">所屬群組</dt>
             <dd class="col-sm-9">
                 @if ($user->group)

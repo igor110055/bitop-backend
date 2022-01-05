@@ -151,8 +151,6 @@
                     <dd class="col-sm-9">{{ $src_user->username }}</dd>
                     <dt class="col-sm-3">Email</dt>
                     <dd class="col-sm-9">{{ $src_user->email }}</dd>
-                    <dt class="col-sm-3">Mobile</dt>
-                    <dd class="col-sm-9">{{ $src_user->mobile }}</dd>
                     <dt class="col-sm-3">所屬群組</dt>
                     <dd class="col-sm-9">
                         <a href="{{ route('admin.groups.show', ['group' => $src_user->group_id]) }}">{{ $src_user->group_id }}</a>
@@ -178,8 +176,6 @@
                     <dd class="col-sm-9">{{ $dst_user->username }}</dd>
                     <dt class="col-sm-3">Email</dt>
                     <dd class="col-sm-9">{{ $dst_user->email }}</dd>
-                    <dt class="col-sm-3">Mobile</dt>
-                    <dd class="col-sm-9">{{ $dst_user->mobile }}</dd>
                     <dt class="col-sm-3">所屬群組</dt>
                     <dd class="col-sm-9">
                         <a href="{{ route('admin.groups.show', ['group' => $dst_user->group_id]) }}">{{ $dst_user->group_id }}</a>

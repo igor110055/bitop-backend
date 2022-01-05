@@ -35,7 +35,7 @@ $api->version('v1', function ($api) {
         $api->post('logout', "{$auth}@logout");
         $api->get('token', "{$auth}@refresh");
         $api->post('email-verification', "{$auth}@sendEmailVerification");
-        $api->post('mobile-verification', "{$auth}@sendMobileVerification");
+        //$api->post('mobile-verification', "{$auth}@sendMobileVerification");
         $api->post('password-verification', "{$auth}@sendPasswordVerification");
         $api->post('password-recovery', "{$auth}@recoverPassword");
         $api->post('register', "{$auth}@register");
@@ -45,9 +45,9 @@ $api->version('v1', function ($api) {
         $api->post('security-code-verification', "{$auth}@sendSecurityCodeVerification");
         $api->post('security-code-recovery', "{$auth}@recoverSecurityCode");
         $api->post('reset-email-verification', "{$auth}@sendResetEmailVerification");
-        $api->post('reset-mobile-verification', "{$auth}@sendResetMobileVerification");
+        //$api->post('reset-mobile-verification', "{$auth}@sendResetMobileVerification");
         $api->post('reset-email', "{$auth}@resetEmail");
-        $api->post('reset-mobile', "{$auth}@resetMobile");
+        //$api->post('reset-mobile', "{$auth}@resetMobile");
         $api->post('two-factor-auth/pre-activate', "{$auth}@preActivateTFA");
         $api->post('two-factor-auth/activate', "{$auth}@activateTFA");
         $api->post('two-factor-auth/deactivate-verification', "{$auth}@sendDeactivateTFAVerification");

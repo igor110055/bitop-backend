@@ -7,7 +7,7 @@ $('.user-search-select').select2({
         dataType: 'json',
     },
     data: data,
-    placeholder: 'Enter email, mobile or account to search',
+    placeholder: 'Enter email or account to search',
     minimumInputLength: 2,
     escapeMarkup: function (markup) { return markup; },
     templateResult: formatUserSelection,

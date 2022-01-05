@@ -54,7 +54,7 @@ class UserRepo implements \App\Repos\Interfaces\UserRepo
         return $this->user->where('mobile', $mobile)->firstOrFail();
     }
 
-    public function create(array $values, Verification $email_verification, Verification $mobile_verification)
+    public function create(array $values, Verification $email_verification, $mobile_verification)
     {
         $user = $this->user->create($values);
         if ($email_verification) {
@@ -339,7 +339,6 @@ class UserRepo implements \App\Repos\Interfaces\UserRepo
                 return $query
                     ->orWhere('id', 'like', $like)
                     ->orWhere('email', 'like', $like)
-                    ->orWhere('mobile', 'like', $like)
                     ->orWhere('username', 'like', $like)
                     ->orWhere('first_name', 'like', $like)
                     ->orWhere('last_name', 'like', $like);

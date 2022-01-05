@@ -30,7 +30,6 @@
                         <th>UserName</th>
                         <th>Name</th>
                         <th>Email</th>
-                        <th>Mobile</th>
                         <th>Group</th>
                         <th>Verification</th>
                     </tr>
@@ -41,7 +40,6 @@
                         <th>UserName</th>
                         <th>Name</th>
                         <th>Email</th>
-                        <th>Mobile</th>
                         <th>Group</th>
                         <th>Verification</th>
                     </tr>
@@ -107,7 +105,6 @@ $(function () {
                         .prop('outerHTML');
                 },
             },
-            { data: 'mobile' },
             {
                 data: 'group_id',
                 render: function (data, type, row) {

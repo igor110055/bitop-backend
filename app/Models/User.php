@@ -33,7 +33,6 @@ class User extends AuthModel
         'email',
         'password',
         'security_code',
-        'mobile',
         'username',
         'group_id',
         'nationality',
@@ -41,7 +40,6 @@ class User extends AuthModel
         'is_merchant',
         'agency_id',
         'email_verification_id',
-        'mobile_verification_id',
         'first_name',
         'last_name',
         'invitation_id',
@@ -62,7 +60,6 @@ class User extends AuthModel
     protected $visible = [
         'id',
         'email',
-        'mobile',
         'username',
         'group_id',
         'nationality',
