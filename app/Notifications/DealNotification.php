@@ -41,7 +41,10 @@ class DealNotification extends Notification implements ShouldQueue
      */
     public function via($notifiable)
     {
-        if ($this->order->is_express) {
+        return ['mail'];
+
+        # remove sms since user don't have mobile anymore.
+        /* if ($this->order->is_express) {
             return ['mail'];
         }
         if (($this->action === 'buy') && $notifiable->is($this->order->src_user)) {
@@ -50,10 +53,10 @@ class DealNotification extends Notification implements ShouldQueue
             return ['mail', 'sms'];
         } else {
             return ['mail'];
-        }
+        } */
     }
 
-    public function toNexmo($notifiable)
+    /* public function toNexmo($notifiable)
     {
         $locale = $notifiable->preferred_locale;
         $content = __('notifications.sms.deal_notification', [
@@ -72,7 +75,7 @@ class DealNotification extends Notification implements ShouldQueue
             'order_id' => $this->order->id,
         ], $locale);
         return new SmsMessage($content);
-    }
+    } */
 
     public function toMail($notifiable)
     {

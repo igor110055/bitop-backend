@@ -39,10 +39,10 @@ class ClaimNotification extends Notification implements ShouldQueue
      */
     public function via($notifiable)
     {
-        return ['mail', 'sms'];
+        return ['mail'];
     }
 
-    public function toNexmo($notifiable)
+    /* public function toNexmo($notifiable)
     {
         $locale = $notifiable->preferred_locale;
         $content = __('notifications.sms.claim_notification', [
@@ -61,7 +61,7 @@ class ClaimNotification extends Notification implements ShouldQueue
             'order_id' => $this->order->id,
         ], $locale);
         return new SmsMessage($content);
-    }
+    } */
 
     public function toMail($notifiable)
     {
