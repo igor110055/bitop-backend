@@ -437,7 +437,7 @@ class AuthController extends ApiController
         }
 
         try {
-            $user = $this->UserRepo->create($validated, $email_verification);
+            $user = $this->UserRepo->create($validated, $email_verification, null);
         } catch (Throwable $e) {
             throw new ConflictDataError;
         }
