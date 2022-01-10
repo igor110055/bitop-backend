@@ -120,5 +120,13 @@ return [
 
     'ngrok' => [
         'domain' => env('NGROK_DOMAIN')
-    ]
+    ],
+
+    'jpush' => [
+        'link' => 'https://api.jpush.cn/v3/push',
+        'key' => env('JPUSH_KEY'),
+        'secret' => env('JPUSH_SECRET'),
+        'queue_name' => 'jpush',
+        'timeout' => 15, # seconds
+    ],
 ];
