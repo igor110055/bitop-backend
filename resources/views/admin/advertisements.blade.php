@@ -38,10 +38,10 @@
                     <tr>
                         <th>生成時間</th>
                         <th>快捷</th>
-                        <th>廣告ID</th>
                         @if (!isset($user))
                         <th>發佈者</th>
                         @endif
+                        <th>廣告ID</th>
                         <th>類型</th>
                         <th>狀態</th>
                         <th>幣別</th>
