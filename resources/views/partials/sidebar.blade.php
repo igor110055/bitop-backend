@@ -1,21 +1,15 @@
 <aside class="sidebar">
     <div class="scrollbar-inner">
         <div class="user">
-            <div class="user__info" data-toggle="dropdown">
-                <!--img class="user__img" src="demo/img/profile-pics/8.jpg" alt=""-->
+            @php
+                $user = Auth::user();
+            @endphp
+            <a class="user__info" href="/admin/users/{{ $user->id }}">
                 <div>
-                    @php
-                    $user = Auth::user();
-                    @endphp
                     <div class="user__name">{{ $user->first_name }} {{ $user->last_name }}</div>
                     <div class="user__email">{{ $user->email }}</div>
                 </div>
-            </div>
-
-            <div class="dropdown-menu">
-                <a class="dropdown-item" href="">Profile</a>
-                <a class="dropdown-item" href="">Settings</a>
-            </div>
+            </a>
         </div>
 
         @php
