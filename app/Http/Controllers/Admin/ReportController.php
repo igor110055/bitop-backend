@@ -77,7 +77,7 @@ class ReportController extends AdminController
 
         // for getting yesteday and tmr date string
         $date = Carbon::createFromDate($date);
-        if ($date->gte(Carbon::today())) {
+        if ($date->gte(Carbon::today($this->timezone))) {
             return redirect()->route('admin.report.index');
         }
         $yesterday = $date->copy()->subDay()->toDateString();
