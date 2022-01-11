@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs\Jpush;
+namespace App\Jobs\PushNotification;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
@@ -14,7 +14,7 @@ use App\Models\{
     Order,
 };
 
-class OrderCompletedNotification extends ExpBackoffJob implements ShouldQueue
+class DealNotification extends ExpBackoffJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -40,7 +40,7 @@ class OrderCompletedNotification extends ExpBackoffJob implements ShouldQueue
     {
         $jpush = app()->make(JpushServiceInterface::class);
         $notification = $this->getNotification();
-        $res = $jpush->sendMessageToUser(
+        $jpush->sendMessageToUser(
             $this->user,
             $notification,
             ['action' => 'order-detail', 'id' => $this->order->id]
@@ -50,23 +50,24 @@ class OrderCompletedNotification extends ExpBackoffJob implements ShouldQueue
     protected function getNotification()
     {
         $locale = $this->user->preferred_locale;
-        $subject = __('notifications.email.order_completed_dst_notification.subject', [
+        $amount = comma_format(trim_zeros($this->order->amount));
+
+        $subject = __('notifications.push.deal_notification.subject', [
             'order_id' => $this->order->id,
         ], $locale);
-
-        $content = __("notifications.email.order_completed_dst_notification.content", [
-            'order_id' => $this->order->id,
+        $content = __('notifications.push.deal_notification.content', [
+            'amount' => $amount,
+            'coin' => $this->order->coin,
         ], $locale);
-
         return [
             'title' => $subject,
-            'body' => isset($content) ? $content : '',
+            'body' => $content,
         ];
     }
 
     public function failed(\Throwable $e)
     {
-        \Log::error('Job: Jpush Order Completed Notification failed, FAILED EXCEPTION: '.$e);
+        \Log::error('Job: Jpush Deal Notification failed, FAILED EXCEPTION: '.$e);
         parent::failed($e);
     }
 }

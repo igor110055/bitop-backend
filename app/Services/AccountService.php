@@ -52,7 +52,7 @@ use App\Exceptions\{
     WithdrawalStatusError,
     WithdrawLimitationError,
 };
-use App\Jobs\Fcm\WithdrawalBadRequestNotification as FcmWithdrawalBadRequestNotification;
+use App\Jobs\Push\WithdrawalBadRequestNotification as PushWithdrawalBadRequestNotification;
 
 class AccountService implements  AccountServiceInterface
 {
@@ -463,7 +463,7 @@ class AccountService implements  AccountServiceInterface
             $this->cancelWithdrawal($withdrawal, Withdrawal::BAD_REQUEST);
             $withdrawal->refresh();
             $withdrawal->user->notify(new WithdrawalBadRequestNotification($withdrawal));
-            FcmWithdrawalBadRequestNotification::dispatch($withdrawal->user, $withdrawal)->onQueue(config('services.fcm.queue_name'));
+            PushWithdrawalBadRequestNotification::dispatch($withdrawal->user, $withdrawal)->onQueue(config('services.push_notification.queue_name'));
             Log::error("submitWithdrawal. Withdrawal {$id} s BadRequestError, withdrawal canceled. {$e->getMessage()}");
             throw $e;
         } catch (\Throwable $e) {

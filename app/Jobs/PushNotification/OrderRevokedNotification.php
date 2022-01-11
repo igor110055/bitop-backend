@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs\Jpush;
+namespace App\Jobs\PushNotification;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
@@ -14,7 +14,7 @@ use App\Models\{
     Order,
 };
 
-class ClaimNotification extends ExpBackoffJob implements ShouldQueue
+class OrderRevokedNotification extends ExpBackoffJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -38,9 +38,9 @@ class ClaimNotification extends ExpBackoffJob implements ShouldQueue
      */
     public function handle()
     {
-        $jpush = app()->make(JpusherviceInterface::class);
+        $jpush = app()->make(JpushServiceInterface::class);
         $notification = $this->getNotification();
-        $jpush->sendMessageToUser(
+        $res = $jpush->sendMessageToUser(
             $this->user,
             $notification,
             ['action' => 'order-detail', 'id' => $this->order->id]
@@ -50,10 +50,10 @@ class ClaimNotification extends ExpBackoffJob implements ShouldQueue
     protected function getNotification()
     {
         $locale = $this->user->preferred_locale;
-        $subject = __('notifications.email.claim_notification.subject', [
+        $subject = __('notifications.email.order_revoked_notification.subject', [
             'order_id' => $this->order->id,
         ], $locale);
-        $content = __("notifications.email.claim_notification.content", [
+        $content = __("notifications.email.order_revoked_notification.content", [
             'order_id' => $this->order->id,
             'username' => $this->order->dst_user->username,
         ], $locale);
@@ -65,7 +65,7 @@ class ClaimNotification extends ExpBackoffJob implements ShouldQueue
 
     public function failed(\Throwable $e)
     {
-        \Log::error('Job: Jpush Claim Notification failed, FAILED EXCEPTION: '.$e);
+        \Log::error('Job: Jpush Order Revoked Notification failed, FAILED EXCEPTION: '.$e);
         parent::failed($e);
     }
 }

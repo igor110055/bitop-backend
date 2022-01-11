@@ -193,7 +193,7 @@ return [
             'content2' => '若您認為您的帳號有安全性風險，請儘速聯繫我們。',
         ],
     ],
-    'fcm' => [
+    'push' => [
         'deal_notification' => [
             'subject' => '['.config('app.name').'] 訂單成立通知 #:order_id',
             'content' => '你有一筆:amount :coin的訂單，請登入查看詳情。',

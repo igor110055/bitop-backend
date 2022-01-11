@@ -64,9 +64,9 @@ use App\Services\{
     FeeServiceInterface,
     ExchangeServiceInterface,
 };
-use App\Jobs\Fcm\{
-    OrderCanceledNotification as FcmOrderCanceledNotification,
-    OrderCompletedNotification as FcmOrderCompletedNotification,
+use App\Jobs\Push\{
+    OrderCanceledNotification as PushOrderCanceledNotification,
+    OrderCompletedNotification as PushOrderCompletedNotification,
 };
 
 class OrderController extends AuthenticatedController
@@ -609,7 +609,7 @@ class OrderController extends AuthenticatedController
 
         # send notification
         $order->dst_user->notify(new OrderCompletedNotification($order));
-        FcmOrderCompletedNotification::dispatch($order->dst_user, $order)->onQueue(config('services.fcm.queue_name'));
+        PushOrderCompletedNotification::dispatch($order->dst_user, $order)->onQueue(config('services.push_notification.queue_name'));
 
         # add order count
         $this->UserRepo->updateOrderCount($order->src_user, true);
@@ -632,7 +632,7 @@ class OrderController extends AuthenticatedController
         # send notification
         $order->src_user->notify(new OrderCanceledNotification($order));
         $order->dst_user->notify(new OrderCanceledNotification($order));
-        FcmOrderCanceledNotification::dispatch($order->src_user, $order)->onQueue(config('services.fcm.queue_name'));
+        PushOrderCanceledNotification::dispatch($order->src_user, $order)->onQueue(config('services.push_notification.queue_name'));
 
         # add order count
         $this->UserRepo->updateOrderCount($order->dst_user, false);

@@ -203,7 +203,7 @@ return [
             'action' => 'Visit '.config('app.name'),
         ],
     ],
-    'fcm' => [
+    'push' => [
         'deal_notification' => [
             'subject' => '['.config('app.name').'] New Order #:order_id',
             'content' => 'You have a :amount :coin new order. Please check out the details in our application',

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs\Jpush;
+namespace App\Jobs\PushNotification;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
@@ -11,24 +11,24 @@ use App\Jobs\ExpBackoffJob;
 use App\Services\JpushServiceInterface;
 use App\Models\{
     User,
-    Order,
+    Withdrawal,
 };
 
-class DealNotification extends ExpBackoffJob implements ShouldQueue
+class WithdrawalBadRequestNotification extends ExpBackoffJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $user;
-    public $order;
+    public $withdrawal;
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(User $user, Order $order)
+    public function __construct(User $user, Withdrawal $withdrawal)
     {
         $this->user = $user;
-        $this->order = $order;
+        $this->withdrawal = $withdrawal;
     }
 
     /**
@@ -40,24 +40,17 @@ class DealNotification extends ExpBackoffJob implements ShouldQueue
     {
         $jpush = app()->make(JpushServiceInterface::class);
         $notification = $this->getNotification();
-        $jpush->sendMessageToUser(
-            $this->user,
-            $notification,
-            ['action' => 'order-detail', 'id' => $this->order->id]
-        );
+        $res = $jpush->sendMessageToUser($this->user, $notification);
     }
 
     protected function getNotification()
     {
         $locale = $this->user->preferred_locale;
-        $amount = comma_format(trim_zeros($this->order->amount));
-
-        $subject = __('notifications.fcm.deal_notification.subject', [
-            'order_id' => $this->order->id,
+        $subject = __('notifications.email.withdrawal_bad_request_notification.subject', [
+            'time' => $this->withdrawal->canceled_at->toDateTimeString(),
         ], $locale);
-        $content = __('notifications.fcm.deal_notification.content', [
-            'amount' => $amount,
-            'coin' => $this->order->coin,
+        $content = __('notifications.email.withdrawal_bad_request_notification.content2', [
+            'canceled_time' => $this->withdrawal->canceled_at->toDateTimeString(),
         ], $locale);
         return [
             'title' => $subject,
@@ -67,7 +60,7 @@ class DealNotification extends ExpBackoffJob implements ShouldQueue
 
     public function failed(\Throwable $e)
     {
-        \Log::error('Job: Jpush Deal Notification failed, FAILED EXCEPTION: '.$e);
+        \Log::error('Job: Jpush Withdrawal Fail Notification failed, FAILED EXCEPTION: '.$e);
         parent::failed($e);
     }
 }

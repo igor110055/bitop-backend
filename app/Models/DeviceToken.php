@@ -15,9 +15,11 @@ class DeviceToken extends UuidModel
     ];
 
     const SERVICE_FCM = 'fcm';
+    const SERVICE_JPUSH = 'jpush';
 
     const SERVICES = [
         self::SERVICE_FCM,
+        self::SERVICE_JPUSH,
     ];
 
     protected $fillable = [

@@ -193,7 +193,7 @@ return [
             'content2' => '若您认为您的帐号有安全性风险，请尽速联系我们。',
         ],
     ],
-    'fcm' => [
+    'push' => [
         'deal_notification' => [
             'subject' => '['.config('app.name').'] 订单成立通知 #:order_id',
             'content' => ' 你有一笔:amount :coin的订单，请登入查看详情。',

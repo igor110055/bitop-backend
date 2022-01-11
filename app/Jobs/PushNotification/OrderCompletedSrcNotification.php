@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs\Jpush;
+namespace App\Jobs\PushNotification;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
@@ -11,24 +11,24 @@ use App\Jobs\ExpBackoffJob;
 use App\Services\JpushServiceInterface;
 use App\Models\{
     User,
-    Withdrawal,
+    Order,
 };
 
-class WithdrawalBadRequestNotification extends ExpBackoffJob implements ShouldQueue
+class OrderCompletedSrcNotification extends ExpBackoffJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $user;
-    public $withdrawal;
+    public $order;
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(User $user, Withdrawal $withdrawal)
+    public function __construct(User $user, Order $order)
     {
         $this->user = $user;
-        $this->withdrawal = $withdrawal;
+        $this->order = $order;
     }
 
     /**
@@ -40,27 +40,33 @@ class WithdrawalBadRequestNotification extends ExpBackoffJob implements ShouldQu
     {
         $jpush = app()->make(JpushServiceInterface::class);
         $notification = $this->getNotification();
-        $res = $jpush->sendMessageToUser($this->user, $notification);
+        $res = $jpush->sendMessageToUser(
+            $this->user,
+            $notification,
+            ['action' => 'order-detail', 'id' => $this->order->id]
+        );
     }
 
     protected function getNotification()
     {
         $locale = $this->user->preferred_locale;
-        $subject = __('notifications.email.withdrawal_bad_request_notification.subject', [
-            'time' => $this->withdrawal->canceled_at->toDateTimeString(),
+        $subject = __('notifications.email.order_completed_src_notification.subject', [
+            'order_id' => $this->order->id,
         ], $locale);
-        $content = __('notifications.email.withdrawal_bad_request_notification.content2', [
-            'canceled_time' => $this->withdrawal->canceled_at->toDateTimeString(),
+
+        $content = __("notifications.email.order_completed_src_notification.content", [
+            'order_id' => $this->order->id,
         ], $locale);
+
         return [
             'title' => $subject,
-            'body' => $content,
+            'body' => isset($content) ? $content : '',
         ];
     }
 
     public function failed(\Throwable $e)
     {
-        \Log::error('Job: Jpush Withdrawal Fail Notification failed, FAILED EXCEPTION: '.$e);
+        \Log::error('Job: Jpush Order Completed Notification failed, FAILED EXCEPTION: '.$e);
         parent::failed($e);
     }
 }

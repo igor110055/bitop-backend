@@ -27,7 +27,7 @@ use App\Services\{
 use App\Notifications\{
     DepositNotification,
 };
-use App\Jobs\Fcm\DepositNotification as FcmDepositNotification;
+use App\Jobs\Push\DepositNotification as PushDepositNotification;
 
 class DepositController extends Controller
 {
@@ -130,7 +130,7 @@ class DepositController extends Controller
             return response(null, 200);
         }
         $deposit->user->notify(new DepositNotification($deposit));
-        FcmDepositNotification::dispatch($deposit->user, $deposit)->onQueue(config('services.fcm.queue_name'));
+        PushDepositNotification::dispatch($deposit->user, $deposit)->onQueue(config('services.push_notification.queue_name'));
         return response(null, 200);
     }
 

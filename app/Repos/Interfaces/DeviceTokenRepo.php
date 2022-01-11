@@ -15,5 +15,5 @@ interface DeviceTokenRepo
     public function create(array $values);
     public function changeActivation(DeviceToken $token, bool $status);
     public function getUnique(array $values, User $user = null);
-    public function getUserActiveTokens(User $user, $platform = null, $service = DeviceToken::SERVICE_FCM);
+    public function getUserActiveTokens(User $user, $platform = null, $service = null);
 }

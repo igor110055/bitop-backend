@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs\Jpush;
+namespace App\Jobs\PushNotification;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;

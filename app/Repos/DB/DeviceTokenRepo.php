@@ -63,11 +63,13 @@ class DeviceTokenRepo implements \App\Repos\Interfaces\DeviceTokenRepo
             ->first();
     }
 
-    public function getUserActiveTokens(User $user, $platform = null, $service = DeviceToken::SERVICE_FCM)
+    public function getUserActiveTokens(User $user, $platform = null, $service = null)
     {
         return $this->token
             ->where('user_id', $user->id)
-            ->where('service', $service)
+            ->when($service, function ($query, $service)  {
+                return $query->where('service', $service);
+            })
             ->when($platform, function ($query, $platform)  {
                 return $query->where('platform', $platform);
             })

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs\Jpush;
+namespace App\Jobs\PushNotification;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
@@ -11,24 +11,24 @@ use App\Jobs\ExpBackoffJob;
 use App\Services\JpushServiceInterface;
 use App\Models\{
     User,
-    Order,
+    Deposit,
 };
 
-class OrderCompletedSrcNotification extends ExpBackoffJob implements ShouldQueue
+class DepositNotification extends ExpBackoffJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $user;
-    public $order;
+    public $deposit;
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(User $user, Order $order)
+    public function __construct(User $user, Deposit $deposit)
     {
         $this->user = $user;
-        $this->order = $order;
+        $this->deposit = $deposit;
     }
 
     /**
@@ -40,33 +40,29 @@ class OrderCompletedSrcNotification extends ExpBackoffJob implements ShouldQueue
     {
         $jpush = app()->make(JpushServiceInterface::class);
         $notification = $this->getNotification();
-        $res = $jpush->sendMessageToUser(
-            $this->user,
-            $notification,
-            ['action' => 'order-detail', 'id' => $this->order->id]
-        );
+        $jpush->sendMessageToUser($this->user, $notification);
     }
 
     protected function getNotification()
     {
         $locale = $this->user->preferred_locale;
-        $subject = __('notifications.email.order_completed_src_notification.subject', [
-            'order_id' => $this->order->id,
+        $subject = __('notifications.email.deposit_notification.subject', [
+            'time' => $this->deposit->confirmed_at->toDateTimeString(),
         ], $locale);
-
-        $content = __("notifications.email.order_completed_src_notification.content", [
-            'order_id' => $this->order->id,
+        $content = __('notifications.email.deposit_notification.content1', [
+            'amount' => comma_format(trim_zeros($this->deposit->amount)),
+            'coin' => $this->deposit->coin,
+            'time' => $this->deposit->confirmed_at->toDateTimeString(),
         ], $locale);
-
         return [
             'title' => $subject,
-            'body' => isset($content) ? $content : '',
+            'body' => $content,
         ];
     }
 
     public function failed(\Throwable $e)
     {
-        \Log::error('Job: Jpush Order Completed Notification failed, FAILED EXCEPTION: '.$e);
+        \Log::error('Job: Jpush Deposit Notification failed, FAILED EXCEPTION: '.$e);
         parent::failed($e);
     }
 }

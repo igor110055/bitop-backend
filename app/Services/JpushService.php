@@ -24,11 +24,9 @@ class JpushService implements JpushServiceInterface
     public function sendMessageToUser(User $user, array $notification = null, array $data = null, array $option = null)
     {
         $tokens = $this->DeviceTokenRepo
-            ->getUserActiveTokens($user)
+            ->getUserActiveTokens($user, null, DeviceToken::SERVICE_JPUSH)
             ->pluck('token')
             ->all();
-        $res = $this->sendMessage('all', $tokens, $notification, $data, $option);
-        $this->handleResponse($tokens, $res);
         if (!empty($tokens)) {
             $res = $this->sendMessage('all', $tokens, $notification, $data, $option);
             $this->handleResponse($tokens, $res);
@@ -81,8 +79,11 @@ class JpushService implements JpushServiceInterface
                 'alert' => $notification,
                 'extras' => $data,
             ],
+        ];
+        $request['message'] = [
             'android' => [
-                'alert' => $notification['body'],
+                'msg_content' => $notification['body'],
+                'content_type' => 'text',
                 'title' => $notification['title'],
                 'extras' => $data,
             ],
