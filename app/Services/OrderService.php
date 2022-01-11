@@ -51,13 +51,13 @@ use App\Repos\Interfaces\{
     WfpaymentRepo,
     WftransferRepo,
 };
-use App\Jobs\Fcm\{
-    DealNotification as FcmDealNotification,
-    ClaimNotification as FcmClaimNotification,
-    OrderCanceledNotification as FcmOrderCanceledNotification,
-    OrderCompletedNotification as FcmOrderCompletedNotification,
-    OrderCompletedSrcNotification as FcmOrderCompletedSrcNotification,
-    OrderRevokedNotification as FcmOrderRevokedNotification,
+use App\Jobs\PushNotification\{
+    DealNotification as PushDealNotification,
+    ClaimNotification as PushClaimNotification,
+    OrderCanceledNotification as PushOrderCanceledNotification,
+    OrderCompletedNotification as PushOrderCompletedNotification,
+    OrderCompletedSrcNotification as PushOrderCompletedSrcNotification,
+    OrderRevokedNotification as PushOrderRevokedNotification,
 };
 
 class OrderService implements OrderServiceInterface
@@ -267,8 +267,8 @@ class OrderService implements OrderServiceInterface
         $order->dst_user->notify($dst_user_notification);
         $src_user_notification = new DealNotification($order, 'src_user', $action);
         $order->src_user->notify($src_user_notification);
-        FcmDealNotification::dispatch($order->dst_user, $order)->onQueue(config('services.fcm.queue_name'));
-        FcmDealNotification::dispatch($order->src_user, $order)->onQueue(config('services.fcm.queue_name'));
+        PushDealNotification::dispatch($order->dst_user, $order)->onQueue(config('services.push_notification.queue_name'));
+        PushDealNotification::dispatch($order->src_user, $order)->onQueue(config('services.push_notification.queue_name'));
 
         return $order;
     }
@@ -467,8 +467,8 @@ class OrderService implements OrderServiceInterface
         $order->dst_user->notify($dst_user_notification);
         $src_user_notification = new DealNotification($order, 'src_user', $action);
         $order->src_user->notify($src_user_notification);
-        FcmDealNotification::dispatch($order->dst_user, $order)->onQueue(config('services.fcm.queue_name'));
-        FcmDealNotification::dispatch($order->src_user, $order)->onQueue(config('services.fcm.queue_name'));
+        PushDealNotification::dispatch($order->dst_user, $order)->onQueue(config('services.push_notification.queue_name'));
+        PushDealNotification::dispatch($order->src_user, $order)->onQueue(config('services.push_notification.queue_name'));
 
         return [$order, $wfpayment];
     }
@@ -536,7 +536,7 @@ class OrderService implements OrderServiceInterface
         if (!$order->is_express) {
             # send notification
             $order->src_user->notify(new ClaimNotification($order));
-            FcmClaimNotification::dispatch($order->src_user, $order)->onQueue(config('services.fcm.queue_name'));
+            PushClaimNotification::dispatch($order->src_user, $order)->onQueue(config('services.push_notification.queue_name'));
         }
 
         return $order;
@@ -825,7 +825,7 @@ class OrderService implements OrderServiceInterface
 
         # revoke notification
         $order->src_user->notify(new OrderRevokedNotification($order));
-        FcmOrderRevokedNotification::dispatch($order->src_user, $order)->onQueue(config('services.fcm.queue_name'));
+        PushOrderRevokedNotification::dispatch($order->src_user, $order)->onQueue(config('services.push_notification.queue_name'));
 
         if ($canceled) {
             # record user order count
@@ -834,8 +834,8 @@ class OrderService implements OrderServiceInterface
             # system canceled notification
             $order->src_user->notify(new OrderCanceledNotification($order, SystemAction::class));
             $order->dst_user->notify(new OrderCanceledNotification($order, SystemAction::class));
-            FcmOrderCanceledNotification::dispatch($order->src_user, $order, SystemAction::class)->onQueue(config('services.fcm.queue_name'));
-            FcmOrderCanceledNotification::dispatch($order->dst_user, $order, SystemAction::class)->onQueue(config('services.fcm.queue_name'));
+            PushOrderCanceledNotification::dispatch($order->src_user, $order, SystemAction::class)->onQueue(config('services.push_notification.queue_name'));
+            PushOrderCanceledNotification::dispatch($order->dst_user, $order, SystemAction::class)->onQueue(config('services.push_notification.queue_name'));
         }
         return $order;
     }
@@ -908,8 +908,8 @@ class OrderService implements OrderServiceInterface
                 $order = $this->confirm($order->id);
                 $order->src_user->notify(new OrderCompletedSrcNotification($order));
                 $order->dst_user->notify(new OrderCompletedNotification($order));
-                FcmOrderCompletedSrcNotification::dispatch($order->src_user, $order)->onQueue(config('services.fcm.queue_name'));
-                FcmOrderCompletedNotification::dispatch($order->dst_user, $order)->onQueue(config('services.fcm.queue_name'));
+                PushOrderCompletedSrcNotification::dispatch($order->src_user, $order)->onQueue(config('services.push_notification.queue_name'));
+                PushOrderCompletedNotification::dispatch($order->dst_user, $order)->onQueue(config('services.push_notification.queue_name'));
                 $this->UserRepo->updateOrderCount($order->dst_user, true);
                 $this->UserRepo->updateOrderCount($order->src_user, true);
             } else {
@@ -979,8 +979,8 @@ class OrderService implements OrderServiceInterface
             $order = $this->confirm($order->id);
             $order->src_user->notify(new OrderCompletedSrcNotification($order));
             $order->dst_user->notify(new OrderCompletedNotification($order));
-            FcmOrderCompletedSrcNotification::dispatch($order->src_user, $order)->onQueue(config('services.fcm.queue_name'));
-            FcmOrderCompletedNotification::dispatch($order->dst_user, $order)->onQueue(config('services.fcm.queue_name'));
+            PushOrderCompletedSrcNotification::dispatch($order->src_user, $order)->onQueue(config('services.push_notification.queue_name'));
+            PushOrderCompletedNotification::dispatch($order->dst_user, $order)->onQueue(config('services.push_notification.queue_name'));
             $this->UserRepo->updateOrderCount($order->dst_user, true);
             $this->UserRepo->updateOrderCount($order->src_user, true);
 

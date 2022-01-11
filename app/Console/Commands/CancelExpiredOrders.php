@@ -17,8 +17,8 @@ use App\Repos\Interfaces\{
 };
 use App\Services\OrderServiceInterface;
 use App\Notifications\OrderCanceledNotification;
-use App\Jobs\Fcm\{
-    OrderCanceledNotification as FcmOrderCanceledNotification,
+use App\Jobs\Push\{
+    OrderCanceledNotification as PushOrderCanceledNotification,
 };
 
 class CancelExpiredOrders extends Command
@@ -83,8 +83,8 @@ class CancelExpiredOrders extends Command
             # send notification
             $order->src_user->notify(new OrderCanceledNotification($order, SystemAction::class));
             $order->dst_user->notify(new OrderCanceledNotification($order, SystemAction::class));
-            FcmOrderCanceledNotification::dispatch($order->src_user, $order, SystemAction::class)->onQueue(config('services.fcm.queue_name'));
-            FcmOrderCanceledNotification::dispatch($order->dst_user, $order, SystemAction::class)->onQueue(config('services.fcm.queue_name'));
+            PushOrderCanceledNotification::dispatch($order->src_user, $order, SystemAction::class)->onQueue(config('services.push_notification.queue_name'));
+            PushOrderCanceledNotification::dispatch($order->dst_user, $order, SystemAction::class)->onQueue(config('services.push_notification.queue_name'));
 
             # add order count
             $this->UserRepo->updateOrderCount($order->dst_user, false);

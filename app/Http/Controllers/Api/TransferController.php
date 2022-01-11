@@ -46,7 +46,7 @@ use App\Services\{
 use App\Http\Resources\{
     TransferResource,
 };
-use App\Jobs\Fcm\TransferNotification as FcmTransferNotification;
+use App\Jobs\Push\TransferNotification as PushTransferNotification;
 
 class TransferController extends Controller
 {
@@ -188,7 +188,7 @@ class TransferController extends Controller
             return redirect(url('/transfer-confirmation?status=0&message=system-error'));
         }
         $transfer->dst_user->notify(new TransferNotification($transfer));
-        FcmTransferNotification::dispatch($transfer->dst_user, $transfer)->onQueue(config('services.fcm.queue_name'));
+        PushTransferNotification::dispatch($transfer->dst_user, $transfer)->onQueue(config('services.push_notification.queue_name'));
         return redirect(url('/transfer-confirmation?status=1'));
     }
 

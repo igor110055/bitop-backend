@@ -30,10 +30,10 @@ use App\Notifications\{
     OrderCompletedNotification,
     OrderCompletedSrcNotification,
 };
-use App\Jobs\Fcm\{
-    OrderCanceledNotification as FcmOrderCanceledNotification,
-    OrderCompletedNotification as FcmOrderCompletedNotification,
-    OrderCompletedSrcNotification as FcmOrderCompletedSrcNotification,
+use App\Jobs\Push\{
+    OrderCanceledNotification as PushOrderCanceledNotification,
+    OrderCompletedNotification as PushOrderCompletedNotification,
+    OrderCompletedSrcNotification as PushOrderCompletedSrcNotification,
 };
 
 class OrderController extends AdminController
@@ -180,15 +180,15 @@ class OrderController extends AdminController
         if ($values['action'] === AdminAction::TYPE_COMPLETE_ORDER) {
             $order->src_user->notify(new OrderCompletedSrcNotification($order));
             $order->dst_user->notify(new OrderCompletedNotification($order));
-            FcmOrderCompletedSrcNotification::dispatch($order->src_user, $order)->onQueue(config('services.fcm.queue_name'));
-            FcmOrderCompletedNotification::dispatch($order->dst_user, $order)->onQueue(config('services.fcm.queue_name'));
+            PushOrderCompletedSrcNotification::dispatch($order->src_user, $order)->onQueue(config('services.push_notification.queue_name'));
+            PushOrderCompletedNotification::dispatch($order->dst_user, $order)->onQueue(config('services.push_notification.queue_name'));
             $this->UserRepo->updateOrderCount($order->dst_user, true);
             $this->UserRepo->updateOrderCount($order->src_user, false);
         } elseif ($values['action'] === AdminAction::TYPE_CANCEL_ORDER) {
             $order->src_user->notify(new OrderCanceledNotification($order, AdminAction::class));
             $order->dst_user->notify(new OrderCanceledNotification($order, AdminAction::class));
-            FcmOrderCanceledNotification::dispatch($order->src_user, $order, AdminAction::class)->onQueue(config('services.fcm.queue_name'));
-            FcmOrderCanceledNotification::dispatch($order->dst_user, $order, AdminAction::class)->onQueue(config('services.fcm.queue_name'));
+            PushOrderCanceledNotification::dispatch($order->src_user, $order, AdminAction::class)->onQueue(config('services.push_notification.queue_name'));
+            PushOrderCanceledNotification::dispatch($order->dst_user, $order, AdminAction::class)->onQueue(config('services.push_notification.queue_name'));
             $this->UserRepo->updateOrderCount($order->dst_user, false);
         }
 
