@@ -48,6 +48,8 @@ use App\Services\{
     FcmService,
     WfpayServiceInterface,
     WfpayService,
+    JpushServiceInterface,
+    JpushService,
 };
 
 class AppServiceProvider extends ServiceProvider
@@ -68,6 +70,7 @@ class AppServiceProvider extends ServiceProvider
         CaptchaServiceInterface::class => CaptchaService::class,
         FcmServiceInterface::class => FcmService::class,
         WfpayServiceInterface::class => WfpayService::class,
+        JpushServiceInterface::class => JpushService::class,
     ];
 
     /**
