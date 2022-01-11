@@ -182,6 +182,9 @@ class InfoController extends ApiController
             $request->headers->has('X-SERVICE') and
             $request->headers->has('X-DEVICE-TOKEN')
         ) {
+            if (empty($request->header('X-DEVICE-TOKEN'))) {
+                return;
+            }
             if (!in_array($request->header('X-PLATFORM'), DeviceToken::PLATFORMS) or
                 !in_array($request->header('X-SERVICE'), DeviceToken::SERVICES)
             ) {

@@ -67,6 +67,7 @@ class DeviceTokenRepo implements \App\Repos\Interfaces\DeviceTokenRepo
     {
         return $this->token
             ->where('user_id', $user->id)
+            ->whereNotNull('token')
             ->when($service, function ($query, $service)  {
                 return $query->where('service', $service);
             })

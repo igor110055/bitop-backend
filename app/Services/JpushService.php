@@ -70,9 +70,9 @@ class JpushService implements JpushServiceInterface
         $request = [];
         $request['platform'] = $platform;
         if (is_array($tokens)) {
-            $request['registration_id'] = $tokens;
+            $request['audience']['registration_id'] = $tokens;
         } elseif (is_string($tokens)) {
-            $request['registration_id'] = [$tokens];
+            $request['audience']['registration_id'] = [$tokens];
         }
         $request['notification'] = [
             'ios' => [
@@ -81,12 +81,10 @@ class JpushService implements JpushServiceInterface
             ],
         ];
         $request['message'] = [
-            'android' => [
-                'msg_content' => $notification['body'],
-                'content_type' => 'text',
-                'title' => $notification['title'],
-                'extras' => $data,
-            ],
+            'msg_content' => $notification['body'],
+            'content_type' => 'text',
+            'title' => $notification['title'],
+            'extras' => $data,
         ];
 
         if ($option) {

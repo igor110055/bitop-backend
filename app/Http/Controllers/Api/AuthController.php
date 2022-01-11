@@ -170,10 +170,17 @@ class AuthController extends ApiController
 
     protected function linkDeviceToken($request)
     {
+        $user = auth()->user();
+        if (!$user) {
+            return;
+        }
         if ($request->headers->has('X-PLATFORM') and
             $request->headers->has('X-SERVICE') and
             $request->headers->has('X-DEVICE-TOKEN')
         ) {
+            if (empty($request->header('X-DEVICE-TOKEN'))) {
+                return;
+            }
             if (!in_array($request->header('X-PLATFORM'), DeviceToken::PLATFORMS) or
                 !in_array($request->header('X-SERVICE'), DeviceToken::SERVICES)
             ) {
@@ -186,13 +193,13 @@ class AuthController extends ApiController
             ];
             if ($token = $this->DeviceTokenRepo->getUnique($data)) {
                 return $this->DeviceTokenRepo->update($token, [
-                    'user_id' => \Auth::id(),
+                    'user_id' => $user->id,
                     'last_active_at' => Carbon::now(),
                 ]);
             } else {
                 return $this->DeviceTokenRepo
                     ->create(array_merge([
-                        'user_id' => \Auth::id(),
+                        'user_id' => $user->id,
                         'last_active_at' => Carbon::now(),
                     ], $data));
             }
