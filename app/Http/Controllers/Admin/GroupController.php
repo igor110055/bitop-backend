@@ -175,7 +175,7 @@ class GroupController extends AdminController
         $share_compositions = $this->ShareSettingRepo
             ->getComposition($group, false, false);
 
-        if (Dec::gte((Dec::add($values['percentage'], $share_compositions['total_percentage'])), 100)) {
+        if (Dec::gt((Dec::add($values['percentage'], $share_compositions['total_percentage'])), 100)) {
             return redirect()
                 ->route('admin.groups.share-settings', ['group' => $group->id])
                 ->with('flash_message', ['message' => "分帳百分比總和超過100%，設定失敗。"]);
