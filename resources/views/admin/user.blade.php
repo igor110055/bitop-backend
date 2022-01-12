@@ -118,7 +118,7 @@
             @if($auth)
                 <dl class="row">
                     <dt class="col-sm-3">送出時間(UTC)</dt>
-                    <dd class="col-sm-9">{{ $auth->created_at }}</dd>
+                    <dd class="col-sm-9">{{ datetime($auth->created_at) }}</dd>
                     <dt class="col-sm-3">驗證狀態</dt>
                     <dd class="col-sm-9">
                         <span class="text-{{ $user->is_verified ? 'default' : 'danger' }}">
@@ -135,7 +135,7 @@
                     <dd class="col-sm-9">{{ $auth->id_number }}</dd>
                     @if ($auth->verified_at)
                     <dt class="col-sm-3">處理時間(UTC)</dt>
-                    <dd class="col-sm-9">{{ $auth->verified_at }}</dd>
+                    <dd class="col-sm-9">{{ datetime($auth->verified_at) }}</dd>
                     @endif
                 </dl>
                 <div class="card-block__title">檔案</div>

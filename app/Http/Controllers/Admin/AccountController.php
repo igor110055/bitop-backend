@@ -107,7 +107,6 @@ class AccountController extends AdminController
 
         $data = $this->queryPagination($query, $total)
             ->map(function ($item) {
-                $item->time = Carbon::parse($item->created_at)->toDateTimeString();
                 $item->balance = formatted_coin_amount($item->balance, $item->account->coin);
                 $item->amount = formatted_coin_amount($item->amount, $item->account->coin);
                 switch ($item->type) {

@@ -47,9 +47,9 @@
 <script src="/vendors/bower_components/moment/min/moment.min.js"></script>
 <script>
 $(function () {
+    var timezoneUtcOffset = {{ config('core.timezone_utc_offset.default') }};
     var des_prefix = @json(__('messages.transaction.des_prefix'));
     var types = @json(__('messages.transaction.types'));
-    console.log(types);
     var table = $('#transactions').DataTable({
         ordering: false,
         processing: true,
@@ -62,7 +62,10 @@ $(function () {
                 data: 'id',
             },
             {
-                data: 'time',
+                data: 'created_at',
+                render: function (data, type, row, meta) {
+                    return moment(data).utcOffset(timezoneUtcOffset).format('YYYY-MM-DD HH:mm:ss');
+                }
             },
             {
                 data: 'type',

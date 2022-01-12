@@ -52,7 +52,7 @@ class WithdrawalController extends AdminController
         $data = $this->queryPagination($query, $total)
             ->map(function ($item) {
                 $item->username = $item->user->username;
-                $item->time = Carbon::parse($item->created_at)->toDateTimeString();
+                $item->time = datetime($item->created_at);
                 $item->amount = formatted_coin_amount($item->amount);
                 $item->fee = formatted_coin_amount($item->fee);
                 return $item;

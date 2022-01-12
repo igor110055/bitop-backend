@@ -73,7 +73,7 @@ class AdvertisementController extends AdminController
         $advertisement = Advertisement::find($advertisement);
         if ($advertisement->deleted_at) {
             $info = [];
-            $info['deleted_at'] = $advertisement->deleted_at->setTimezone($this->tz)->toDateTimeString();
+            $info['deleted_at'] = datetime($advertisement->deleted_at);
             if ($admin_action = $advertisement->admin_actions()->first()) {
                 $info['action'] = 'Admin';
                 $info['admin'] = $admin_action->admin_id;

@@ -52,8 +52,8 @@ class DepositController extends AdminController
         $data = $this->queryPagination($query, $total)
             ->map(function ($item) {
                 $item->username = $item->user->username;
-                $item->create_time = Carbon::parse($item->created_at)->toDateTimeString();
-                $item->confirm_time  = Carbon::parse($item->confirmed_at)->toDateTimeString();
+                $item->create_time = datetime($item->created_at);
+                $item->confirm_time  = datetime($item->confirmed_at);
                 $item->amount = formatted_coin_amount($item->amount);
                 return $item;
             });
