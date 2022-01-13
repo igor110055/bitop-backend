@@ -77,15 +77,17 @@ class JpushService implements JpushServiceInterface
         $request['notification'] = [
             'ios' => [
                 'alert' => $notification,
-                'extras' => $data,
             ],
         ];
         $request['message'] = [
             'msg_content' => $notification['body'],
             'content_type' => 'text',
             'title' => $notification['title'],
-            'extras' => $data,
         ];
+        if ($data) {
+            $request['notification']['ios']['extras'] = $data;
+            $request['message']['extras'] = $data;
+        }
 
         if ($option) {
             foreach ($option as $key => $value) {
