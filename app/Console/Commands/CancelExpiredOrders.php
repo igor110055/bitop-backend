@@ -17,7 +17,7 @@ use App\Repos\Interfaces\{
 };
 use App\Services\OrderServiceInterface;
 use App\Notifications\OrderCanceledNotification;
-use App\Jobs\Push\{
+use App\Jobs\PushNotification\{
     OrderCanceledNotification as PushOrderCanceledNotification,
 };
 

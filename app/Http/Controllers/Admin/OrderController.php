@@ -30,7 +30,7 @@ use App\Notifications\{
     OrderCompletedNotification,
     OrderCompletedSrcNotification,
 };
-use App\Jobs\Push\{
+use App\Jobs\PushNotification\{
     OrderCanceledNotification as PushOrderCanceledNotification,
     OrderCompletedNotification as PushOrderCompletedNotification,
     OrderCompletedSrcNotification as PushOrderCompletedSrcNotification,

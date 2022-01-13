@@ -64,7 +64,7 @@ use App\Services\{
     FeeServiceInterface,
     ExchangeServiceInterface,
 };
-use App\Jobs\Push\{
+use App\Jobs\PushNotification\{
     OrderCanceledNotification as PushOrderCanceledNotification,
     OrderCompletedNotification as PushOrderCompletedNotification,
 };

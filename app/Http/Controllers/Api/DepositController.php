@@ -27,7 +27,7 @@ use App\Services\{
 use App\Notifications\{
     DepositNotification,
 };
-use App\Jobs\Push\DepositNotification as PushDepositNotification;
+use App\Jobs\PushNotification\DepositNotification as PushDepositNotification;
 
 class DepositController extends Controller
 {

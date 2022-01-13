@@ -52,7 +52,7 @@ use App\Exceptions\{
     WithdrawalStatusError,
     WithdrawLimitationError,
 };
-use App\Jobs\Push\WithdrawalBadRequestNotification as PushWithdrawalBadRequestNotification;
+use App\Jobs\PushNotification\WithdrawalBadRequestNotification as PushWithdrawalBadRequestNotification;
 
 class AccountService implements  AccountServiceInterface
 {

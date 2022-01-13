@@ -46,7 +46,7 @@ use App\Services\{
 use App\Http\Resources\{
     TransferResource,
 };
-use App\Jobs\Push\TransferNotification as PushTransferNotification;
+use App\Jobs\PushNotification\TransferNotification as PushTransferNotification;
 
 class TransferController extends Controller
 {
