@@ -301,6 +301,10 @@ class OrderService implements OrderServiceInterface
             )
         );
 
+        if ($advertisement->type === Advertisement::TYPE_BUY) {
+            $total = (string) Dec::create($total)->floor(0);
+        }
+
         # check amount range
         if (Dec::gt($amount, $advertisement->remaining_amount)) {
             throw new BadRequestError('Requested amount exceeds the remaining amount');

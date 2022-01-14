@@ -444,7 +444,11 @@ class OrderController extends AuthenticatedController
         if (!is_null($amount)) {
             $amount = trim_redundant_decimal($amount, $advertisement['coin']);
         } else {
-            $total = currency_trim_redundant_decimal($total, $advertisement['currency']);
+            if ($action === Advertisement::TYPE_SELL) {
+                $total = (string) Dec::create($total)->floor(0);
+            } else {
+                $total = currency_trim_redundant_decimal($total, $currency);
+            }
         }
         $type = ($action === Advertisement::TYPE_BUY) ? Advertisement::TYPE_SELL : Advertisement::TYPE_BUY;
         if ($advertisement->type !== $type) {
