@@ -72,7 +72,14 @@ class BankAccountRepo implements \App\Repos\Interfaces\BankAccountRepo
 
     public function create(User $user, array $values)
     {
-        $values['verified_at'] = $user->isAgent ? Carbon::now()->format('Uv') : null;
+        $verified = false;
+        if ($user->isAgent) {
+            $verified = true;
+        }
+        if ($user->is_verified and (data_get($values, 'name') === $user->name)) {
+            $verified = true;
+        }
+        $values['verified_at'] = $verified ? Carbon::now()->format('Uv') : null;
         return $user->bank_accounts()->create($values);
     }
 
