@@ -439,6 +439,7 @@ class OrderController extends AuthenticatedController
 
         $amount = data_get($values, 'amount');
         $total = data_get($values, 'total');
+        $currency = $advertisement->currency;
         $action = $values['action'];
         $payment_method = data_get($values, 'payment_method');
         if (!is_null($amount)) {
