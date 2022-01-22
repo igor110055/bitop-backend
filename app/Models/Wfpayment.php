@@ -63,6 +63,7 @@ class Wfpayment extends UuidModel
 
     protected $casts = [
         'payment_info' => 'array',
+        'response' => 'array',
     ];
 
     protected $fillable = [

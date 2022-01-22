@@ -253,7 +253,7 @@ class WfpayService implements WfpayServiceInterface
                 Log::alert("Wfservice vendor error. Unknown error", $reporting_data);
                 throw new VendorException($e->getMessage());
             }
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             $reporting_data['error_message'] = $e->getMessage();
             Log::alert("Wfservice unknown error.", $reporting_data);
             throw new UnknownError($e->getMessage());
