@@ -67,6 +67,7 @@ class WfpaymentRepo implements \App\Repos\Interfaces\WfpaymentRepo
         $force_matching = ($wfpayment->payment_method === Wfpayment::METHOD_BANK);
 
         if ($force_matching) {
+            $responses = [];
             foreach ($wfpay_accounts as $account) {
                 $supported_payment_methods = data_get($account, 'configs.payment_methods', []);
                 if (!in_array($wfpayment->payment_method, $supported_payment_methods)) {
@@ -91,22 +92,30 @@ class WfpaymentRepo implements \App\Repos\Interfaces\WfpaymentRepo
                     if ($result['status'] === Wfpayment::STATUS_PENDINT_ALLOCATION) {
                         continue;
                     } else {
-                        return [$result, $account];
+                        $responses[] = [
+                            'wfpay_account_id' => $account->id,
+                            'response' => $result
+                        ];
+                        return [$result, $account, $responses];
                     }
-                } catch (BadRequestError $e) {
+                } catch (\Throwable $e) {
                     $json = $e->getMessage();
-                    $this->update($wfpayment, [
+                    $responses[] = [
                         'wfpay_account_id' => $account->id,
                         'response' => $json
-                    ]);
-                    throw new BadRequestError;
+                    ];
+                    continue;
                 }
             }
+
             if (isset($first_result)) {
-                return [$first_result, $first_account];
+                return [$first_result, $first_account, $responses];
             }
+            # All wfpay_account failed, and since it's in a transaction, no data will be saved. so we send alert here
+            \Log::alert('WfpaymentRepo/createRemote, All wfpay_account failed.', $wfpayment);
             throw new BadRequestError;
         } else {
+            $responses = [];
             foreach ($wfpay_accounts as $account) {
                 $supported_payment_methods = data_get($account, 'configs.payment_methods', []);
                 if (!in_array($wfpayment->payment_method, $supported_payment_methods)) {
@@ -124,16 +133,30 @@ class WfpaymentRepo implements \App\Repos\Interfaces\WfpaymentRepo
                             $wfpayment->return_url,
                             $force_matching
                         );
-                    return [$result, $account];
-                } catch (BadRequestError $e) {
+                    if (!isset($first_result)) {
+                        $first_account = $account;
+                        $first_result = $result;
+                    }
+                    $responses[] = [
+                        'wfpay_account_id' => $account->id,
+                        'response' => $result
+                    ];
+                    return [$result, $account, $responses];
+                } catch (\Throwable $e) {
                     $json = $e->getMessage();
-                    $this->update($wfpayment, [
+                    $responses[] = [
                         'wfpay_account_id' => $account->id,
                         'response' => $json
-                    ]);
-                    throw new BadRequestError;
+                    ];
+                    continue;
                 }
             }
+            if (isset($first_result)) {
+                return [$first_result, $first_account, $responses];
+            }
+            # All wfpay_account failed, and since it's in a transaction, no data will be saved. so we send alert here
+            \Log::alert('WfpaymentRepo/createRemote, All wfpay_account failed.', $wfpayment);
+            throw new BadRequestError;
         }
     }
 
@@ -148,7 +171,7 @@ class WfpaymentRepo implements \App\Repos\Interfaces\WfpaymentRepo
         ];
 
         $wfpayment = $this->create($data);
-        list($remote, $wfpay_account) = $this->createRemote($wfpayment);
+        list($remote, $wfpay_account, $responses) = $this->createRemote($wfpayment);
         $update = [
             'wfpay_account_id' => $wfpay_account->id,
             'remote_id' => data_get($remote, 'id'),
@@ -156,7 +179,7 @@ class WfpaymentRepo implements \App\Repos\Interfaces\WfpaymentRepo
             'guest_payment_amount' => data_get($remote, 'guest_payment_amount'),
             'payment_url' => data_get($remote, 'payment_url'),
             'merchant_fee' => data_get($remote, 'merchant_fee'),
-            'response' => json_encode($remote),
+            'response' => $responses,
         ];
         $bank_account_info = data_get($remote, 'bank_account');
         if (!is_null($bank_account_info) && is_array($bank_account_info)) {
