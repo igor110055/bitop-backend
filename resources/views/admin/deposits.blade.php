@@ -28,11 +28,10 @@
                 <thead class="thead-default">
                     <tr>
                         <th>ID</th>
-                        <th>Create Time</th>
-                        <th>User Name</th>
+                        <th>User</th>
                         <th>Coin</th>
                         <th>Amount</th>
-                        <th>Confirmed Time</th>
+                        <th>入帳時間</th>
                     </tr>
                 </thead>
             </table>
@@ -47,6 +46,7 @@
 <script src="/vendors/bower_components/moment/min/moment.min.js"></script>
 <script>
 $(function () {
+    var timezoneUtcOffset = {{ config('core.timezone_utc_offset.default') }};
     var table = $('#deposits').DataTable({
         ordering: false,
         processing: true,
@@ -65,31 +65,25 @@ $(function () {
                 },
             },
             {
-                data: 'create_time',
-            },
-            {
                 data: 'username',
                 render: function (data, type, row) {
                     return $('<a/>')
-                        .text(data)
+                        .text(data + ' (' + row.user_id + ')')
                         .attr('href', '/admin/users/' + row.user_id)
                         .prop('outerHTML');
                 },
             },
             {
                 data: 'coin',
-                render: function (data, type, row) {
-                    return $('<a/>')
-                        .text(data)
-                        .attr('href', '/admin/accounts/' + row.account_id)
-                        .prop('outerHTML');
-                },
             },
             {
                 data: 'amount',
             },
             {
-                data: 'confirm_time',
+                data: 'created_at',
+                render: function (data, type, row, meta) {
+                    return moment(data).utcOffset(timezoneUtcOffset).format('YYYY-MM-DD HH:mm');
+                }
             },
         ],
     });
@@ -99,18 +93,12 @@ $(function () {
             from: $('[name="from"]').val(),
             to: $('[name="to"]').val(),
         };
-        if (moment(param.to).diff(moment(param.from), 'days') > 10) {
-            swal({
-                type: 'warning',
-                title: '查詢範圍不可超過 10 天',
-            });
-        } else {
-            table.settings()[0].ajax.data = param;
-            table
-                .ajax
-                .url('{{ route('admin.deposits.search') }}')
-                .load(null, false);
-        }
+
+        table.settings()[0].ajax.data = param;
+        table
+            .ajax
+            .url('{{ route('admin.deposits.search') }}')
+            .load(null, false);
     });
 });
 </script>

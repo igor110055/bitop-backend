@@ -64,9 +64,11 @@
             <div class="card-block pb-1">
                 <dl class="row">
                     <dt class="col-sm-3">三方帳號</dt>
-                    <dd class="col-sm-9"><a href="{!! $wfpayment->wfpay_account->backstage_url !!}" target="_blank">{{ $wfpayment->wfpay_account_id }}</a></dd>
+                    <dd class="col-sm-9"><a href="{!! $wfpayment->wfpay_account->backstage_url !!}" target="_blank">{{ $wfpayment->wfpay_account_id.' ('.$wfpayment->wfpay_account->name.')' }}</a></dd>
                     <dt class="col-sm-3">訂單號</dt>
                     <dd class="col-sm-9">{{ $wfpayment->id }}</dd>
+                    <dt class="col-sm-3">三方訂單號</dt>
+                    <dd class="col-sm-9">{{ $wfpayment->remote_id }}</dd>
                     <dt class="col-sm-3">生成時間</dt>
                     <dd class="col-sm-9">{{ datetime($wfpayment->created_at) }}</dd>
                     <dt class="col-sm-3">狀態</dt>
@@ -99,9 +101,11 @@
             <div class="card-block pb-1">
                 <dl class="row">
                     <dt class="col-sm-3">三方帳號</dt>
-                    <dd class="col-sm-9"><a href="{!! $wftransfer->wfpay_account->backstage_url !!}" target="_blank">{{ $wftransfer->wfpay_account_id }}</a></dd>
+                    <dd class="col-sm-9"><a href="{!! $wfpayment->wfpay_account->backstage_url !!}" target="_blank">{{ $wftransfer->wfpay_account_id.' ('.$wftransfer->wfpay_account->name.')' }}</a></dd>
                     <dt class="col-sm-3">訂單號</dt>
                     <dd class="col-sm-9">{{ $wftransfer->id }}</dd>
+                    <dt class="col-sm-3">三方訂單號</dt>
+                    <dd class="col-sm-9">{{ $wftransfer->remote_id }}</dd>
                     <dt class="col-sm-3">生成時間</dt>
                     <dd class="col-sm-9">{{ datetime($wftransfer->created_at) }}</dd>
                     <dt class="col-sm-3">狀態</dt>

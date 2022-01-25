@@ -28,11 +28,13 @@
                 <thead class="thead-default">
                     <tr>
                         <th>ID</th>
-                        <th>Create Time</th>
-                        <th>User Name</th>
+                        <th>User</th>
+                        <th>發起時間</th>
+                        <th>完成時間</th>
                         <th>Coin</th>
                         <th>Amount</th>
                         <th>Fee</th>
+                        <th>狀態</th>
                     </tr>
                 </thead>
             </table>
@@ -47,6 +49,7 @@
 <script src="/vendors/bower_components/moment/min/moment.min.js"></script>
 <script>
 $(function () {
+    var timezoneUtcOffset = {{ config('core.timezone_utc_offset.default') }};
     var table = $('#withdrawals').DataTable({
         ordering: false,
         processing: true,
@@ -65,16 +68,29 @@ $(function () {
                 },
             },
             {
-                data: 'time',
-            },
-            {
                 data: 'username',
                 render: function (data, type, row) {
                     return $('<a/>')
-                        .text(data)
+                        .text(data + ' (' + row.user_id + ')')
                         .attr('href', '/admin/users/' + row.user_id)
                         .prop('outerHTML');
                 },
+            },
+            {
+                data: 'created_at',
+                render: function (data, type, row, meta) {
+                    return moment(data).utcOffset(timezoneUtcOffset).format('YYYY-MM-DD HH:mm');
+                }
+            },
+            {
+                data: 'notified_at',
+                render: function (data, type, row, meta) {
+                    if (data) {
+                        return moment(data).utcOffset(timezoneUtcOffset).format('YYYY-MM-DD HH:mm');
+                    } else {
+                        return '';
+                    }
+                }
             },
             {
                 data: 'coin',
@@ -91,6 +107,9 @@ $(function () {
             {
                 data: 'fee',
             },
+            {
+                data: 'status',
+            },
         ],
     });
 
@@ -99,18 +118,11 @@ $(function () {
             from: $('[name="from"]').val(),
             to: $('[name="to"]').val(),
         };
-        if (moment(param.to).diff(moment(param.from), 'days') > 10) {
-            swal({
-                type: 'warning',
-                title: '查詢範圍不可超過 10 天',
-            });
-        } else {
-            table.settings()[0].ajax.data = param;
-            table
-                .ajax
-                .url('{{ route('admin.withdrawals.search') }}')
-                .load(null, false);
-        }
+        table.settings()[0].ajax.data = param;
+        table
+            .ajax
+            .url('{{ route('admin.withdrawals.search') }}')
+            .load(null, false);
     });
 });
 </script>

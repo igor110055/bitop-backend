@@ -25,7 +25,7 @@ class WithdrawalController extends AdminController
     public function index()
     {
         return view('admin.withdrawals', [
-            'from' => Carbon::parse('today', $this->tz)->format($this->dateFormat),
+            'from' => Carbon::parse('today - 3 months', $this->tz)->format($this->dateFormat),
             'to' => Carbon::parse('today', $this->tz)->format($this->dateFormat),
         ]);
     }
@@ -34,6 +34,7 @@ class WithdrawalController extends AdminController
     {
         return view('admin.withdrawal', [
             'withdrawal' => $withdrawal,
+            'user' => $withdrawal->user,
         ]);
     }
 
@@ -41,7 +42,7 @@ class WithdrawalController extends AdminController
     {
         $values = $request->validated();
         $keyword = data_get($values, 'search.value');
-        $from = Carbon::parse(data_get($values, 'from', 'today'), $this->tz);
+        $from = Carbon::parse(data_get($values, 'from', 'today - 3 months'), $this->tz);
         $to = Carbon::parse(data_get($values, 'to', 'today'), $this->tz)->addDay();
         $condition = $this->timeIntervalCondition('created_at', $from, $to);
         $query = $this->WithdrawalRepo
@@ -52,7 +53,6 @@ class WithdrawalController extends AdminController
         $data = $this->queryPagination($query, $total)
             ->map(function ($item) {
                 $item->username = $item->user->username;
-                $item->time = datetime($item->created_at);
                 $item->amount = formatted_coin_amount($item->amount);
                 $item->fee = formatted_coin_amount($item->fee);
                 return $item;

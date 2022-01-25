@@ -180,12 +180,11 @@ class WithdrawalRepo implements \App\Repos\Interfaces\WithdrawalRepo
                     $like = "%{$keyword}%";
                     return $query
                         ->orWhere('id', 'like', $like)
-                        ->orWhere('coin', 'like', $like)
-                        ->orWhereHas('user', function (Builder $query) use ($like) {
-                            $query->where('username', 'like', $like);
-                        });
+                        ->orWhere('address', 'like', $like)
+                        ->orWhere('user_id', 'like', $like);
                 });
             })
+            ->with('user')
             ->orderBy('id', 'desc');
     }
 
@@ -233,7 +232,7 @@ class WithdrawalRepo implements \App\Repos\Interfaces\WithdrawalRepo
             ->offset($offset)
             ->limit($limit)
             ->get();
-        
+
         return [
             'total' => $total,
             'filtered' => $data->count(),

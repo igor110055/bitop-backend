@@ -50,12 +50,10 @@ class DepositRepo implements \App\Repos\Interfaces\DepositRepo
                     $like = "%{$keyword}%";
                     return $query
                         ->orWhere('id', 'like', $like)
-                        ->orWhere('coin', 'like', $like)
-                        ->orWhereHas('user', function (Builder $query) use ($like) {
-                            $query->where('username', 'like', $like);
-                        });
+                        ->orWhere('user_id', 'like', $like);
                 });
             })
+            ->with(['user'])
             ->orderBy('id', 'desc');
     }
 
