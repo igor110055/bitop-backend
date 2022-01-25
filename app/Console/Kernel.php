@@ -20,6 +20,7 @@ use App\Console\Commands\{
     PruneAnnouncementReadTableCommand,
     CheckPendingWfpayments,
     CheckPendingWftransfers,
+    SubmitExportLogs,
 };
 
 class Kernel extends ConsoleKernel
