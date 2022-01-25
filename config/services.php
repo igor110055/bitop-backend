@@ -134,4 +134,8 @@ return [
         'queue_name' => 'jpush',
         'timeout' => 15, # seconds
     ],
+
+    'export_log' => [
+        'link' => env('EXPORT_LOG_URL', ''),
+    ],
 ];

@@ -47,6 +47,11 @@ class SubmitExportLogs extends Command
      */
     public function handle()
     {
+        $link = config('services.export_log.link');
+        if (empty($link)) {
+            return;
+        }
+
         $export_logs = $this->ExportLogRepo->getAllPending();
 
         foreach ($export_logs as $log) {
