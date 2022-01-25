@@ -42,4 +42,9 @@ class Deposit extends UuidModel
     {
         return $this->belongsTo(Account::class, 'account_id');
     }
+
+    public function export_logs()
+    {
+        return $this->morphMany(ExportLog::class, 'loggable');
+    }
 }

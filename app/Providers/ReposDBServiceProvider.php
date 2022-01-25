@@ -65,6 +65,7 @@ class ReposDBServiceProvider extends ServiceProvider
         Interfaces\WfpaymentRepo::class => DB\WfpaymentRepo::class,
         Interfaces\WftransferRepo::class => DB\WftransferRepo::class,
         Interfaces\WfpayAccountRepo::class => DB\WfpayAccountRepo::class,
+        Interfaces\ExportLogRepo::class => DB\ExportLogRepo::class,
     ];
 
     public function register()

@@ -77,6 +77,7 @@ class OrderService implements OrderServiceInterface
         UserRepo $UserRepo,
         WfpaymentRepo $WfpaymentRepo,
         WftransferRepo $WftransferRepo,
+        ExportServiceInterface $ExportService,
         WfpayServiceInterface $WfpayService
     ) {
         $this->AccountRepo = $AccountRepo;
@@ -93,6 +94,7 @@ class OrderService implements OrderServiceInterface
         $this->AccountService = $AccountService;
         $this->FeeService = $FeeService;
         $this->AdvertisementService = $AdvertisementService;
+        $this->ExportService = $ExportService;
         $this->WfpayService = $WfpayService;
     }
 
@@ -548,7 +550,7 @@ class OrderService implements OrderServiceInterface
 
     public function confirm($order_id)
     {
-        return DB::transaction(function () use ($order_id) {
+        $order = DB::transaction(function () use ($order_id) {
 
             $order = $this->OrderRepo
                 ->findForUpdate($order_id);
@@ -668,6 +670,14 @@ class OrderService implements OrderServiceInterface
 
             return $order->fresh();
         });
+
+        # create export_log
+        if ($order->is_express) {
+            $this->ExportService
+                ->createOrderLogs($order);
+        }
+
+        return $order;
     }
 
     /* public function getProfitUnitPrice(Order $order)

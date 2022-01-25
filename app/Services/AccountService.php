@@ -70,6 +70,7 @@ class AccountService implements  AccountServiceInterface
         WalletLogRepo $WalletLogRepo,
         ConfigRepo $ConfigRepo,
         SystemActionRepo $SystemActionRepo,
+        ExportServiceInterface $ExportService,
         FeeServiceInterface $FeeService,
         WalletServiceInterface $WalletService,
         ExchangeServiceInterface $ExchangeService
@@ -87,6 +88,7 @@ class AccountService implements  AccountServiceInterface
         $this->WalletLogRepo = $WalletLogRepo;
         $this->ConfigRepo = $ConfigRepo;
         $this->SystemActionRepo = $SystemActionRepo;
+        $this->ExportService = $ExportService;
         $this->FeeService = $FeeService;
         $this->WalletService = $WalletService;
         $this->ExchangeService = $ExchangeService;
@@ -579,6 +581,10 @@ class AccountService implements  AccountServiceInterface
                 'description' => 'System submit this withdrawal',
             ]);
         });
+
+        # create export_log
+        $this->ExportService
+            ->createWithdrawalLog($withdrawal);
     }
 
     public function compareWithdrawals(Withdrawal $withdrawal, array $compared, $is_callback = false)
@@ -845,7 +851,7 @@ class AccountService implements  AccountServiceInterface
             throw new DuplicateRecordError;
         }
 
-        return DB::transaction(function () use ($account, $values) {
+        $deposit = DB::transaction(function () use ($account, $values) {
             $account = $this->AccountRepo->findForUpdate($account->id);
             $wallet_balance = $this->WalletBalanceRepo->findForUpdateByCoin($account->coin);
 
@@ -892,6 +898,12 @@ class AccountService implements  AccountServiceInterface
 
             return $deposit;
         });
+
+        # create export_log
+        $this->ExportService
+            ->createDepositLog($deposit);
+
+        return $deposit;
     }
 
     public function getWalletAddress(User $user, string $coin)

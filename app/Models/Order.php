@@ -165,6 +165,11 @@ class Order extends RandomIDModel
         return $this->hasMany(Wftransfer::class);
     }
 
+    public function export_logs()
+    {
+        return $this->morphMany(ExportLog::class, 'loggable');
+    }
+
     public function getAdOwnerAttribute()
     {
         return $this->advertisement->owner;

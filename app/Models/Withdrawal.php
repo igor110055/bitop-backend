@@ -100,6 +100,11 @@ class Withdrawal extends UuidModel
         return $this->morphMany(SystemAction::class, 'applicable');
     }
 
+    public function export_logs()
+    {
+        return $this->morphMany(ExportLog::class, 'loggable');
+    }
+
     public function getIsConfirmedAttribute()
     {
         return $this->confirmed_at !== null;
