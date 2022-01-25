@@ -25,7 +25,7 @@ class DepositController extends AdminController
     public function index()
     {
         return view('admin.deposits', [
-            'from' => Carbon::parse('today', $this->tz)->format($this->dateFormat),
+            'from' => Carbon::parse('today - 3 months', $this->tz)->format($this->dateFormat),
             'to' => Carbon::parse('today', $this->tz)->format($this->dateFormat),
         ]);
     }
@@ -34,6 +34,7 @@ class DepositController extends AdminController
     {
         return view('admin.deposit', [
             'deposit' => $deposit,
+            'user' => $deposit->user,
         ]);
     }
 
@@ -41,7 +42,7 @@ class DepositController extends AdminController
     {
         $values = $request->validated();
         $keyword = data_get($values, 'search.value');
-        $from = Carbon::parse(data_get($values, 'from', 'today'), $this->tz);
+        $from = Carbon::parse(data_get($values, 'from', 'today - 3 months'), $this->tz);
         $to = Carbon::parse(data_get($values, 'to', 'today'), $this->tz)->addDay();
         $condition = $this->timeIntervalCondition('created_at', $from, $to);
         $query = $this->DepositRepo
@@ -52,8 +53,6 @@ class DepositController extends AdminController
         $data = $this->queryPagination($query, $total)
             ->map(function ($item) {
                 $item->username = $item->user->username;
-                $item->create_time = datetime($item->created_at);
-                $item->confirm_time  = datetime($item->confirmed_at);
                 $item->amount = formatted_coin_amount($item->amount);
                 return $item;
             });

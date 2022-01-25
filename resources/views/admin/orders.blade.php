@@ -41,11 +41,11 @@
                         <th>快捷</th>
                         <th>賣家</th>
                         <th>買家</th>
-                        <th>幣別</th>
-                        <th>數量</th>
-                        <th>法幣</th>
+                        <th>商品</th>
+                        <th>總價</th>
                         <th>單價</th>
                         <th>狀態</th>
+                        <th>完成時間</th>
                     </tr>
                 </thead>
             </table>
@@ -117,12 +117,15 @@ $(function () {
             },
             {
                 data: 'coin',
-            },
-            {
-                data: 'amount',
+                render: function (data, type, row) {
+                    return row.amount + ' ' + row.coin;
+                },
             },
             {
                 data: 'currency',
+                render: function (data, type, row) {
+                    return row.total + ' ' + row.currency;
+                },
             },
             {
                 data: 'unit_price',
@@ -141,6 +144,16 @@ $(function () {
                         .text(i.text)
                         .addClass('badge badge-pill badge-' + i.class)
                         .prop('outerHTML');
+                }
+            },
+            {
+                data: 'completed_at',
+                render: function (data, type, row, meta) {
+                    if (data) {
+                        return moment(data).utcOffset(timezoneUtcOffset).format('YYYY-MM-DD HH:mm');
+                    } else {
+                        return '';
+                    }
                 }
             },
         ],

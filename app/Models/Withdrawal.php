@@ -50,6 +50,19 @@ class Withdrawal extends UuidModel
         'callback_response',
     ];
 
+    protected $hidden = [
+        'src_amount',
+        'dst_amount',
+        'wallet_fee',
+        'wallet_fee_coin',
+        'is_full_payment',
+        'callback',
+        'response',
+        'callback_response',
+        'submitted_at',
+        'submitted_confirmed_at',
+    ];
+
     protected $casts = [
         'is_full_payment' => 'boolean',
         'response' => 'array',
@@ -64,6 +77,8 @@ class Withdrawal extends UuidModel
         'expired_at',
         'canceled_at',
     ];
+
+    protected $appends = ['status'];
 
     public function transactions()
     {

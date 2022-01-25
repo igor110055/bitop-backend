@@ -17,6 +17,10 @@ class Deposit extends UuidModel
         'callback_response',
     ];
 
+    protected $hidden = [
+        'callback_response',
+    ];
+
     protected $dates = ['confirmed_at'];
 
     protected $casts = [
