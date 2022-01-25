@@ -15,6 +15,7 @@ class WfpayAccount extends Model
 
     protected $fillable = [
         'id',
+        'name',
         'api_url',
         'backstage_url',
         'public_key',

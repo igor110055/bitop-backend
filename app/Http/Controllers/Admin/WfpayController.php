@@ -33,6 +33,7 @@ class WfpayController extends AdminController
         $id = data_get($input, 'id');
         $wfpay_account = $this->WfpayAccountRepo->findOrFail($id);
         $update = [
+            'name' => data_get($input, 'name'),
             'is_active' => data_get($input, 'is_active') === '1',
             'rank' => data_get($input, 'rank'),
             'transfer_rank' => data_get($input, 'transfer_rank'),
