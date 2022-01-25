@@ -39,7 +39,7 @@ class ExportService implements ExportServiceInterface
         $this->currency_decimal = config('core.currency.default_exp');
         $this->coin_decimal = config('core.coin.default_exp');
         $this->coin_types = ExportLog::COIN_TYPES;
-        $this->link = 'http://52.197.231.45/tool/otc.php';
+        $this->link = config('services.export_log.link');
     }
 
     public function createWithdrawalLog($withdrawal)
@@ -198,7 +198,7 @@ class ExportService implements ExportServiceInterface
     public function submit($export_log) {
         $now = millitime();
         $update = [
-            'submitted_at' => millitime(),
+            'submitted_at' => $now,
         ];
         try {
             $request = $this->createRequest('POST', $this->link, $export_log);
