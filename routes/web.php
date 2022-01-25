@@ -154,5 +154,9 @@ Route::group(
         Route::get('wallet_balances/transactions/search', 'WalletBalanceController@transactionSearch')->name('admin.wallet-balances.transactions.search');
 
         Route::resource('wfpays', 'WfpayController', ['only' => ['index', 'store'], 'as' => 'admin']);
+
+        Route::get('export_logs/search', 'ExportLogController@search')->name('admin.export_logs.search');
+        Route::post('export_logs/submit', 'ExportLogController@submit')->name('admin.export_logs.submit');
+        Route::resource('export_logs', 'ExportLogController', ['only' => ['index'], 'as' => 'admin']);
     }
 );

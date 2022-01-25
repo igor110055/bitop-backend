@@ -87,6 +87,10 @@ class Kernel extends ConsoleKernel
             ->everyThreeMinutes()
             ->withoutOverlapping();
 
+        $schedule->command(SubmitExportLogs::class)
+            ->everyMinute()
+            ->withoutOverlapping();
+
         $schedule
             ->command(PruneAnnouncementReadTableCommand::class)
             ->daily()

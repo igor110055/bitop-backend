@@ -50,6 +50,8 @@ use App\Services\{
     WfpayService,
     JpushServiceInterface,
     JpushService,
+    ExportServiceInterface,
+    ExportService,
 };
 
 class AppServiceProvider extends ServiceProvider
@@ -71,6 +73,7 @@ class AppServiceProvider extends ServiceProvider
         FcmServiceInterface::class => FcmService::class,
         WfpayServiceInterface::class => WfpayService::class,
         JpushServiceInterface::class => JpushService::class,
+        ExportServiceInterface::class => ExportService::class,
     ];
 
     /**
