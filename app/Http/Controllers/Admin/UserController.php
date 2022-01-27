@@ -498,7 +498,7 @@ class UserController extends AdminController
         # store
         DB::transaction(function () use ($values, $user, $expired_time) {
             if ($lock = $this->UserRepo->getUserLock($user, $values['type'])) {
-                $this->UserRepo->unlockUserLock($lock, true);
+                $this->UserRepo->unlockUserLock($lock);
             }
 
             $userlock = $this->UserRepo->createUserLock($user, $values['type'], $expired_time);

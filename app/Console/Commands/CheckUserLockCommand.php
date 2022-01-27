@@ -49,7 +49,7 @@ class CheckUserLockCommand extends Command
      */
     public function handle()
     {
-        $locks = $this->UserRepo->getAllUserLocks();
+        $locks = $this->UserRepo->getExpiredUserLocks();
         foreach ($locks as $lock) {
             DB::transaction(function () use ($lock) {
                 $this->UserRepo->unlockUserLock($lock);

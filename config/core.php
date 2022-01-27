@@ -14,19 +14,19 @@ return [
         ],
         'user-lock' => [
             'login' => [
-                'time' => 3600, # seconds
+                'time' => 1, # hours
             ],
             'security-code' => [
-                'time' => 86400, # seconds
+                'time' => 24, # hours
             ],
             'admin' => [
-                'time' => 1500000000, # seconds, total approx 50 yrs
+                'time' => 1000000, # hours, more than 100 years
             ],
             'backend-login-password' => [
-                'time' => 3600, # seconds
+                'time' => 1, # hours
             ],
             'backend-login-2fa' => [
-                'time' => 86400, # seconds
+                'time' => 24, # hours
             ],
         ],
     ],

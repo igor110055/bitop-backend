@@ -59,6 +59,10 @@ class AdvertisementController extends AuthenticatedController
             'real_name.check',
             ['only' => ['create', 'buy', 'sell']]
         );
+        $this->middleware(
+            'userlock',
+            ['only' => ['create', 'edit', 'updateStatus']]
+        );
     }
 
     public function preview(PreviewAdRequest $request)

@@ -72,7 +72,7 @@ class TransferController extends Controller
         );
         $this->middleware(
             'userlock',
-            ['only' => ['show','create', 'getTransfers']]
+            ['only' => ['create']]
         );
     }
 

@@ -27,6 +27,10 @@ class AddressController extends AuthenticatedController
         parent::__construct();
         $this->AddressRepo = $AddressRepo;
         $this->WalletService = $WalletService;
+        $this->middleware(
+            'userlock',
+            ['only' => ['create', 'delete', 'bulkDelete']]
+        );
     }
 
     public function getAddresses(GetAddressRequest $request)

@@ -91,8 +91,6 @@ class WithdrawalController extends Controller
         $this->middleware(
             'userlock',
             ['only' => [
-                'show',
-                'preview',
                 'create',
             ]]
         );

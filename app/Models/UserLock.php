@@ -12,22 +12,17 @@ class UserLock extends UuidModel
     const TRANSFER = 'transfer';
     const WITHDRAWAL = 'withdrawal';
 
-    const RECORD_IP = [
+    const CHECK_IP_TYPES = [
         self::LOGIN,
-        self::SECURITY_CODE,
         self::BACKEND_LOGIN_PASSWORD,
     ];
 
-    const FRONTEND_TYPES = [
-        self::ADMIN,
-        self::SECURITY_CODE,
+    const AUTH_TYPES = [
         self::LOGIN,
-    ];
-
-    const BACKEND_TYPES = [
-        self::ADMIN,
+        self::SECURITY_CODE,
         self::BACKEND_LOGIN_PASSWORD,
         self::BACKEND_LOGIN_2FA,
+        self::ADMIN,
     ];
 
     const FEATURE_TYPES = [

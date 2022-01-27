@@ -70,14 +70,14 @@ class UserRepo implements \App\Repos\Interfaces\UserRepo
     {
         if (is_null($expired)) {
             $time = config("core.users.user-lock.$type.time");
-            $expired = Carbon::now()->addSeconds($time)->format('Uv');
+            $expired = Carbon::now()->addHours($time)->format('Uv');
         }
 
         $data = [
             'type' => $type,
             'expired_at' => $expired,
         ];
-        if (in_array($type, UserLock::RECORD_IP)) {
+        if (in_array($type, UserLock::CHECK_IP_TYPES)) {
             $data['ip'] = request_ip();
         }
         return $user->user_locks()->create($data);
@@ -195,11 +195,15 @@ class UserRepo implements \App\Repos\Interfaces\UserRepo
             ->first();
     }
 
-    public function getUserLocks(User $user, string $type = null, string $ip = null)
+    public function getUserLocks(User $user, $type = null, string $ip = null)
     {
         return $user->user_locks()
             ->when($type, function ($query, $type) {
-                return $query->where('type', $type);
+                if (is_array($type)) {
+                    return $query->whereIn('type', $type);
+                } else {
+                    return $query->where('type', $type);
+                }
             })
             ->when($ip, function ($query, $ip) {
                 return $query->where('ip', $ip);
@@ -208,30 +212,18 @@ class UserRepo implements \App\Repos\Interfaces\UserRepo
             ->get();
     }
 
-    public function checkAdminUserLock(User $user)
-    {
-        foreach (UserLock::BACKEND_TYPES as $type) {
-            if ($type === UserLock::BACKEND_LOGIN_PASSWORD) {
-                $records = $this->getUserLocks($user, $type, request_ip());
-            } else {
-                $records = $this->getUserLocks($user, $type);
-            }
-            if ($records->isNotEmpty()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public function checkUserLock(User $user)
     {
-        foreach (UserLock::FRONTEND_TYPES as $type) {
-            if ($type === UserLock::LOGIN) {
-                $records = $this->getUserLocks($user, $type, request_ip());
+        $records = $this->getUserLocks($user, UserLock::AUTH_TYPES);
+        if (empty($records)) {
+            return false;
+        }
+        foreach ($records as $record) {
+            if (in_array($record->type, UserLock::CHECK_IP_TYPES)) {
+                if ($record->ip == request_ip()) {
+                    return true;
+                }
             } else {
-                $records = $this->getUserLocks($user, $type);
-            }
-            if ($records->isNotEmpty()) {
                 return true;
             }
         }
@@ -246,33 +238,31 @@ class UserRepo implements \App\Repos\Interfaces\UserRepo
         return false;
     }
 
-    public function getAllUserLocks()
+    public function getExpiredUserLocks()
     {
+        $now = Carbon::now();
         return UserLock::where('is_active', true)
+            ->where('expired_at', '<=', $now)
             ->orderBy('created_at')
             ->get();
     }
 
-    public function unlockUserLock(UserLock $lock, bool $force = false)
+    public function unlockUserLock(UserLock $lock)
     {
-        if ($force) {
-            $lock->update(['is_active' => false]);
-        } else {
-            DB::transaction(function () use ($lock) {
-                if ($lock->expired_at->lt(Carbon::now())) {
-                    $lock->update(['is_active' => false]);
-                    if ($lock->type === UserLock::LOGIN) {
-                        user_log(UserLog::LOG_IN_UNLOCK, ['id' => $lock->user_id]);
-                    } elseif ($lock->type === UserLock::SECURITY_CODE) {
-                        user_log(UserLog::SECURITY_CODE_UNLOCK, ['id' => $lock->user_id]);
-                    } elseif ($lock->type === UserLock::ADMIN) {
-                        user_log(UserLog::SECURITY_CODE_UNLOCK, ['id' => $lock->user_id]);
-                    } elseif ($lock->type === UserLock::BACKEND_LOGIN_PASSWORD or $lock->type === UserLock::BACKEND_LOGIN_2FA) {
-                        user_log(UserLog::ADMIN_LOG_IN_UNLOCK, ['id' => $lock->user_id]);
-                    }
+        DB::transaction(function () use ($lock) {
+            if ($lock->expired_at->lt(Carbon::now())) {
+                $lock->update(['is_active' => false]);
+                if ($lock->type === UserLock::LOGIN) {
+                    user_log(UserLog::LOG_IN_UNLOCK, ['id' => $lock->user_id]);
+                } elseif ($lock->type === UserLock::SECURITY_CODE) {
+                    user_log(UserLog::SECURITY_CODE_UNLOCK, ['id' => $lock->user_id]);
+                } elseif ($lock->type === UserLock::ADMIN) {
+                    user_log(UserLog::SECURITY_CODE_UNLOCK, ['id' => $lock->user_id]);
+                } elseif ($lock->type === UserLock::BACKEND_LOGIN_PASSWORD or $lock->type === UserLock::BACKEND_LOGIN_2FA) {
+                    user_log(UserLog::ADMIN_LOG_IN_UNLOCK, ['id' => $lock->user_id]);
                 }
-            });
-        }
+            }
+        });
     }
 
     public function getAllUsers()

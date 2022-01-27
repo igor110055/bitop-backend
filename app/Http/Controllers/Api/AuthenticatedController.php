@@ -10,6 +10,5 @@ class AuthenticatedController extends ApiController
     {
         parent::__construct();
         $this->middleware('auth:api');
-        $this->middleware('userlock');
     }
 }

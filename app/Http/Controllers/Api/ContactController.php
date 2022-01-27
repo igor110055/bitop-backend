@@ -26,6 +26,11 @@ class ContactController extends AuthenticatedController
         parent::__construct();
         $this->ContactRepo = $ContactRepo;
         $this->UserRepo = $UserRepo;
+
+        $this->middleware(
+            'userlock',
+            ['only' => ['create', 'delete', 'bulkDelete']]
+        );
     }
 
     public function index()

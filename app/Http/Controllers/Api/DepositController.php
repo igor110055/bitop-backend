@@ -52,13 +52,6 @@ class DepositController extends Controller
                 'getAddress',
             ]]
         );
-        $this->middleware(
-            'userlock',
-            ['only' => [
-                'show',
-                'getAddress',
-            ]]
-        );
     }
 
     public function getDeposits(DepositListRequest $request)

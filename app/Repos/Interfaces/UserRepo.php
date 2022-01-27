@@ -27,13 +27,12 @@ interface UserRepo
     public function createUserLock(User $user, string $type, Carbon $expired = null);
     public function authEventRecordLock(User $user, string $event);
     public function getFailedCount(User $user, string $event);
-    public function getUserLocks(User $user, string $type = null, string $ip = null);
+    public function getUserLocks(User $user, $type = null, string $ip = null);
     public function getUserLock(User $user, string $type = null, string $ip = null);
-    public function checkAdminUserLock(User $user);
     public function checkUserLock(User $user);
     public function checkUserFeatureLock(User $user, string $type);
-    public function getAllUserLocks();
-    public function unlockUserLock(UserLock $lock, bool $force = false);
+    public function getExpiredUserLocks();
+    public function unlockUserLock(UserLock $lock);
     # ---------------------------
 
     public function getAllUsers();

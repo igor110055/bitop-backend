@@ -141,17 +141,10 @@ class AuthController extends ApiController
                 'sendSecurityCodeVerification',
                 'resetPassword',
                 'recoverSecurityCode',
-                'uploadFiles',
-                'requestVerifyIdentity',
                 'sendResetEmailVerification',
                 'resetEmail',
-                'sendResetMobileVerification',
-                'resetMobile',
-                'preActivateTFA',
-                'activateTFA',
                 'sendDeactivateTFAVerification',
                 'deactivateTFA',
-                'changeDeviceTokenStatus',
             ]]
         );
     }

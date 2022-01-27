@@ -32,6 +32,11 @@ class GroupController extends AuthenticatedController
             'real_name.check',
             ['only' => ['applyNewGroup']]
         );
+
+        $this->middleware(
+            'userlock',
+            ['only' => ['createInvitation']]
+        );
     }
 
     public function index()

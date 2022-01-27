@@ -102,6 +102,11 @@ class OrderController extends AuthenticatedController
             'real_name.check',
             ['only' => ['previewTrade', 'trade', 'matchExpressTrade', 'getExpressTradeSettings']]
         );
+
+        $this->middleware(
+            'userlock',
+            ['only' => ['trade', 'tradeExpress', 'claim', 'revoke', 'confirm', 'cancel']]
+        );
     }
 
     public function index(OrderListRequest $request)

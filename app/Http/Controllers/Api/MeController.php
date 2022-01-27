@@ -24,6 +24,11 @@ class MeController extends AuthenticatedController
     ) {
         parent::__construct();
         $this->UserRepo = $UserRepo;
+
+        $this->middleware(
+            'userlock',
+            ['only' => ['show', 'update']]
+        );
     }
 
     public function show()

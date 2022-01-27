@@ -23,6 +23,10 @@ class BankAccountController extends AuthenticatedController
     {
         parent::__construct();
         $this->BankAccountRepo = $bank_account;
+        $this->middleware(
+            'userlock',
+            ['only' => ['create', 'delete', 'updateStatus']]
+        );
     }
 
     public function index(Request $request)

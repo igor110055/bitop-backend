@@ -58,7 +58,7 @@ class AuthController extends AdminController
 
                 # check user lock
                 if ($user = $this->UserRepo->findByEmailOrFail($credentials['email'])) {
-                    if ($this->UserRepo->checkAdminUserLock($user)) {
+                    if ($this->UserRepo->checkUserLock($user)) {
                         throw new UserLoginLockError;
                     }
                 }
