@@ -14,6 +14,15 @@ return [
             'assistant' => 'Assistant',
             'viewer' => 'Viewer',
         ],
+        'lock_type' => [
+            'login' => 'blocked due to 3 wrong password tries',
+            'security-code' => 'blocked due to 3 wrong security code tries',
+            'admin' => 'blocked by admin',
+            'backend-login-password' => 'blocked due to 3 backstage wrong password tries',
+            'backend-login-2fa' => 'blocked due to 3 backstage wrong 2fa tries',
+            'transfer' => 'transfer blocked',
+            'withdrawal' => 'withdrawal blocked',
+        ],
     ],
     'asset_transaction' => [
         'types' => [

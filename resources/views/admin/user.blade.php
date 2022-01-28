@@ -43,19 +43,10 @@
         @endcan
 
         @can('edit-users')
-        @if (!$is_root)
         <a
-            href="{{ route('admin.users.feature-lock', ['user' => $user->id]) }}"
+            href="{{ route('admin.users.lock', ['user' => $user->id]) }}"
             class="btn btn-primary waves-effect"
-        >鎖定特定功能</a>
-        @else
-            @role('super-admin')
-            <a
-                href="{{ route('admin.users.feature-lock', ['user' => $user->id]) }}"
-                class="btn btn-primary waves-effect"
-            >鎖定特定功能</a>
-            @endrole
-        @endif
+        >鎖定用戶功能</a>
         @endcan
 
         @can('edit-auth')
@@ -97,18 +88,57 @@
         <div class="card">
             <div class="card-header"><h3 class="card-title">帳號狀態</h3></div>
             <div class="card-block">
-                <dl class="row">
-                    <dt class="col-sm-3">狀態</dt>
-                    <dd class="col-sm-9">
-                        @if ($user_locks->isEmpty())
-                            <span class="badge badge-pill badge-info">normal</span>
-                        @else
+                @if ($user_locks->isEmpty())
+                    <span class="badge badge-pill badge-info">正常</span>
+                @else
+                    <table id="accounts" class="table">
+                        <thead>
+                            <tr>
+                                <th>鎖定類型</th>
+                                <th>開始時間</th>
+                                <th>結束時間</th>
+                                @can('edit-users')
+                                <th>手動解鎖</th>
+                                @endcan
+                            </tr>
+                        </thead>
+                        <tbody>
                             @foreach ($user_locks as $lock)
-                            <span class="badge badge-pill badge-danger">{{ $lock->type.'-lock' }}</span>
+                            <tr>
+                                <td>{{ __("messages.user.lock_type.{$lock->type}") }}</td>
+                                <td>{{ datetime($lock->created_at) }}</td>
+                                <td>{{ datetime($lock->expired_at) }}</td>
+                                @can('edit-users')
+                                <td><a href="#" class="unlock-btn" data-id="{{ $lock->id }}">解鎖</a></td>
+                                @endcan
+                            </tr>
                             @endforeach
-                        @endif
-                    </dd>
-                </dl>
+                        </tbody>
+                    </table>
+                @endif
+            </div>
+            <div class="modal fade" id="unlock-modal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title pull-left">手動解鎖</h5>
+                        </div>
+                        <form class="unlock-form" method="post" action="{{ route('admin.users.unlock') }}">
+                            <div class="modal-body">
+                                {{ csrf_field() }}
+                                {{ method_field('POST') }}
+                                <input type="hidden" id="unlock-id" name="id" value="" >
+                                <div class="mt-3">
+                                    @include('widgets.forms.input', ['name' => 'description', 'value' => '', 'title' => '解鎖原因紀錄', 'placeholder' => ''])
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" type="button" class="btn btn-primary" value="">送出</button>
+                                <button type="button" class="btn btn-link" data-dismiss="modal">取消</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -281,26 +311,6 @@
 
     <div class="col-lg-6">
         @can('edit-users')
-        @if(!$is_root)
-        <div class="card">
-            <div class="card-header"><h3 class="card-title">鎖定使用者</h3></div>
-            <div class="card-block">
-                <form action="{{ route('admin.users.admin-lock', ['user' => $user]) }}" method="post">
-                    {{ csrf_field() }}
-                    {{ method_field('PUT') }}
-                    @include('widgets.forms.input', ['name' => 'description', 'value' => '', 'title' => 'Description', 'required' => true])
-                    @if ($admin_lock->isEmpty())
-                    <button type="submit" name="action" value="lock" class="btn btn-primary">鎖定</button>
-                    @else
-                    <button type="submit" name="action" value="unlock" class="btn btn-primary">解除鎖定</button>
-                    @endif
-                </form>
-            </div>
-        </div>
-        @endif
-        @endcan
-
-        @can('edit-users')
         @if ($user->two_factor_auth)
         <div class="card">
             <div class="card-header"><h3 class="card-title">強制關閉二次驗證</h3></div>
@@ -381,6 +391,27 @@ $(function () {
         });
     });
     @endif
+
+    $('.unlock-btn').on('click', function (e) {
+        e.preventDefault();
+        var id = $(this).attr("data-id");
+        $('#unlock-id').val(id);
+        $("#unlock-modal").modal('show');
+    });
+
+    $('.unlock-form').on('submit', function (e) {
+        e.preventDefault();
+        $.ajax({
+            url: '{{ route('admin.users.unlock') }}',
+            method: 'POST',
+            data: $(this).serialize(),
+            dataType: 'json',
+        }).done(function (data) {
+            window.location.reload();
+        }).fail(function (err) {
+            $.notify({ message: 'Oops... there is something wrong!.' }, { type: 'danger' });
+        });
+    });
 });
 
 function handleNext(next_user)

@@ -14,6 +14,15 @@ return [
             'assistant' => 'Assistant',
             'viewer' => 'Viewer',
         ],
+        'lock_type' => [
+            'login' => '密碼連續錯誤，禁止登入',
+            'security-code' => '安全碼連續錯誤，禁止登入',
+            'admin' => '管理員鎖定，禁止登入',
+            'backend-login-password' => '後台密碼連續錯誤，禁止登入',
+            'backend-login-2fa' => '後台二步驟驗證連續錯誤，禁止登入',
+            'transfer' => '禁止轉帳',
+            'withdrawal' => '禁止提現',
+        ],
     ],
     'asset_transaction' => [
         'types' => [

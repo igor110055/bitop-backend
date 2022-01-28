@@ -3,6 +3,7 @@
     <select
         class="form-control select2 {{ $class ?? '' }}"
         name="{{ $name }}"
+        {!! isset($id) ? 'id = "'.$id.'"' : '' !!}
         {{ isset($disabled) && $disabled ? 'disabled' : ''}}
         {{ isset($required) && $required ? 'required' : '' }}
     >

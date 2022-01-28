@@ -2,7 +2,7 @@
     <div class="form-group mb-0">
         <label {!! isset($id) ? "for='$id'" : '' !!}>{{ $title }}</label>
         <input
-            {!! isset($id) ? "id='$id'" : '' !!}
+            {!! isset($id) ? 'id="'.$id.'"' : '' !!}
             type="{{ $type ?? 'text' }}"
             class="form-control {{ $class ?? '' }}"
             name="{{ $name }}"

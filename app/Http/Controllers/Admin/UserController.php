@@ -86,11 +86,11 @@ class UserController extends AdminController
             ['only' => [
                 'edit',
                 'update',
-                'adminLock',
                 'editLimitations',
                 'storeLimitation',
-                'createFeatureLock',
-                'storeFeatureLock',
+                'createLock',
+                'storeLock',
+                'unlock',
                 'deactivateTFA',
             ]]
         );
@@ -216,39 +216,6 @@ class UserController extends AdminController
             'result' => 'done',
             'next' => $next_user ? $next_user_url : null,
         ]);
-    }
-
-    public function adminLock(User $user, Request $request, AdminActionRepo $AdminActionRepo)
-    {
-        $action = $request->input('action');
-        $user = $this->UserRepo->findOrFail($user->id);
-        if ($action === 'lock') {
-            if ($user->is_root) {
-                return redirect()->route('admin.users.show', ['user' => $user]);
-            }
-            if ($this->UserRepo->getUserLocks($user, UserLock::ADMIN)->isEmpty()) {
-                $this->UserRepo->createUserLock($user, UserLock::ADMIN);
-                $AdminActionRepo->createByApplicable($user, [
-                    'admin_id' => \Auth::id(),
-                    'type' => AdminAction::TYPE_USER_LOCK,
-                    'description' => $request->input('description'),
-                ]);
-            }
-            return redirect()->route('admin.users.show', ['user' => $user])->with('flash_message', ['message' => '鎖定完成']);
-
-        } elseif ($action === 'unlock') {
-            DB::transaction(function () use ($user, $request, $AdminActionRepo) {
-                foreach ($this->UserRepo->getUserLocks($user, UserLock::ADMIN) as $lock) {
-                    $lock->update(['is_active' => false]);
-                }
-                $AdminActionRepo->createByApplicable($user, [
-                    'admin_id' => \Auth::id(),
-                    'type' => AdminAction::TYPE_USER_UNLOCK,
-                    'description' => $request->input('description'),
-                ]);
-            });
-            return redirect()->route('admin.users.show', ['user' => $user])->with('flash_message', ['message' => '解除鎖定完成']);
-        }
     }
 
     public function search(Request $request)
@@ -471,25 +438,30 @@ class UserController extends AdminController
         return redirect()->route('admin.users.limitations', ['user' => $user])->with('flash_message', ['message' => '設定完成']);
     }
 
-    public function createFeatureLock(User $user)
+    public function createLock(User $user)
     {
+        $types = [];
+        foreach (UserLock::FEATURE_TYPES as $type) {
+            $types[$type] = __("messages.user.lock_type.{$type}");
+        }
         return view('admin.user_feature_lock', [
             'user' => $user,
-            'types' => [
-                UserLock::TRANSFER => 'Transfer',
-                UserLock::WITHDRAWAL => 'Withdrawal',
-            ],
+            'types' => $types,
         ]);
     }
 
-    public function storeFeatureLock(User $user, Request $request)
+    public function storeLock(User $user, Request $request)
     {
         $values = $request->validate([
             'type' => 'required|in:'.implode(',', UserLock::FEATURE_TYPES),
-            'expired_time' => 'required|string',
+            'expired_time' => 'required_unless:type,admin|string',
             'description' => 'required|string',
         ]);
-        $expired_time = Carbon::parse($values['expired_time'], $this->tz);
+        if (data_get($values, 'expired_time')) {
+            $expired_time = Carbon::parse($values['expired_time'], $this->tz);
+        } else {
+            $expired_time = null;
+        }
 
         if ($user->is_root) {
             return redirect()->route('admin.users.show', ['user' => $user->id]);
@@ -498,26 +470,37 @@ class UserController extends AdminController
         # store
         DB::transaction(function () use ($values, $user, $expired_time) {
             if ($lock = $this->UserRepo->getUserLock($user, $values['type'])) {
-                $this->UserRepo->unlockUserLock($lock);
+                return redirect()->route('admin.users.show', ['user' => $user->id]);
             }
 
             $userlock = $this->UserRepo->createUserLock($user, $values['type'], $expired_time);
-
-            if ($values['type'] === UserLock::TRANSFER) {
-                $this->AdminActionRepo->createByApplicable($userlock, [
-                    'admin_id' => \Auth::id(),
-                    'type' => AdminAction::TYPE_USER_TRANSFER_LOCK,
-                    'description' => $values['description'],
-                ]);
-            } else if($values['type'] === UserLock::WITHDRAWAL) {
-                $this->AdminActionRepo->createByApplicable($userlock, [
-                    'admin_id' => \Auth::id(),
-                    'type' => AdminAction::TYPE_USER_WITHDRAWAL_LOCK,
-                    'description' => $values['description'],
-                ]);
-            }
+            $this->AdminActionRepo->createByApplicable($userlock, [
+                'admin_id' => \Auth::id(),
+                'type' => AdminAction::TYPE_USER_LOCK,
+                'description' => $values['description'],
+            ]);
         });
         return redirect()->route('admin.users.show', ['user' => $user->id])->with('flash_message', ['message' => '設定完成']);
+    }
+
+    public function unlock(Request $request)
+    {
+        $values = $request->validate([
+            'id' => 'required',
+            'description' => 'required|string',
+        ]);
+
+        DB::transaction(function () use ($values) {
+            $userlock = UserLock::find($values['id']);
+            $userlock->update(['is_active' => false]);
+            $this->AdminActionRepo->createByApplicable($userlock, [
+                'admin_id' => \Auth::id(),
+                'type' => AdminAction::TYPE_USER_UNLOCK,
+                'description' => $values['description'],
+            ]);
+        });
+        $request->session()->flash('flash_message', ['message' => '解鎖完成']);
+        return response('1', 200);
     }
 
     public function authorizeAdmin(User $user)

@@ -16,9 +16,6 @@ class AdminAction extends UuidModel
     const TYPE_APPROVE_BANK_ACCOUNT = 'approve-bank-account';
     const TYPE_REJECT_BANK_ACCOUNT = 'reject-bank-account';
 
-    const TYPE_USER_TRANSFER_LOCK = 'user-transfer-lock';
-    const TYPE_USER_WITHDRAWAL_LOCK = 'user-withdrawal-lock';
-
     protected $fillable = [
         'admin_id',
         'type',

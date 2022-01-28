@@ -28,6 +28,7 @@ class UserLock extends UuidModel
     const FEATURE_TYPES = [
         self::TRANSFER,
         self::WITHDRAWAL,
+        self::ADMIN,
     ];
 
     protected $fillable = [

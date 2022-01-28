@@ -43,9 +43,9 @@ Route::group(
         Route::get('users/{user}/limitations', 'UserController@getLimitations')->name('admin.users.limitations');
         Route::get('users/{user}/limitations/edit/{type}/{coin}', 'UserController@editLimitations')->name('admin.users.limitations.edit');
         Route::post('users/{user}/limitations/store', 'UserController@storeLimitation')->name('admin.users.limitations.store');
-        Route::put('users/{user}/admin-lock', 'UserController@adminLock')->name('admin.users.admin-lock');
-        Route::get('users/{user}/feature-lock', 'UserController@createFeatureLock')->name('admin.users.feature-lock');
-        Route::post('users/{user}/feature-lock', 'UserController@storeFeatureLock')->name('admin.users.feature-lock.store');
+        Route::get('users/{user}/lock', 'UserController@createLock')->name('admin.users.lock');
+        Route::post('users/{user}/lock', 'UserController@storeLock')->name('admin.users.lock.store');
+        Route::post('users/unlock', 'UserController@unlock')->name('admin.users.unlock');
         Route::get('users/{user}/authorize-admin', 'UserController@authorizeAdmin')->name('admin.users.admin.authorize');
         Route::get('users/{user}/authorize-tester', 'UserController@authorizeTester')->name('admin.users.admin.authorize-tester');
         Route::put('users/{user}/role', 'UserController@updateRole')->name('admin.users.role.update');
