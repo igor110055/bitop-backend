@@ -50,7 +50,7 @@ class GroupRepo implements \App\Repos\Interfaces\GroupRepo
         $time = config('core')['group_invitation']['expired_time'];
         return $group->group_invitations()->create([
             'invitation_code' => $code,
-            'expired_at' => Carbon::now()->addSecond($time)->format('Uv'),
+            'expired_at' => Carbon::now()->addHours($time)->format('Uv'),
         ]);
     }
 

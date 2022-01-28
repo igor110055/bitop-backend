@@ -137,7 +137,7 @@ return [
     ],
     'log_context_max_length' => 4096,
     'group_invitation' => [
-        'expired_time' => 3000, #sec
+        'expired_time' => 720, # hours
     ],
     'timezone' => [
         'default' => 'Asia/Taipei',
