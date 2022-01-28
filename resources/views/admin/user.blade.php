@@ -34,7 +34,10 @@
             href="{{ route('admin.users.limitations', ['user' => $user->id]) }}"
             class="btn btn-primary waves-effect"
         >限額設定</a>
-
+        <a
+            href="{{ route('admin.user_logs', ['user' => $user->id]) }}"
+            class="btn btn-primary waves-effect"
+        >安全性紀錄</a>
         @can('edit-accounts')
         <a
             href="{{ route('admin.users.transfers.create', ['user' => $user->id]) }}"

@@ -54,4 +54,6 @@ interface UserRepo
     public function getNextUserForAuthentication();
     public function setAttribute(User $user, array $array);
     public function updateOrderCount(User $user, bool $complete);
+    public function queryUserLogs(User $user, $where = []);
+    public function countAllLogs(User $user)
 }

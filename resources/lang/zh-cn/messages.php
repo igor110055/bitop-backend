@@ -23,6 +23,22 @@ return [
             'transfer' => '禁止转帐',
             'withdrawal' => '禁止提现',
         ],
+        'log_message' => [
+            'log-in' => '登入',
+            'log-in-lock' => '连续密码错误，被禁止登入',
+            'log-in-unlock' => '禁止登入解锁',
+            'password-fail' => '输入密码错误',
+            'password-success' => '输入正确密码',
+            'security-code-lock' => '连续安全码错误，被禁止登入',
+            'security-code-unlock' => '禁止登入解锁',
+            'security-code-fail' => '输入错误的安全码',
+            'security-code-success' => '输入正确的安全码',
+            'admin-log-in' => '登入后台',
+            'admin-log-in-password-fail' => '后台输入错误密码',
+            'admin-log-in-2fa-fail' => '后台输入错误二步骤验证码',
+            'admin-log-in-lock' => '被禁止登入',
+            'admin-log-in-unlock' => '禁止登入解锁',
+        ],
     ],
     'asset_transaction' => [
         'types' => [

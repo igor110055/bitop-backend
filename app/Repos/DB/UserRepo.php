@@ -400,4 +400,23 @@ class UserRepo implements \App\Repos\Interfaces\UserRepo
             }
         }
     }
+
+    public function queryUserLogs(User $user, $where = [])
+    {
+        $searchable_events = UserLog::SEARCHABLE_EVENTS;
+        return $user->user_logs()
+            ->whereIn('message', $searchable_events)
+            ->when($where, function($query, $where){
+                return $query->where($where);
+            })
+            ->latest();
+    }
+
+    public function countAllLogs(User $user)
+    {
+        $searchable_events = UserLog::SEARCHABLE_EVENTS;
+        return $user->user_logs()
+            ->whereIn('message', $searchable_events)
+            ->count();
+    }
 }

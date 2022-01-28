@@ -14,6 +14,7 @@ use App\Http\Requests\Admin\{
     OrderSearchRequest,
     AdvertisementSearchRequest,
     TransferRequest,
+    SearchRequest,
 };
 
 use App\Exceptions\{
@@ -80,6 +81,7 @@ class UserController extends AdminController
         $this->AccountService = $AccountService;
         $this->TwoFactorAuthService = $TwoFactorAuthService;
         $this->tz = config('core.timezone.default');
+        $this->dateFormat = 'Y-m-d';
 
         $this->middleware(
             ['can:edit-users'],
@@ -596,5 +598,35 @@ class UserController extends AdminController
         }
 
         return redirect()->route('admin.accounts.show', ['account' => $src_account])->with('flash_message', ['message' => '手動劃轉完成']);
+    }
+
+    public function logList(User $user)
+    {
+        return view('admin.user_logs', [
+            'user' => $user,
+            'from' => Carbon::parse('today - 3 months', $this->tz)->format($this->dateFormat),
+            'to' => Carbon::parse('today', $this->tz)->format($this->dateFormat),
+        ]);
+    }
+
+    public function getLogs(User $user, SearchRequest $request)
+    {
+        $values = $request->validated();
+        $from = Carbon::parse(data_get($values, 'from', 'today - 3 months'), $this->tz);
+        $to = Carbon::parse(data_get($values, 'to', 'today'), $this->tz)->addDay();
+        $condition = $this->timeIntervalCondition('created_at', $from, $to);
+        $query = $this->UserRepo
+            ->queryUserLogs($user, $condition);
+        $total = $this->UserRepo->countAllLogs($user);
+        $filtered = $query->count();
+        $data = $this->queryPagination($query, $total);
+
+        return $this->draw(
+            $this->result(
+                $total,
+                $filtered,
+                $data
+            )
+        );
     }
 }

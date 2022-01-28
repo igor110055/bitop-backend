@@ -23,6 +23,22 @@ return [
             'transfer' => '禁止轉帳',
             'withdrawal' => '禁止提現',
         ],
+        'log_message' => [
+            'log-in' => '登入',
+            'log-in-lock' => '連續密碼錯誤，被禁止登入',
+            'log-in-unlock' => '禁止登入解鎖',
+            'password-fail' => '輸入密碼錯誤',
+            'password-success' => '輸入正確密碼',
+            'security-code-lock' => '連續安全碼錯誤，被禁止登入',
+            'security-code-unlock' => '禁止登入解鎖',
+            'security-code-fail' => '輸入錯誤的安全碼',
+            'security-code-success' => '輸入正確的安全碼',
+            'admin-log-in' => '登入後台',
+            'admin-log-in-password-fail' => '後台輸入錯誤密碼',
+            'admin-log-in-2fa-fail' => '後台輸入錯誤二步驟驗證碼',
+            'admin-log-in-lock' => '被禁止登入',
+            'admin-log-in-unlock' => '禁止登入解鎖',
+        ],
     ],
     'asset_transaction' => [
         'types' => [

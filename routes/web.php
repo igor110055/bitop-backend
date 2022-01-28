@@ -46,6 +46,8 @@ Route::group(
         Route::get('users/{user}/lock', 'UserController@createLock')->name('admin.users.lock');
         Route::post('users/{user}/lock', 'UserController@storeLock')->name('admin.users.lock.store');
         Route::post('users/unlock', 'UserController@unlock')->name('admin.users.unlock');
+        Route::get('users/{user}/logs', 'UserController@logList')->name('admin.user_logs');
+        Route::get('users/{user}/logs/search', 'UserController@getLogs')->name('admin.user_logs.search');
         Route::get('users/{user}/authorize-admin', 'UserController@authorizeAdmin')->name('admin.users.admin.authorize');
         Route::get('users/{user}/authorize-tester', 'UserController@authorizeTester')->name('admin.users.admin.authorize-tester');
         Route::put('users/{user}/role', 'UserController@updateRole')->name('admin.users.role.update');

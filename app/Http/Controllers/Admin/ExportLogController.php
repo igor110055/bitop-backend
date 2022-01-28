@@ -45,7 +45,7 @@ class ExportLogController extends AdminController
         $to = Carbon::parse(data_get($values, 'to', 'today'), $this->tz)->addDay();
         $condition = $this->timeIntervalCondition('created_at', $from, $to);
         $query = $this->ExportLogRepo
-            ->queryExportLogs($condition, $keyword, true);
+            ->queryExportLogs($condition, $keyword);
         $total = $this->ExportLogRepo->countAll();
         $filtered = $query->count();
         $data = $this->queryPagination($query, $total);

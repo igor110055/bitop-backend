@@ -23,6 +23,22 @@ return [
             'transfer' => 'transfer blocked',
             'withdrawal' => 'withdrawal blocked',
         ],
+        'log_message' => [
+            'log-in' => 'Log in',
+            'log-in-lock' => '3 wrong passwords, blocked.',
+            'log-in-unlock' => 'Unlocked',
+            'password-fail' => 'Wrong password',
+            'password-success' => 'Correct password',
+            'security-code-lock' => '3 wrong security code, blocked.',
+            'security-code-unlock' => 'Unlocked',
+            'security-code-fail' => 'Wrong security code',
+            'security-code-success' => 'Correct security code',
+            'admin-log-in' => 'Log into backstage',
+            'admin-log-in-password-fail' => 'Wrong passwrod in backstage',
+            'admin-log-in-2fa-fail' => 'Wrong 2FA code in backstage',
+            'admin-log-in-lock' => 'Blocked',
+            'admin-log-in-unlock' => 'Unlocked',
+        ],
     ],
     'asset_transaction' => [
         'types' => [

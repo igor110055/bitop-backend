@@ -34,6 +34,23 @@ class UserLog extends UuidModel
         self::ADMIN_LOG_IN_2FA_FAIL,
     ];
 
+    const SEARCHABLE_EVENTS = [
+        self::LOG_IN,
+        self::LOG_IN_LOCK,
+        self::LOG_IN_UNLOCK,
+        self::PASSWORD_FAIL,
+        self::PASSWORD_SUCCESS,
+        self::SECURITY_CODE_LOCK,
+        self::SECURITY_CODE_UNLOCK,
+        self::SECURITY_CODE_FAIL,
+        self::SECURITY_CODE_SUCCESS,
+        self::ADMIN_LOG_IN,
+        self::ADMIN_LOG_IN_PASSWORD_FAIL,
+        self::ADMIN_LOG_IN_2FA_FAIL,
+        self::ADMIN_LOG_IN_LOCK,
+        self::ADMIN_LOG_IN_UNLOCK,
+    ];
+
     protected $fillable = [
         'user_id',
         'message',
