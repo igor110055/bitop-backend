@@ -96,7 +96,7 @@ class ExportService implements ExportServiceInterface
 
         $unit_price = $coin_price['unit_price'];
         $total = (string) Dec::mul($deposit->amount, $unit_price, $this->currency_decimal);
-        $amount = (string) Dec::mul($deposit->amount, 1, $this->coin_decimal);
+        $amount = (string) Dec::mul($deposit->amount, -1, $this->coin_decimal);
         $data = [
             'user_id' => $deposit->user_id,
             'transaction_id' => data_get($transaction, 'id'),
@@ -201,7 +201,10 @@ class ExportService implements ExportServiceInterface
             'submitted_at' => $now,
         ];
         try {
-            $request = $this->createRequest('POST', $this->link, $export_log);
+            $headers = [];
+            $method = 'POST';
+            $body = $this->formatData($export_log);
+            $request = new Request($method, $this->link, $headers, $body);
             $client = new Client();
             $response = $client->send($request);
             if ((string) $response->getBody() == 'ok') {
@@ -242,13 +245,8 @@ class ExportService implements ExportServiceInterface
         $this->ExportLogRepo->update($export_log, $update);
     }
 
-    protected function createRequest(
-        string $method,
-        string $link,
-        $data
-    ) {
-        $headers = [];
-
+    public function formatData($data)
+    {
         $formatted_data = [
             "SerialNumber" => $data->id,
             "LoginID" => $data->user_id,
@@ -262,7 +260,6 @@ class ExportService implements ExportServiceInterface
             "BankcFee" => $data->bankc_fee,
             "ConfirmTime" => $data->created_at->timestamp,
         ];
-        $body = json_encode([$formatted_data]);
-        return new Request($method, $link, $headers, $body);
+        return json_encode([$formatted_data]);
     }
 }
