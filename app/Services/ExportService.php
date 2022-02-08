@@ -39,6 +39,7 @@ class ExportService implements ExportServiceInterface
         $this->currency_decimal = config('core.currency.default_exp');
         $this->coin_decimal = config('core.coin.default_exp');
         $this->coin_types = ExportLog::COIN_TYPES;
+        $this->order_sell_accounts = ExportLog::ORDER_SELL_ACCOUNTS;
         $this->link = config('services.export_log.link');
     }
 
@@ -126,22 +127,15 @@ class ExportService implements ExportServiceInterface
                 ->latest()
                 ->first();
             if (!is_null($wfpayment)) {
-                //$merchant_order_id = $wfpayment->id;
                 $wfpay_account = $wfpayment->wfpay_account;
                 $account = $wfpay_account->id;
             }
         } else {
-            $bank_account = $bank_account = $order->bank_accounts->first();
-            if ($bank_account) {
-                $bank_account = $bank_account->bank_name.', '.$bank_account->name.', '.$bank_account->account;
-            }
-
             $wftransfer = $order->wftransfers()
                 ->where('status', Wftransfer::STATUS_COMPLETED)
                 ->latest()
                 ->first();
             if (!is_null($wftransfer)) {
-                //$merchant_order_id = $wftransfer->id;
                 $wfpay_account = $wftransfer->wfpay_account;
                 $account = $wfpay_account->id;
             }
@@ -156,11 +150,11 @@ class ExportService implements ExportServiceInterface
         $unit_price = $order->unit_price;
         $total = (string) Dec::mul($order->total, -1, $this->currency_decimal);
         $amount = (string) Dec::mul($order->amount, 1, $this->coin_decimal);
-        $fee = (string) Dec::mul(data_get($order, 'fee', 0), $unit_price, $this->currency_decimal);
+        $fee = (string) Dec::mul(data_get($order, 'fee', 0), $unit_price, $this->coin_decimal);
         $data = [
             'user_id' => $order->src_user_id,
             'transaction_id' => data_get($transaction, 'id'),
-            'account' => (isset($bank_account) and !is_null($bank_account)) ? $bank_account : $account,
+            'account' => data_get($this->order_sell_accounts, $order->coin),
             'amount' => $total,
             'coin' => $amount,
             'bank_fee' => '0.000',
@@ -172,7 +166,7 @@ class ExportService implements ExportServiceInterface
 
         $order->export_logs()->create($data);
 
-        # buyer transaction
+        # buyer's 1st transaction
         $transaction = $order->transactions()
             ->where('type', Transaction::TYPE_BUY_ORDER)
             ->latest()
@@ -187,6 +181,22 @@ class ExportService implements ExportServiceInterface
             'coin' => $amount,
             'bank_fee' => '0.000',
             'system_fee' => '0.000',
+            'type' => data_get($this->coin_types, $order->coin),
+            'bankc_fee' => $unit_price,
+            'handler_id' =>  $order->dst_user_id,
+        ];
+
+        $order->export_logs()->create($data);
+
+        # buyer's 2nd transaction
+        $data = [
+            'user_id' => $order->dst_user_id,
+            'transaction_id' => data_get($transaction, 'id'),
+            'account' => null,
+            'amount' => $total,
+            'coin' => $amount,
+            'bank_fee' => '0.000',
+            'system_fee' => $fee,
             'type' => data_get($this->coin_types, $order->coin),
             'bankc_fee' => $unit_price,
             'handler_id' =>  $order->dst_user_id,
