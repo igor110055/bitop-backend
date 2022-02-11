@@ -101,7 +101,7 @@
             <div class="card-block pb-1">
                 <dl class="row">
                     <dt class="col-sm-3">三方帳號</dt>
-                    <dd class="col-sm-9"><a href="{!! $wfpayment->wfpay_account->backstage_url !!}" target="_blank">{{ $wftransfer->wfpay_account_id.' ('.$wftransfer->wfpay_account->name.')' }}</a></dd>
+                    <dd class="col-sm-9"><a href="{!! $wftransfer->wfpay_account->backstage_url !!}" target="_blank">{{ $wftransfer->wfpay_account_id.' ('.$wftransfer->wfpay_account->name.')' }}</a></dd>
                     <dt class="col-sm-3">訂單號</dt>
                     <dd class="col-sm-9">{{ $wftransfer->id }}</dd>
                     <dt class="col-sm-3">三方訂單號</dt>
