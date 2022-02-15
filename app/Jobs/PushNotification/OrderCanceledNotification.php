@@ -12,6 +12,8 @@ use App\Services\JpushServiceInterface;
 use App\Models\{
     User,
     Order,
+    SystemAction,
+    AdminAction,
 };
 
 class OrderCanceledNotification extends ExpBackoffJob implements ShouldQueue
