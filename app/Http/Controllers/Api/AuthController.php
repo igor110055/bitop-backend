@@ -61,6 +61,7 @@ use App\Http\Requests\{
 use App\Models\{
     Config,
     Group,
+    Invitation,
     Verification,
     UserLog,
     UserLock,
@@ -415,7 +416,7 @@ class AuthController extends ApiController
         # Use header locale if payload locale not existed.
         $validated['locale'] = data_get($validated, 'locale', \App::getLocale());
 
-        #group
+        # Invitatoin & group
         if ($invitation_required = $this->ConfigRepo->get(Config::ATTRIBUTE_INVITATION_REQUIRED)) {
             if (!data_get($validated, 'invitation_code')) {
                 throw new InvalidInvitationError;
@@ -423,14 +424,12 @@ class AuthController extends ApiController
         }
         $validated['group_id'] = Group::DEFAULT_GROUP_ID;
         if ($invitation_code = data_get($validated, 'invitation_code')) {
-            # check the code and add group_id to $validated
-            $inv = $this->GroupRepo->getInvitationByCode($invitation_code);
-            if ($inv &&
-                ($inv->expired_at > Carbon::now()->format('Uv')) &&
-                ($inv->used_at === null)
-            ) {
-                $validated['group_id'] = $inv->group_id;
-                $validated['invitation_id'] = $inv->id;
+            # check the code and add inviter group_id to $validated
+            $invitation = Invitation::find($invitation_code);
+            if ($invitation) {
+                $inviter = $invitation->user;
+                $validated['inviter_id'] = $inviter->id;
+                $validated['group_id'] = $inviter->group_id;
             } else {
                 throw new InvalidInvitationError;
             }
@@ -440,11 +439,6 @@ class AuthController extends ApiController
             $user = $this->UserRepo->create($validated, $email_verification, null);
         } catch (Throwable $e) {
             throw new ConflictDataError;
-        }
-
-        # set invitation code used time
-        if ($user->invitation) {
-            $this->GroupRepo->setInvitationUsedTime($user->invitation);
         }
 
         $email_verification->verificable()->associate($user)->save();

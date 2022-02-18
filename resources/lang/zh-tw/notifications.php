@@ -136,14 +136,6 @@ return [
             ],
             'admin' => ['content' => '管理者已經取消你的訂單，如有任何問題，請透過客服管道聯繫我們。'],
         ],
-        'group_invitation_notification' => [
-            'subject' => '['.config('app.name').'] 群組邀請通知 [:group_name]',
-            'greeting' => '您好，新用戶',
-            'content' => '[:group_name] 群組擁有者 :username 邀請您加入 [:group_name] 群組，請點擊以下連結進行註冊。',
-            'action' => '註冊連結',
-            'content2' => '或是於註冊時填寫邀請碼: :invitation_code。',
-            'content3' => '以上連結與邀請碼有效期限為 UTC :expired_at，逾期將失效。',
-        ],
         'auth_result_notificaiton' => [
             'guest' => '親愛的用戶',
             'status' => [

@@ -7,6 +7,7 @@ use Throwable;
 use Illuminate\Http\Request;
 
 use App\Http\Resources\{
+    GroupResource,
     MeResource,
 };
 use App\Http\Requests\{
@@ -15,7 +16,6 @@ use App\Http\Requests\{
 use App\Repos\Interfaces\{
     UserRepo,
 };
-
 
 class MeController extends AuthenticatedController
 {
@@ -27,7 +27,12 @@ class MeController extends AuthenticatedController
 
         $this->middleware(
             'userlock',
-            ['only' => ['show', 'update']]
+            ['only' => ['show', 'update', 'getInvitationInfo']]
+        );
+
+        $this->middleware(
+            'real_name.check',
+            ['only' => ['getInvitationInfo']]
         );
     }
 
@@ -47,5 +52,22 @@ class MeController extends AuthenticatedController
             ]);
         }
         return response(null, 204);
+    }
+
+    public function getInvitationInfo()
+    {
+        $user = auth()->user();
+        $invitation = $this->UserRepo->findOrCreateInvitation($user);
+        $url = url("auth/register?invitation={$invitation->id}");
+        $invitees_count = $user->invitees()->count();
+        $group = $user->groups()->first();
+
+        return [
+            'code' => $invitation->id,
+            'url' => $url,
+            'invitee_count' => $invitees_count,
+            'group' => new GroupResource($group),
+            'commission_percentage' => config('core.share.percentage.inviter'),
+        ];
     }
 }

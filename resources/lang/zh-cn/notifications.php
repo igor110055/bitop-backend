@@ -136,14 +136,6 @@ return [
             ],
             'admin' => ['content' => '管理者已经取消你的订单，如有任何问题，请透过客服管道联系我们。'],
         ],
-        'group_invitation_notification' => [
-            'subject' => '['.config('app.name').'] 群组邀请通知 [:group_name]',
-            'greeting' => '您好，新用户',
-            'content' => '[:group_name] 群组拥有者 :username 邀请您加入 [:group_name] 群组，请点击以下连结进行注册。',
-            'action' => '注册连结',
-            'content2' => '或是于注册时填写邀请码: :invitation_code。',
-            'content3' => '以上连结与邀请码有效期限为 UTC :expired_at，逾期将失效。',
-        ],
         'auth_result_notificaiton' => [
             'guest' => '亲爱的用户',
             'status' => [

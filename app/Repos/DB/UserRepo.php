@@ -14,6 +14,7 @@ use App\Models\{
     UserLog,
     UserLock,
     Authentication,
+    Invitation,
 };
 
 class UserRepo implements \App\Repos\Interfaces\UserRepo
@@ -418,5 +419,38 @@ class UserRepo implements \App\Repos\Interfaces\UserRepo
         return $user->user_logs()
             ->whereIn('message', $searchable_events)
             ->count();
+    }
+
+    public function findInvitation(User $user)
+    {
+        return $user->invitations()->first();
+    }
+
+    public function deleteInvitations(User $user)
+    {
+        $user->invitations()->delete();
+    }
+
+    public function createInvitation(User $user)
+    {
+        # Every user should have 1 invitations, so delete existing invitations first.
+        $this->deleteInvitations($user);
+
+        $id = generate_code(
+            Invitation::CODE_LENGTH,
+            Invitation::CODE_TYPE_DIGIT_ALL
+        );
+        return $user->invitations()->create([
+            'id' => $id,
+        ]);
+    }
+
+    public function findOrCreateInvitation(User $user)
+    {
+        $invitation = $this->findInvitation($user);
+        if (is_null($invitation)) {
+            return $this->createInvitation($user);
+        }
+        return $invitation;
     }
 }

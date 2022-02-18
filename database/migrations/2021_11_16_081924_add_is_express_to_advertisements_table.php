@@ -28,9 +28,8 @@ class AddIsExpressToAdvertisementsTable extends Migration
     public function down()
     {
         Schema::table('advertisements', function (Blueprint $table) {
-            $table->dropColumn('is_express');
-
             $table->dropIndex(['is_express', 'type', 'status', 'coin']);
+            $table->dropColumn('is_express');
         });
     }
 }

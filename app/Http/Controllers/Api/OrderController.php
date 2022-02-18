@@ -176,15 +176,7 @@ class OrderController extends AuthenticatedController
                 $normalized['amount']
             );
             $result['fee'] = $fee['amount'];
-
-            if (data_get($fee, 'fee_setting')) {
-                if (data_get($fee, 'fee_setting.unit') !== '%') {
-                    throw new BadRequestError('Fee setting error');
-                }
-                $result['fee_percentage'] = trim_zeros(data_get($fee, 'fee_setting.value', '0'));
-            } else {
-                $result['fee_percentage'] = '0';
-            }
+            $result['fee_percentage'] = $fee['fee_percentage'];
         }
 
         // calculate profit
@@ -264,12 +256,7 @@ class OrderController extends AuthenticatedController
                 $coin,
                 1
             );
-            if (data_get($fee, 'fee_setting')) {
-                if (data_get($fee, 'fee_setting.unit') !== '%') {
-                    throw new BadRequestError('Fee setting error');
-                }
-                $response['fee_percentage'] = trim_zeros(data_get($fee, 'fee_setting.value', '0'));
-            }
+            $response['fee_percentage'] = $fee['fee_percentage'];
         }
         $response['fee_percentage'] = isset($response['fee_percentage']) ? $response['fee_percentage'] : '0';
 
@@ -354,15 +341,7 @@ class OrderController extends AuthenticatedController
                     $amount
                 );
                 $result['fee'] = $fee['amount'];
-
-                if (data_get($fee, 'fee_setting')) {
-                    if (data_get($fee, 'fee_setting.unit') !== '%') {
-                        throw new BadRequestError('Fee setting error');
-                    }
-                    $result['fee_percentage'] = trim_zeros(data_get($fee, 'fee_setting.value', '0'));
-                } else {
-                    $result['fee_percentage'] = '0';
-                }
+                $result['fee_percentage'] = $fee['fee_percentage'];
             }
 
             if ($action === Advertisement::TYPE_SELL) {

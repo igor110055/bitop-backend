@@ -59,6 +59,7 @@ $api->version('v1', function ($api) {
     $api->group(['prefix' => 'me'], function ($api) use ($me) {
         $api->get('/', "{$me}@show");
         $api->put('/', "{$me}@update");
+        $api->get('/invitation_info', "{$me}@getInvitationInfo");
     });
 
     # /api/users/*

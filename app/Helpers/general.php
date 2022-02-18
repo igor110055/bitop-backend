@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Log;
 use App\Exceptions\Core\WrongRequestHeaderError;
 use App\Models\{
     Verification,
-    GroupInvitation,
+    Invitation,
     DeviceToken,
 };
 
@@ -21,7 +21,7 @@ if (!function_exists('generate_code')) {
             Verification::CODE_TYPE_DIGIT_LOWER => '023456789abcdefghijkmnopqrstuvwxyz',
             Verification::CODE_TYPE_DIGIT_UPPER => '3479ACEFHJKLMNPRTUVWXY',
             Verification::CODE_TYPE_DIGIT_ALPHA => '3479abcdefghijkmnopqrstuvwxyzACEFHJKLMNPRTUVWXY',
-            GroupInvitation::CODE_TYPE_DIGIT_ALL => '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+            Invitation::CODE_TYPE_DIGIT_ALL => '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
         ];
 
         if ($length < 0 or $length > 64) {

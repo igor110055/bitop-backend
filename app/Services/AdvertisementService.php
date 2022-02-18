@@ -92,16 +92,7 @@ class AdvertisementService implements  AdvertisementServiceInterface
                         $amount
                     );
                 $fee_amount = $fee['amount'];
-
-                # get fee rate, must be percentage
-                if (data_get($fee, 'fee_setting')) {
-                    if (data_get($fee, 'fee_setting.unit') !== '%') {
-                        throw new BadRequestError('Fee setting error');
-                    }
-                    $fee_percentage = trim_zeros(data_get($fee, 'fee_setting.value', '0'));
-                } else {
-                    $fee_percentage = '0';
-                }
+                $fee_percentage = $fee['fee_percentage'];
 
                 $fulfill_percentage = bcadd(100, $fee_percentage, 6);
                 $fulfill_amount = trim_zeros(bcdiv((string) $amount * 100, $fulfill_percentage, $decimal));

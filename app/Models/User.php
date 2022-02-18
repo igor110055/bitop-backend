@@ -35,6 +35,7 @@ class User extends AuthModel
         'security_code',
         'username',
         'group_id',
+        'inviter_id',
         'nationality',
         'is_admin',
         'is_merchant',
@@ -193,6 +194,11 @@ class User extends AuthModel
         return $this->hasOne(GroupInvitation::class, 'id', 'invitation_id');
     }
 
+    public function invitations()
+    {
+        return $this->hasMany(invitation::class);
+    }
+
     public function accounts()
     {
         return $this->hasMany(Account::class);
@@ -206,6 +212,16 @@ class User extends AuthModel
     public function bank_accounts()
     {
         return $this->hasMany(BankAccount::class);
+    }
+
+    public function inviter()
+    {
+        return $this->belongsTo(User::class, 'inviter_id');
+    }
+
+    public function invitees()
+    {
+        return $this->hasMany(User::class, 'inviter_id');
     }
 
     public function group()

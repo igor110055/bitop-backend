@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'root_id' => env('ROOT_ID', '00000000000000'),
+    'system_user_id' => env('SYSTEM_USER_ID', '00000000000000'),
     'users' => [
         'password' => [
             'regular_expression' => '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/', # At least one uppercase, one lowercase and one digit
@@ -171,5 +173,16 @@ return [
         'user_chunk' => 10,
         'queue' => 'broadcast',
     ],
-
+    'fee' => [
+        'percentage' => [
+            'transaction' => 0.3,
+        ],
+    ],
+    'share' => [
+        'percentage' => [
+            'inviter' => 70,
+            'group_owner' => 10,
+            'system' => 20,
+        ],
+    ],
 ];

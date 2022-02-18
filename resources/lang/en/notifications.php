@@ -137,14 +137,6 @@ return [
             ],
             'admin' => ['content' => 'Admin has canceled your order. Please contact us through our customer service if you have any further question.'],
         ],
-        'group_invitation_notification' => [
-            'subject' => '['.config('app.name').'] Group Invitation Notification [:group_name]',
-            'greeting' => 'Hello new customer,',
-            'content' => '[:group_name] group owner :username has invited you to join the [:group_name] group, please click the "Register Link" button below to register',
-            'action' => 'Register Link',
-            'content2' => 'or use the invitation code :invitation_code in the registry page.',
-            'content3' => 'Notice that the "Register Link" button or the invitation code will be expired at :expired_at UTC.',
-        ],
         'auth_result_notificaiton' => [
             'guest' => 'Dear User',
             'status' => [

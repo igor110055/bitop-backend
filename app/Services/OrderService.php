@@ -610,7 +610,7 @@ class OrderService implements OrderServiceInterface
                     ->getFeeShares(
                         $order->coin,
                         $order->fee,
-                        $order->src_user->group
+                        $order->src_user
                     );
                 foreach ($fee_shares as $share) {
                     $this->AccountService

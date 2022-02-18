@@ -25,6 +25,7 @@ use App\Repos\Interfaces\{
     FeeCostRepo,
     CoinExchangeRateRepo,
     SystemActionRepo,
+    UserRepo,
 };
 
 class FeeService implements FeeServiceInterface
@@ -34,13 +35,15 @@ class FeeService implements FeeServiceInterface
         ShareSettingRepo $ShareSettingRepo,
         CoinExchangeRateRepo $CoinExchangeRateRepo,
         ConfigRepo $ConfigRepo,
-        FeeCostRepo $FeeCostRepo
+        FeeCostRepo $FeeCostRepo,
+        UserRepo $UserRepo
     ) {
         $this->FeeSettingRepo = $FeeSettingRepo;
         $this->ShareSettingRepo = $ShareSettingRepo;
         $this->CoinExchangeRateRepo = $CoinExchangeRateRepo;
         $this->ConfigRepo = $ConfigRepo;
         $this->FeeCostRepo = $FeeCostRepo;
+        $this->UserRepo = $UserRepo;
         $this->coins = config('coin');
         $this->currencies = array_keys(config('currency'));
     }
@@ -77,6 +80,7 @@ class FeeService implements FeeServiceInterface
     ): array {
         assert(in_array($type, FeeSetting::TYPES));
         $decimal = $this->coins[$coin]['decimal'];
+        $default_fee_percentage = config('core.fee.percentage.transaction');
 
         if ($subject instanceof User) {
             $fee_applicable = $subject->group;
@@ -88,7 +92,7 @@ class FeeService implements FeeServiceInterface
         $matched_setting = $this->getMatchedSetting($coin_amount, $fee_settings);
 
         if (is_null($matched_setting)) {
-            $coin_fee_amount = Dec::fromString("0", $decimal);
+            $coin_fee_amount = Dec::mul($coin_amount, $default_fee_percentage)->div(100, $decimal);
         } elseif ($matched_setting->unit === '%') {
             $coin_fee_amount = Dec::mul($coin_amount, $matched_setting->value)->div(100, $decimal);
         } elseif ($matched_setting->unit === $coin) {
@@ -101,6 +105,7 @@ class FeeService implements FeeServiceInterface
             'coin' => $coin,
             'amount' => (string) $coin_fee_amount, # decimal depends on each coin
             'fee_setting' => $matched_setting,
+            'fee_percentage' => trim_zeros(data_get($matched_setting, 'value', $default_fee_percentage)),
         ];
     }
 
@@ -132,6 +137,78 @@ class FeeService implements FeeServiceInterface
      * @return list of shares include amount, currency, user and corresponding shareSetting
      */
     public function getFeeShares(
+        string $coin,
+        string $amount,
+        User $user
+    ): array {
+        $decimal = $this->coins[$coin]['decimal'];
+        $shareAmount = function ($amount, $percentage) use ($decimal) {
+            return $amount->mul($percentage)
+                ->div(100)
+                ->floor($decimal);
+        };
+
+        $percentage = config('core.share.percentage');
+        $share_sum = Dec::create(0);
+        $share_results = [];
+        $amount = Dec::create($amount);
+        if (!$amount->isPositive()) {
+            return [];
+        }
+
+        # Inviter share
+        $inviter = $user->inviter;
+        if (is_null($inviter)) {
+            $inviter = $user;
+        }
+        $share_amount = $shareAmount($amount, $percentage['inviter']);
+        $share_results[] = [
+            'user' => $inviter,
+            'amount' => $share_amount,
+        ];
+        $share_sum = $share_sum->add($share_amount);
+
+        # Group owner share
+        $group_owner = $user->group->owner;
+        if (is_null($group_owner)) {
+            $system_user = $this->UserRepo->find(config('core.system_user_id'));
+            $group_owner = $system_user;
+        }
+        if (is_null($group_owner)) {
+            $group_owner = $user;
+        }
+        $share_amount = $shareAmount($amount, $percentage['group_owner']);
+        $share_results[] = [
+            'user' => $group_owner,
+            'amount' => $share_amount,
+        ];
+        $share_sum = $share_sum->add($share_amount);
+
+        # System share
+        $system_share_amount = $amount->sub($share_sum);
+
+        $system_user = $this->UserRepo->find(config('core.system_user_id'));
+        if (is_null($system_user)) {
+            $root = $this->UserRepo->find(config('core.root_id'));
+            $system_user = $root;
+        }
+        if (is_null($system_user)) {
+            $system_user = $user;
+        }
+        $share_results[] = [
+            'user' => $system_user,
+            'amount' => $system_share_amount,
+        ];
+        $share_sum = $share_sum->add($system_share_amount);
+
+        if (empty($share_results)) {
+            throw new InternalServerError('Share results are empty');
+        }
+
+        return $share_results;
+    }
+
+    /* public function getFeeShares(
         string $coin,
         string $amount,
         Group $group = null
@@ -211,7 +288,7 @@ class FeeService implements FeeServiceInterface
         }
 
         return $share_results;
-    }
+    } */
 
     public function updateFeeCost()
     {
