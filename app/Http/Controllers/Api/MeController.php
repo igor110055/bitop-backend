@@ -60,14 +60,19 @@ class MeController extends AuthenticatedController
         $invitation = $this->UserRepo->findOrCreateInvitation($user);
         $url = url("auth/register?invitation={$invitation->id}");
         $invitees_count = $user->invitees()->count();
-        $group = $user->groups()->first();
 
-        return [
+        $res = [
             'code' => $invitation->id,
             'url' => $url,
             'invitee_count' => $invitees_count,
-            'group' => new GroupResource($group),
-            'commission_percentage' => config('core.share.percentage.inviter'),
+            'commission_rate' => config('core.share.percentage.inviter'),
         ];
+
+        $group = $user->groups()->first();
+        if ($group) {
+            $res['group'] = new GroupResource($group);
+        }
+
+        return $res;
     }
 }
