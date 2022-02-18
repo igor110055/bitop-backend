@@ -18,6 +18,14 @@
                     無
                 @endif
             </dd>
+            <dt class="col-sm-3">邀請人</dt>
+            <dd class="col-sm-9">
+                @if ($user->inviter)
+                    <a href="/admin/users/{{ $user->inviter->id }}">{{ $user->inviter->name.', '.$user->inviter->username }} ({{ $user->inviter->id }})</a>
+                @else
+                    無
+                @endif
+            </dd>
             <dt class="col-sm-3">國籍</dt>
             <dd class="col-sm-9">{{ $user->nationality }}</dd>
             <dt class="col-sm-3">偏好語言</dt>

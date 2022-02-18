@@ -50,13 +50,13 @@
             </div>
             @endif
 
-            @can('edit-fees')
+            @role('super-admin')
             @isset($group)
             <a href="{{ route('admin.groups.fee-settings.edit', ['group' => $group->id, 'type' => $type, 'coin' => $coin]) }}" class="btn btn-primary mb-5">前往設定</a>
             @else
             <a href="{{ route('admin.fee-settings.edit', ['type' => $type, 'coin' => $coin]) }}" class="btn btn-primary mb-5">前往設定</a>
             @endisset
-            @endcan
+            @endrole
 
         @endforeach
         </div>

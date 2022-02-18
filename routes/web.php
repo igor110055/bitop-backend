@@ -63,12 +63,12 @@ Route::group(
         Route::post('accounts/{account}/manipulation', 'AccountController@storeManipulation')->name('admin.accounts.manipulations.store');
 
         Route::get('groups/{group}/users', 'GroupController@getUsers')->name('admin.groups.users');
-        Route::get('groups/{group}/share-settings', 'GroupController@getShareSettings')->name('admin.groups.share-settings');
+        /*Route::get('groups/{group}/share-settings', 'GroupController@getShareSettings')->name('admin.groups.share-settings');
         Route::get('groups/{group}/share-settings/create', 'GroupController@createShareSetting')->name('admin.groups.share-settings.create');
         Route::post('groups/{group}/share-settings', 'GroupController@storeShareSetting')->name('admin.groups.share-settings.store');
         Route::delete('groups/{group}/share-settings', 'GroupController@destoryShareSetting')->name('admin.groups.share-settings.destroy');
         Route::get('groups/{group}/fee-settings', 'GroupController@getFeeSettings')->name('admin.groups.fee-settings');
-        Route::get('groups/{group}/fee-settings/edit/{type}/{coin}', 'GroupController@editFeeSettings')->name('admin.groups.fee-settings.edit');
+        Route::get('groups/{group}/fee-settings/edit/{type}/{coin}', 'GroupController@editFeeSettings')->name('admin.groups.fee-settings.edit'); */
         Route::get('groups/{group}/limitations', 'GroupController@getLimitations')->name('admin.groups.limitations');
         Route::get('groups/{group}/limitations/edit/{type}/{coin}', 'GroupController@editLimitations')->name('admin.groups.limitations.edit');
         Route::post('groups/{group}/limitations/store', 'GroupController@storeLimitation')->name('admin.groups.limitations.store');

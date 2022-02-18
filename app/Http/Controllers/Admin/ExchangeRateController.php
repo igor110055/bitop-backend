@@ -15,7 +15,6 @@ use App\Models\{
 use App\Repos\Interfaces\{
     CurrencyExchangeRateRepo,
     GroupRepo,
-    ShareSettingRepo,
 };
 
 
@@ -23,13 +22,11 @@ class ExchangeRateController extends AdminController
 {
     public function __construct(
         CurrencyExchangeRateRepo $CurrencyExchangeRateRepo,
-        GroupRepo $GroupRepo,
-        ShareSettingRepo $ShareSettingRepo
+        GroupRepo $GroupRepo
     ) {
         parent::__construct();
         $this->CurrencyExchangeRateRepo = $CurrencyExchangeRateRepo;
         $this->GroupRepo = $GroupRepo;
-        $this->ShareSettingRepo = $ShareSettingRepo;
 
         $this->middleware(
             ['role:super-admin']

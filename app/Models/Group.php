@@ -54,4 +54,9 @@ class Group extends Model
     {
         return $this->morphMany(Limitation::class, 'limitable');
     }
+
+    public function admin_actions()
+    {
+        return $this->morphMany(AdminAction::class, 'applicable');
+    }
 }

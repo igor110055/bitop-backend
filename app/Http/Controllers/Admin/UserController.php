@@ -174,13 +174,36 @@ class UserController extends AdminController
         ]);
     }
 
-    public function update(User $user, Request $request)
+    public function update(User $user, GroupRepo $GroupRepo, Request $request)
     {
-        $this->UserRepo->update($user, [
+        $new_group = $GroupRepo->findOrFail($request->input('group_id'));
+        $groups = $user->groups;
+
+        if ($groups->isNotEmpty()) {
+            foreach ($groups as $group) {
+                if ($group->id !== $new_group->id) {
+                    return redirect()->route('admin.users.edit', ['user' => $user])->with('flash_message', ['message' => "用戶為群組 {$group->name} 的群主，無法變更其群組。", 'class' => 'danger']);
+                }
+            }
+        }
+
+        if (!$this->UserRepo->checkUsernameAvailability($request->input('name'), $user)) {
+            return redirect()->route('admin.users.edit', ['user' => $user])->with('flash_message', ['message' => "顯示名稱已被其他用戶註冊", 'class' => 'danger']);
+        }
+
+        $update = [
             'username' => $request->input('name'),
             'group_id' => $request->input('group_id'),
+        ];
+
+        $this->UserRepo->update($user, $update);
+
+        $this->AdminActionRepo->createByApplicable($user, [
+            'admin_id' => \Auth::id(),
+            'type' => AdminAction::TYPE_USER_UPDATE,
+            'description' => json_encode($update),
         ]);
-        $user->refresh();
+
         return $this->show($user);
     }
 

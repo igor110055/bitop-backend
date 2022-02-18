@@ -40,8 +40,6 @@ class FeeSettingController extends AdminController
         $this->middleware(
             ['can:edit-fees'],
             ['only' => [
-                'edit',
-                'store',
             ]]
         );
 
@@ -49,6 +47,8 @@ class FeeSettingController extends AdminController
             ['role:super-admin'],
             ['only' => [
                 'storeFixed',
+                'edit',
+                'store',
             ]]
         );
     }

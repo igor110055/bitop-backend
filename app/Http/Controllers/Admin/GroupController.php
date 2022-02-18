@@ -27,6 +27,7 @@ use App\Repos\Interfaces\{
     ConfigRepo,
     GroupApplicationRepo,
     AdminActionRepo,
+    UserRepo,
 };
 use App\Services\{
     FeeServiceInterface,
@@ -44,7 +45,8 @@ class GroupController extends AdminController
         ShareSettingRepo $ShareSettingRepo,
         LimitationRepo $LimitationRepo,
         GroupApplicationRepo $GroupApplicationRepo,
-        AdminActionRepo $AdminActionRepo
+        AdminActionRepo $AdminActionRepo,
+        UserRepo $UserRepo
     ) {
         parent::__construct();
         $this->FeeSettingRepo = $FeeSettingRepo;
@@ -55,6 +57,7 @@ class GroupController extends AdminController
         $this->LimitationRepo = $LimitationRepo;
         $this->GroupApplicationRepo = $GroupApplicationRepo;
         $this->AdminActionRepo = $AdminActionRepo;
+        $this->UserRepo = $UserRepo;
         $this->coins = array_keys(config('coin'));
 
         $this->middleware(
@@ -100,8 +103,24 @@ class GroupController extends AdminController
     public function update(Group $group, GroupUpdateRequest $request)
     {
         $values = $request->validated();
+        $user = $this->UserRepo->findOrFail($values['user_id']);
+        $own_groups = $user->groups;
+
+        if ($own_groups->isNotEmpty()) {
+            foreach ($own_groups as $own_group) {
+                if ($group->id !== $own_group->id) {
+                    return redirect()->route('admin.groups.show', ['group' => $group->id])->with('flash_message', ['message' => "用戶 {$user->username} 已為群組 {$own_group->name} 的群主，無法指定為此群組的群主。"]);
+                }
+            }
+        }
 
         $this->GroupRepo->update($group, $values);
+
+        $this->AdminActionRepo->createByApplicable($group, [
+            'admin_id' => \Auth::id(),
+            'type' => AdminAction::TYPE_GROUP_UPDATE,
+            'description' => json_encode($values),
+        ]);
 
         return redirect()->route('admin.groups.show', ['group' => $group->id])->with('flash_message', ['message' => '群組資料編輯完成']);
     }

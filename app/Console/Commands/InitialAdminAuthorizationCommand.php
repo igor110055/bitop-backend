@@ -69,7 +69,6 @@ class InitialAdminAuthorizationCommand extends Command
             'edit-auth',
             'view-auth',
             'edit-groups',
-            'edit-fees',
             'edit-advertisements',
             'edit-orders',
             'edit-limitations',
