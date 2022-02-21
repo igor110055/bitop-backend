@@ -21,6 +21,7 @@ use App\Exceptions\Exception as InternelServerError;
 
 use DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 use App\Models\{
     FeeSetting,
@@ -199,7 +200,33 @@ class WalletService implements WalletServiceInterface
         return $this->get($link, true);
     }
 
-    public function withdrawal($coin, $address, $tag, $amount, $callback, $client_withdrawal_id, $is_full_payment = true)
+    public function checkInternalAddress($address, $coin)
+    {
+        if (in_array($coin, config('core.coin.support_internal_transfer'))) {
+            try {
+                $dryrun = $this->withdrawal(
+                    $coin,
+                    $address,
+                    null, # tag
+                    '0.0001',
+                    url('nowhere'),
+                    (string) Str::uuid(), # client_withdrawal_id,
+                    true, # is_full_payment
+                    true # dryrun
+                );
+                if (data_get($dryrun, 'type') === 'internal') {
+                    return true;
+                }
+            } catch (BadRequestError $e) { # invalid address situation
+                return false;
+            } catch (Throwable $e) {
+                Log::alert('WalletService/checkInternalAddress. unknown error: '. $e->getMessage());
+            }
+        }
+        return false;
+    }
+
+    public function withdrawal($coin, $address, $tag, $amount, $callback, $client_withdrawal_id, $is_full_payment = true, $dryrun = false)
     {
         $coin = $this->coin_map[$coin];
         $link = $this->link("{$coin}/withdrawals");
@@ -212,6 +239,7 @@ class WalletService implements WalletServiceInterface
             'callback' => $callback,
             'client_id' => $client_withdrawal_id,
             'timestamp' => $timestamp,
+            'dryrun' => $dryrun,
         ];
         return $this->post($link, $data);
     }

@@ -70,7 +70,16 @@ class SubmitWalletWithdrawal extends Command
 
         assert(in_array($coin, array_keys($this->coins)));
 
-        $res = $this->WalletService->withdrawal($coin, $address, $tag, $amount, $callback, $client_withdrawal_id, $is_full_payment);
+        $res = $this->WalletService->withdrawal(
+            $coin,
+            $address,
+            $tag,
+            $amount,
+            $callback,
+            $client_withdrawal_id,
+            $is_full_payment,
+            false  # dryrun
+        );
         $this->WalletService->checkWithdrawalResponseParameter($res);
 
         DB::transaction(function () use ($coin, $res) {
