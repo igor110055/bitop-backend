@@ -615,9 +615,6 @@ class AccountService implements  AccountServiceInterface
             if (data_get($compared, 'id') !== $withdrawal->wallet_id) {
                 $diff['id'] = data_get($compared, 'id');
             }
-            if (data_get($compared, 'transaction') !== $withdrawal->transaction) {
-                $diff['transaction'] = data_get($compared, 'transaction');
-            }
         }
 
         if (!empty($diff)) {
@@ -674,7 +671,6 @@ class AccountService implements  AccountServiceInterface
             data_get($response, 'amount') !== data_get($values, 'amount') or
             data_get($response, 'src_amount') !== data_get($values, 'src_amount') or
             data_get($response, 'dst_amount') !== data_get($values, 'dst_amount') or
-            data_get($response, 'transaction') !== data_get($values, 'transaction') or
             data_get($response, 'currency') !== data_get($values, 'currency') or
             data_get($response, 'fee_currency') !== data_get($values, 'fee_currency') or
             data_get($response, 'is_full_payment') !== data_get($values, 'is_full_payment')
@@ -756,7 +752,10 @@ class AccountService implements  AccountServiceInterface
             $wallet_balance = $this->WalletBalanceRepo->findForUpdateByCoin($fee_coin);
 
             $this->WithdrawalRepo->setNotifed($withdrawal);
-            $this->WithdrawalRepo->update($withdrawal, ['callback_response' => $values]);
+            $this->WithdrawalRepo->update($withdrawal, [
+                'callback_response' => $values,
+                'transaction' => data_get($values, 'transaction'),
+            ]);
 
             $fee_amount = data_get($values, 'fee', '0');
             if (!Dec::eq($fee_amount, $withdrawal->wallet_fee)) {
