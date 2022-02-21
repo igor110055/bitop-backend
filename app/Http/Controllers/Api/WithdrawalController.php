@@ -130,13 +130,29 @@ class WithdrawalController extends Controller
     {
         $values = $request->validated();
         $user = auth()->user();
+
+        $coin = data_get($values, 'coin');
+        $amount = data_get($values, 'amount');
+        $address = data_get($values, 'address');
         $result = $this->AccountService
             ->calcWithdrawal(
                 $user,
-                data_get($values, 'coin'),
-                data_get($values, 'amount'),
+                $coin,
+                $amount,
                 false
             );
+
+        if (!empty($address)) {
+            $is_internal_address = $this->WalletService
+                ->checkInternalAddress(
+                    $address,
+                    $coin
+                );
+            if ($is_internal_address) {
+                $result['fee'] = '0';
+            }
+        }
+
         return [
             'coin' => data_get($result, 'coin'),
             'amount' => data_get($result, 'amount'),

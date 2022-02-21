@@ -373,13 +373,30 @@ class AccountService implements  AccountServiceInterface
         string $message = null
     ) {
         $account = $this->AccountRepo->findByUserCoinOrCreate($user, $coin);
-        $calc_result = $this->calcWithdrawal(
-            $user,
-            $coin,
-            $amount,
-            true
-        );
-        return DB::transaction(function () use ($account, $address, $tag, $calc_result, $message) {
+
+        $coin_decimal = $this->coins[$coin]['decimal'];
+        $amount = Dec::create($amount)->floor($coin_decimal);
+
+        $is_internal_address = $this->WalletService
+            ->checkInternalAddress(
+                $address,
+                $coin
+            );
+        if ($is_internal_address) {
+            $fee = 0;
+            $fee_setting = null;
+        } else {
+            $calc_result = $this->calcWithdrawal(
+                $user,
+                $coin,
+                $amount,
+                true
+            );
+            $fee = data_get($calc_result, 'fee');
+            $fee_setting = data_get($calc_result, 'fee_setting');
+        }
+
+        return DB::transaction(function () use ($account, $amount, $address, $tag, $fee, $fee_setting, $message) {
             $account = $this->AccountRepo->findForUpdate($account->id);
             # Create withdrawal
             $withdrawal =  $this->WithdrawalRepo->create([
@@ -388,9 +405,9 @@ class AccountService implements  AccountServiceInterface
                 'coin' => $account->coin,
                 'address' => $address,
                 'tag' => $tag,
-                'amount' => $calc_result['amount'],
-                'fee' => $calc_result['fee'],
-                'fee_setting_id' => $calc_result['fee_setting']['id'],
+                'amount' => (string) $amount,
+                'fee' => $fee,
+                'fee_setting_id' => data_get($fee_setting, 'id'),
                 'message' => $message,
                 'expired_at' => millitime(Carbon::now()->addMinute(config('core.withdrawal.timeout'))),
             ]);
@@ -401,7 +418,7 @@ class AccountService implements  AccountServiceInterface
             ]);
 
             # transaction
-            $amount_with_fee = (string) Dec::add($calc_result['amount'], $calc_result['fee']);
+            $amount_with_fee = (string) Dec::add($amount, $fee);
             $account = $this->lock(
                 $account->user,
                 $account->coin,
@@ -453,8 +470,9 @@ class AccountService implements  AccountServiceInterface
                 $tag,
                 $amount,
                 $callback,
-                $id,  # client_id
-                true  # is_full_payment
+                $id,   # client_id
+                true,  # is_full_payment
+                false  # dryrun
             );
             Log::info("submitWithdrawal. Withdrawal {$id} submitted successfully.", $response);
         } catch (ConflictHttpException $e) {
@@ -860,6 +878,7 @@ class AccountService implements  AccountServiceInterface
                     'user_id' => $account->user_id,
                     'account_id' => $account->id,
                     'wallet_id' => data_get($values, 'id'),
+                    'type' => data_get($values, 'type'),
                     'transaction' => data_get($values, 'transaction'),
                     'coin' => $account->coin,
                     'address' => data_get($values, 'address'),

@@ -20,6 +20,7 @@ interface WalletServiceInterface
     );
     public function getAllBalance(); // all coin balances in the wallet
     public function getBalanceByCoin($coin); // specific coin balance in the wallet
+    public function checkInternalAddress($address, $coin);
     public function withdrawal(
         $coin,
         $address,
@@ -27,7 +28,8 @@ interface WalletServiceInterface
         $amount,
         $callback,
         $client_withdrawal_id,
-        $is_full_payment = true
+        $is_full_payment = true,
+        $dryrun
     );
     public function getAllWithdrawals($coin);
     public function getAllDeposits($coin);

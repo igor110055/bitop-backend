@@ -63,6 +63,10 @@ return [
             'USDT-TRC20' => 6,
         ],
         'require_tag' => [],
+        'support_internal_transfer' => [
+            'USDT-ERC20',
+            'USDT-TRC20',
+        ],
     ],
     'nationality' => [
         'CN' => [

@@ -15,6 +15,7 @@ class PreviewWithdrawalRequest extends PublicRequest
         return [
             'coin' => 'required|in:'.implode(",", $coins),
             'amount' => 'required|numeric|min:0',
+            'address' => 'string|nullable',
         ];
     }
 }

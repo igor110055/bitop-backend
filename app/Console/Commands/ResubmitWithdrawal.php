@@ -77,7 +77,8 @@ class ResubmitWithdrawal extends Command
             $amount,
             $callback,
             $id,  # client_id
-            true  # is_full_payment
+            true,  # is_full_payment
+            false # dryrun
         );
         $this->line(json_encode($response));
         Log::alert("ResubmitWithdrawal. Withdrawal {$id}", $response);
