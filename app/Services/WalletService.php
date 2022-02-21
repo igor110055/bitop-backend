@@ -289,7 +289,6 @@ class WalletService implements WalletServiceInterface
             'id',
             'address',
             'account',
-            'transaction',
             'currency',
             'amount',
             'confirmed_at'
@@ -338,7 +337,6 @@ class WalletService implements WalletServiceInterface
             'id',
             'address',
             'account',
-            'transaction',
             'currency',
             'amount',
             'src_amount',
