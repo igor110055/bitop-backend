@@ -26,7 +26,7 @@ class GoogleChatLogHandler extends AbstractProcessingHandler
             json_encode($data)
         );
         $client = new Client([
-            'timeout' => '0.1',
+            'timeout' => '0.2',
         ]);
         try {
             $promise = $client->sendAsync($request)->wait();

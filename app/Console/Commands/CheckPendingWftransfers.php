@@ -60,7 +60,7 @@ class CheckPendingWftransfers extends Command
             } catch (\Throwable $e) {
                 $msg = $e->getMessage();
                 $this->error("CheckPendingWftransfers, get remote order {$wftransfer->id} failed. {$msg}");
-                Log::critical("CheckPendingWftransfers, get remote order {$wftransfer->id} failed. {$msg}");
+                Log::alert("CheckPendingWftransfers, get remote order {$wftransfer->id} failed. {$msg}");
                 $msg = json_decode($msg, true);
                 if (data_get($msg, 'error_key') === 'order_not_found') {
                     $this->WftransferRepo->update($wftransfer, ['closed_at' => millitime()]);

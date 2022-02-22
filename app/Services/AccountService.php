@@ -631,7 +631,10 @@ class AccountService implements  AccountServiceInterface
         }
         if ($is_callback) {
             if (data_get($compared, 'id') !== $withdrawal->wallet_id) {
-                $diff['id'] = data_get($compared, 'id');
+                $diff['id'] = [
+                    'compared' => data_get($compared, 'id'),
+                    'withdrawal' => $withdrawal->wallet_id,
+                ];
             }
         }
 
@@ -773,6 +776,7 @@ class AccountService implements  AccountServiceInterface
             $this->WithdrawalRepo->update($withdrawal, [
                 'callback_response' => $values,
                 'transaction' => data_get($values, 'transaction'),
+                'fee' => data_get($values, 'fee'),
             ]);
 
             $fee_amount = data_get($values, 'fee', '0');
