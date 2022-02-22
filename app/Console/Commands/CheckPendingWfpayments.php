@@ -60,7 +60,7 @@ class CheckPendingWfpayments extends Command
             } catch (\Throwable $e) {
                 $msg = $e->getMessage();
                 $this->error("CheckPendingWfpayments, get remote order {$wfpayment->id} failed. {$msg}");
-                Log::critical("CheckPendingWfpayments, get remote order {$wfpayment->id} failed. {$msg}");
+                Log::alert("CheckPendingWfpayments, get remote order {$wfpayment->id} failed. {$msg}");
                 $msg = json_decode($msg, true);
                 if (data_get($msg, 'error_key') === 'order_not_found') {
                     $this->WfpaymentRepo->update($wfpayment, ['closed_at' => millitime()]);

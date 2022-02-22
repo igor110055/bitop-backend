@@ -59,7 +59,7 @@ class SubmitPendingWithdrawals extends Command
                 $this->AccountService->submitWithdrawal($w);
             } catch (\Throwable $e) {
                 $this->error("SubmitPendingWithdrawals, withdrawal {$w->id} submit failed. {$e->getMessage()}");
-                Log::critical("SubmitPendingWithdrawals, withdrawal {$w->id} submit failed. {$e->getMessage()}");
+                Log::alert("SubmitPendingWithdrawals, withdrawal {$w->id} submit failed. {$e->getMessage()}");
             }
         }
     }

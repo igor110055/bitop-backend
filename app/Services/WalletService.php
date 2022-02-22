@@ -369,7 +369,6 @@ class WalletService implements WalletServiceInterface
             'amount',
             'src_amount',
             'dst_amount',
-            'fee',
             'is_full_payment',
             'callback',
             'client_id',
@@ -435,7 +434,7 @@ class WalletService implements WalletServiceInterface
                 Log::info("WalletService response.", $json);
                 return $json;
             }
-            Log::critical('WalletService Invalid json response from vendor: ' . (string)$response->getBody(), $reporting_data);
+            Log::alert('WalletService Invalid json response from vendor: ' . (string)$response->getBody(), $reporting_data);
             throw new VendorException('Invalid json response from vendor.');
         } catch (ClientException $e) { # status code 4xx
             $response = $e->getResponse();
@@ -473,7 +472,7 @@ class WalletService implements WalletServiceInterface
                 throw new VendorException('BadBalanceError or BadUtxoBalanceError');
             }
 
-            Log::critical("WalletService request error. {$status_code} {$message}", $reporting_data);
+            Log::alert("WalletService request error. {$status_code} {$message}", $reporting_data);
             throw new BadRequestError($message);
 
         } catch (RequestException $e) { # status code 5xx
@@ -539,7 +538,7 @@ class WalletService implements WalletServiceInterface
     {
         $calculated = "sha512=".hash_hmac('sha512', $content, $this->key);
         if ($calculated !== $signature) {
-            Log::critical('Wallet Service verifySignature fail', [
+            Log::alert('Wallet Service verifySignature fail', [
                 'content' => $content,
                 'calculated' => $calculated,
                 'signature' => $signature,
