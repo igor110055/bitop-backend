@@ -51,7 +51,7 @@ class WithdrawalRepo implements \App\Repos\Interfaces\WithdrawalRepo
             'transaction' => data_get($values, 'transaction'),
             'src_amount' => data_get($values, 'src_amount'),
             'dst_amount' => data_get($values, 'dst_amount'),
-            'wallet_fee' => data_get($values, 'fee'),
+            'wallet_fee' => data_get($values, 'fee', '0'),
             'wallet_fee_coin' => data_get($values, 'fee_currency') ?? data_get($values, 'currency'),
             'response' => $values,
         ];

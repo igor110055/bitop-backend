@@ -565,34 +565,36 @@ class AccountService implements  AccountServiceInterface
             }
 
             # wallet balance: wallet fee
-            if (isset($wallet_fee_balance)) {
-                $this->WalletBalanceRepo->withdraw(
-                    $wallet_fee_balance,
-                    $withdrawal->wallet_fee
-                );
-                $wallet_fee_balance->refresh();
+            if (Dec::create($withdrawal->wallet_fee)->isPositive()) {
+                if (isset($wallet_fee_balance)) {
+                    $this->WalletBalanceRepo->withdraw(
+                        $wallet_fee_balance,
+                        $withdrawal->wallet_fee
+                    );
+                    $wallet_fee_balance->refresh();
 
-                # wallet balance log
-                $this->WalletBalanceLogRepo->create(
-                    $withdrawal,
-                    $wallet_fee_balance,
-                    WalletBalanceLog::TYPE_WALLET_FEE,
-                    (string) Dec::create($withdrawal->wallet_fee)->additiveInverse()
-                );
-            } else {
-                $this->WalletBalanceRepo->withdraw(
-                    $wallet_balance,
-                    $withdrawal->wallet_fee
-                );
-                $wallet_balance->refresh();
+                    # wallet balance log
+                    $this->WalletBalanceLogRepo->create(
+                        $withdrawal,
+                        $wallet_fee_balance,
+                        WalletBalanceLog::TYPE_WALLET_FEE,
+                        (string) Dec::create($withdrawal->wallet_fee)->additiveInverse()
+                    );
+                } else {
+                    $this->WalletBalanceRepo->withdraw(
+                        $wallet_balance,
+                        $withdrawal->wallet_fee
+                    );
+                    $wallet_balance->refresh();
 
-                # wallet balance log
-                $this->WalletBalanceLogRepo->create(
-                    $withdrawal,
-                    $wallet_balance,
-                    WalletBalanceLog::TYPE_WALLET_FEE,
-                    (string) Dec::create($withdrawal->wallet_fee)->additiveInverse()
-                );
+                    # wallet balance log
+                    $this->WalletBalanceLogRepo->create(
+                        $withdrawal,
+                        $wallet_balance,
+                        WalletBalanceLog::TYPE_WALLET_FEE,
+                        (string) Dec::create($withdrawal->wallet_fee)->additiveInverse()
+                    );
+                }
             }
             $this->SystemActionRepo->createByApplicable($withdrawal, [
                 'type' => SystemAction::TYPE_SUBMIT_WITHDRAWAL,
