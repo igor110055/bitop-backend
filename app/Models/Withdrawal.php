@@ -26,6 +26,7 @@ class Withdrawal extends UuidModel
         'user_id',
         'account_id',
         'wallet_id',
+        'type',
         'transaction',
         'coin',
         'address',
