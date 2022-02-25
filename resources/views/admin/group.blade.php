@@ -12,16 +12,6 @@
             href="{{ route('admin.groups.users', ['group' => $group->id]) }}"
             class="btn btn-primary waves-effect"
         >成員列表</a>
-        <!-- @role('super-admin')
-        <a
-            href="{{ route('admin.groups.share-settings', ['group' => $group->id]) }}"
-            class="btn btn-primary waves-effect"
-        >分帳設定</a>
-        <a
-            href="{{ route('admin.groups.fee-settings', ['group' => $group->id]) }}"
-            class="btn btn-primary waves-effect"
-        >手續費設定</a>
-        @endrole -->
         @can('edit-groups')
         <a
             href="{{ route('admin.groups.limitations', ['group' => $group->id]) }}"
