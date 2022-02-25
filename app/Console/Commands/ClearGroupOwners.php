@@ -6,7 +6,7 @@ use DB;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
-class UpdateUserInviter extends Command
+class ClearGroupOwners extends Command
 {
     /**
      * The name and signature of the console command.
