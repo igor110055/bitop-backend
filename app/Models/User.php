@@ -196,7 +196,7 @@ class User extends AuthModel
 
     public function invitations()
     {
-        return $this->hasMany(invitation::class);
+        return $this->hasMany(Invitation::class);
     }
 
     public function accounts()
