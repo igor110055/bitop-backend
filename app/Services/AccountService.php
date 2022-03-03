@@ -778,7 +778,7 @@ class AccountService implements  AccountServiceInterface
             $this->WithdrawalRepo->update($withdrawal, [
                 'callback_response' => $values,
                 'transaction' => data_get($values, 'transaction'),
-                'fee' => data_get($values, 'fee'),
+                'wallet_fee' => data_get($values, 'fee'),
             ]);
 
             $fee_amount = data_get($values, 'fee', '0');
