@@ -69,6 +69,7 @@ Route::group(
         Route::delete('groups/{group}/share-settings', 'GroupController@destoryShareSetting')->name('admin.groups.share-settings.destroy');
         Route::get('groups/{group}/fee-settings', 'GroupController@getFeeSettings')->name('admin.groups.fee-settings');
         Route::get('groups/{group}/fee-settings/edit/{type}/{coin}', 'GroupController@editFeeSettings')->name('admin.groups.fee-settings.edit'); */
+        Route::get('groups/{group}/delete', 'GroupController@delete')->name('admin.groups.delete');
         Route::get('groups/{group}/limitations', 'GroupController@getLimitations')->name('admin.groups.limitations');
         Route::get('groups/{group}/limitations/edit/{type}/{coin}', 'GroupController@editLimitations')->name('admin.groups.limitations.edit');
         Route::post('groups/{group}/limitations/store', 'GroupController@storeLimitation')->name('admin.groups.limitations.store');
@@ -77,7 +78,7 @@ Route::group(
         Route::get('groups/applications/', 'GroupController@getApplications')->name('admin.groups.applications');
         Route::get('groups/applications/{application}', 'GroupController@getApplication')->name('admin.groups.application');
         Route::post('groups/applications/{application}/verify', 'GroupController@verifyApplication')->name('admin.groups.application-verify');
-        Route::resource('groups', 'GroupController', ['only' => ['index', 'show', 'create'], 'as' => 'admin']);
+        Route::resource('groups', 'GroupController', ['only' => ['index', 'show', 'create', 'destroy'], 'as' => 'admin']);
 
         Route::get('fee-settings/data', 'FeeSettingController@data');
         Route::get('fee-settings/edit/{type}/{coin}', 'FeeSettingController@edit')->name('admin.fee-settings.edit');

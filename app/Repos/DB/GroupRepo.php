@@ -101,7 +101,5 @@ class GroupRepo implements \App\Repos\Interfaces\GroupRepo
             'filtered' => $data->count(),
             'data' => $data,
         ];
-
-        
     }
 }

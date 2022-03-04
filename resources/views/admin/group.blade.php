@@ -17,6 +17,12 @@
             href="{{ route('admin.groups.limitations', ['group' => $group->id]) }}"
             class="btn btn-primary waves-effect"
         >限額設定</a>
+        @if($group->id !== 'default')
+        <a
+            href="{{ route('admin.groups.delete', ['group' => $group->id]) }}"
+            class="btn btn-danger waves-effect"
+        >刪除群組</a>
+        @endif
         @endcan
     </div>
 </div>

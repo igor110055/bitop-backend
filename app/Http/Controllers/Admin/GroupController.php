@@ -17,6 +17,7 @@ use App\Models\{
     Config,
     GroupApplication,
     AdminAction,
+    User,
 };
 use App\Repos\Interfaces\{
     FeeSettingRepo,
@@ -109,12 +110,16 @@ class GroupController extends AdminController
         if ($own_groups->isNotEmpty()) {
             foreach ($own_groups as $own_group) {
                 if ($group->id !== $own_group->id) {
-                    return redirect()->route('admin.groups.show', ['group' => $group->id])->with('flash_message', ['message' => "用戶 {$user->username} 已為群組 {$own_group->name} 的群主，無法指定為此群組的群主。"]);
+                    return redirect()->route('admin.groups.show', ['group' => $group->id])->with('flash_message', ['message' => "用戶 {$user->username} 已為群組 {$own_group->id} 的群主，無法指定為此群組的群主。"]);
                 }
             }
         }
 
         $this->GroupRepo->update($group, $values);
+
+        $this->UserRepo->update($user, [
+            'group_id' => $group->id,
+        ]);
 
         $this->AdminActionRepo->createByApplicable($group, [
             'admin_id' => \Auth::id(),
@@ -140,12 +145,22 @@ class GroupController extends AdminController
         $values = $request->validated();
         $values['id'] = strtolower($values['id']);
 
+        $user = $this->UserRepo->findOrFail($values['user_id']);
+        $own_groups = $user->groups;
+        if ($own_groups->isNotEmpty()) {
+            $own_group = $own_groups->first();
+            return redirect()->route('admin.groups.create')->with('flash_message', ['message' => "用戶 {$user->username} 已為群組 {$own_group->id} 的群主，無法指定為此群組的群主。", 'class' => 'danger']);
+        }
+
         try {
             $group = $this->GroupRepo
                 ->create($values);
         } catch (Exception $e) {
             return response('Group id '.$values['id'].' has been used.', 409);
         }
+        $this->UserRepo->update($user, [
+            'group_id' => $group->id,
+        ]);
 
         return redirect()->route('admin.groups.show', ['group' => $group->id])->with('flash_message', ['message' => '群組已新增']);
     }
@@ -394,5 +409,33 @@ class GroupController extends AdminController
             }
         });
         return redirect()->route('admin.groups.applications')->with('flash_message', ['message' => "驗證{$application->group_name}群組申請"]);
+    }
+
+    public function delete(Group $group)
+    {
+        $groups = $this->GroupRepo->getJoinableGroupIds()->toArray();
+        $groups = array_diff($groups, [$group->id]);
+        return view('admin.group_delete', [
+            'group' => $group,
+            'groups' => array_combine($groups, $groups),
+        ]);
+    }
+
+    public function destroy(Group $group, Request $request)
+    {
+        $new_group = $this->GroupRepo->findOrFail($request->input('group_id'));
+        if ($group->id === Group::DEFAULT_GROUP_ID) {
+            return redirect()->route('admin.groups.delete', ['group' => $group])->with('flash_message', ['message' => "錯誤，Default 群組無法刪除", 'class' => 'danger']);
+        }
+        if ($group->id === $new_group->id) {
+            return redirect()->route('admin.groups.delete', ['group' => $group])->with('flash_message', ['message' => "錯誤，必須指定新的群組", 'class' => 'danger']);
+        }
+
+        User::where('group_id', $group->id)
+            ->update([
+                'group_id' => $new_group->id,
+            ]);
+        $group->delete();
+        return redirect()->route('admin.groups.index')->with('flash_message', ['message' => "群組 {$group->id} 已刪除"]);
     }
 }

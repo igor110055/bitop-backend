@@ -2,8 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class Group extends Model
 {
+    use SoftDeletes;
+
     const DEFAULT_GROUP_ID = 'default';
 
     protected $fillable = [
