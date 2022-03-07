@@ -62,7 +62,6 @@ class ExportService implements ExportServiceInterface
         $unit_price = $coin_price['unit_price'];
         $total = (string) Dec::mul($withdrawal->amount, $unit_price, $this->currency_decimal);
         $amount = (string) Dec::mul($withdrawal->amount, 1, $this->coin_decimal);
-        $fee_total = (string) Dec::mul($withdrawal->fee, $unit_price, $this->currency_decimal);
         $data = [
             'user_id' => $withdrawal->user_id,
             'transaction_id' => data_get($transaction, 'id'),
@@ -70,7 +69,7 @@ class ExportService implements ExportServiceInterface
             'coin' => $amount,
             'bank_fee' => '0.000',
             'system_fee' => '0.000',
-            'c_fee' => $fee_total,
+            'c_fee' => $withdrawal->fee,
             'type' => data_get($this->coin_types, $withdrawal->coin),
             'bankc_fee' => $unit_price,
             'handler_id' => $withdrawal->user_id,
