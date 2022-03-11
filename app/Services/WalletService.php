@@ -217,7 +217,7 @@ class WalletService implements WalletServiceInterface
                 if (data_get($dryrun, 'type') === 'internal') {
                     return true;
                 }
-            } catch (BadRequestError $e) { # invalid address situation
+            } catch (WrongAddressFormatError $e) { # invalid address situation
                 return false;
             } catch (Throwable $e) {
                 Log::alert('WalletService/checkInternalAddress. unknown error: '. $e->getMessage());
@@ -459,9 +459,9 @@ class WalletService implements WalletServiceInterface
                 throw new ModelNotFoundException;
             }
 
-            # for address validation api
+            # for address validation / preview withdrawal api
             if ($status_code === 422) {
-                if (data_get($reporting_data, 'response_body.code') === self::BadAddressError) {
+                if (($error_code === self::BadAddressError) or ($error_code === self::BadParameterError)) {
                     throw new WrongAddressFormatError;
                 }
             }
