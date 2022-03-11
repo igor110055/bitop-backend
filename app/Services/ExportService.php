@@ -62,7 +62,6 @@ class ExportService implements ExportServiceInterface
         $unit_price = $coin_price['unit_price'];
         $total = (string) Dec::mul($withdrawal->amount, $unit_price, $this->currency_decimal);
         $amount = (string) Dec::mul($withdrawal->amount, 1, $this->coin_decimal);
-        $fee_total = (string) Dec::mul($withdrawal->fee, $unit_price, $this->currency_decimal);
         $data = [
             'user_id' => $withdrawal->user_id,
             'transaction_id' => data_get($transaction, 'id'),
@@ -70,7 +69,7 @@ class ExportService implements ExportServiceInterface
             'coin' => $amount,
             'bank_fee' => '0.000',
             'system_fee' => '0.000',
-            'c_fee' => $fee_total,
+            'c_fee' => $withdrawal->fee,
             'type' => data_get($this->coin_types, $withdrawal->coin),
             'bankc_fee' => $unit_price,
             'handler_id' => $withdrawal->user_id,
@@ -122,20 +121,14 @@ class ExportService implements ExportServiceInterface
         $advertisement = $order->advertisement;
         $account = null;
         if ($advertisement->type === Advertisement::TYPE_SELL) {
-            $wfpayment = $order->wfpayments()
-                ->where('status', Wfpayment::STATUS_COMPLETED)
-                ->latest()
-                ->first();
-            if (!is_null($wfpayment)) {
+            $wfpayment = $order->payment_src;
+            if (!is_null($wfpayment) and ($wfpayment instanceof Wfpayment)) {
                 $wfpay_account = $wfpayment->wfpay_account;
                 $account = $wfpay_account->id;
             }
         } else {
-            $wftransfer = $order->wftransfers()
-                ->where('status', Wftransfer::STATUS_COMPLETED)
-                ->latest()
-                ->first();
-            if (!is_null($wftransfer)) {
+            $wftransfer = $order->payment_src;
+            if (!is_null($wftransfer) and ($wftransfer instanceof Wftransfer)) {
                 $wfpay_account = $wftransfer->wfpay_account;
                 $account = $wfpay_account->id;
             }
@@ -158,7 +151,7 @@ class ExportService implements ExportServiceInterface
             'amount' => $total,
             'coin' => $amount,
             'bank_fee' => '0.000',
-            'system_fee' => $fee,
+            'system_fee' => '0.000',
             'type' => data_get($this->coin_types, $order->coin),
             'bankc_fee' => $unit_price,
             'handler_id' =>  $order->src_user_id,
@@ -176,7 +169,7 @@ class ExportService implements ExportServiceInterface
         $data = [
             'user_id' => $order->dst_user_id,
             'transaction_id' => data_get($transaction, 'id'),
-            'account' => $account,
+            'account' => null,
             'amount' => $total,
             'coin' => $amount,
             'bank_fee' => '0.000',
@@ -192,12 +185,12 @@ class ExportService implements ExportServiceInterface
         $data = [
             'user_id' => $order->dst_user_id,
             'transaction_id' => data_get($transaction, 'id'),
-            'account' => null,
+            'account' => $account,
             'amount' => $total,
             'coin' => $amount,
             'bank_fee' => '0.000',
-            'system_fee' => $fee,
-            'type' => data_get($this->coin_types, $order->coin),
+            'system_fee' => '0.000',
+            'type' => '3',
             'bankc_fee' => $unit_price,
             'handler_id' =>  $order->dst_user_id,
         ];
