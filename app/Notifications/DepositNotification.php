@@ -45,13 +45,13 @@ class DepositNotification extends Notification implements ShouldQueue
     {
         $locale = $this->deposit->user->preferred_locale;
         $subject = __('notifications.email.deposit_notification.subject', [
-            'time' => $this->deposit->confirmed_at->toDateTimeString(),
+            'time' => datetime($this->deposit->confirmed_at),
         ], $locale);
         $greeting = __('notifications.email.deposit_notification.greeting', [], $locale);
         $content1 = __('notifications.email.deposit_notification.content1', [
             'amount' => comma_format(trim_zeros($this->deposit->amount)),
             'coin' => $this->deposit->coin,
-            'time' => $this->deposit->confirmed_at->toDateTimeString(),
+            'time' => datetime($this->deposit->confirmed_at),
         ], $locale);
         $content2 = __('notifications.email.deposit_notification.content2', [], $locale);
         return (new MailMessage)

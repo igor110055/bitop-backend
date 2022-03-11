@@ -56,7 +56,7 @@ class TransferVerification extends Notification implements ShouldQueue
         $url = url("api/transfers/confirm/${id}/${code}");
 
         $subject = __('notifications.email.transfer_verification.subject', [
-            'time' => Carbon::now()->toDateTimeString(),
+            'time' => datetime(Carbon::now()),
         ], $locale);
         $greeting = __('notifications.email.transfer_verification.greeting', [], $locale);
         $content1 = __('notifications.email.transfer_verification.content1', [], $locale);

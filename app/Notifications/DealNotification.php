@@ -100,7 +100,7 @@ class DealNotification extends Notification implements ShouldQueue
         $action = __('notifications.email.deal_notification.action', [], $locale);
         if ($this->role === 'dst_user') {
             $reminder =  __('notifications.email.deal_notification.dst_user_reminder', [
-                'time' => $this->order->expired_at->toDateTimeString(),
+                'time' => datetime($this->order->expired_at),
             ], $locale);
         } else {
             $reminder = '';

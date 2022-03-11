@@ -44,7 +44,7 @@ class CriticalErrorAlert extends Notification implements ShouldQueue
     public function toMail($notifiable)
     {
         $subject = __('notifications.email.critical_error_alert.subject', [
-            'time' => Carbon::now()->toDateTimeString(),
+            'time' => datetime(Carbon::now()),
         ]);
         return (new MailMessage)
             ->subject($subject)

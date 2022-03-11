@@ -30,7 +30,7 @@ return [
             'content' => 'Your reset verification code is',
         ],
         'transfer_verification' => [
-            'subject' => '['.config('app.name').'] Transfer Request - :time (UTC)',
+            'subject' => '['.config('app.name').'] Transfer Request - :time (UTC+8)',
             'greeting' => 'Transfer Requested',
             'content1' => 'Your account just issued a transfer request. Transfer information:',
             'content2' => "Before you confirm the transfer, please verify the target account carefully. If you could confirm that this operation is your own action, please click the button below:",
@@ -38,16 +38,16 @@ return [
             'content3' => 'For the safety of your assets, the button link will expire after 30 minutes.',
         ],
         'transfer_notification' => [
-            'subject' => '['.config('app.name').'] Transfer Notification - :time (UTC)',
+            'subject' => '['.config('app.name').'] Transfer Notification - :time (UTC+8)',
             'greeting' => 'Transfer Received!',
-            'content1' => 'You received a transfer of :amount :coin from user :source at :time (UTC)',
+            'content1' => 'You received a transfer of :amount :coin from user :source at :time (UTC+8)',
             'message' => ':source has left a message: :message',
             'content2' => 'Please kindly check your transaction details for more information. If you have any other concerns with this transfer please contact us.',
         ],
         'deposit_notification' => [
-            'subject' => '['.config('app.name').'] Deposit Received Notification - :time (UTC)',
+            'subject' => '['.config('app.name').'] Deposit Received Notification - :time (UTC+8)',
             'greeting' => 'Deposit Success!',
-            'content1' => 'You have successfully deposit :amount :coin in your account at :time (UTC)',
+            'content1' => 'You have successfully deposit :amount :coin in your account at :time (UTC+8)',
             'content2' => 'Please kindly check your transaction details for more information. If you have any other concerns with this deposit please contact us.',
         ],
         'order_confirmation' => [
@@ -55,7 +55,7 @@ return [
             'content' => 'Your order confirmation code is',
         ],
         'withdrawal_verification' => [
-            'subject' => '['.config('app.name').'] Withdrawal Request - :time (UTC)',
+            'subject' => '['.config('app.name').'] Withdrawal Request - :time (UTC+8)',
             'greeting' => 'Withdrawal Requested',
             'content1' => 'Your account just issued a withdrawal request. Withdrawal information:',
             'content2' => "Before you confirm the withdrawal, please verify the target address carefully. If you confirm the withdrawal to an erroneous address, we won't be able to help recovering your assets. If you understand the risks and can confirm that this was your own action, please click the button below:",
@@ -63,10 +63,10 @@ return [
             'content3' => 'For the safety of your assets, the button link will expire after 30 minutes.',
         ],
         'withdrawal_bad_request_notification' => [
-            'subject' => '['.config('app.name').'] Withdrawal Failure Notification - :time (UTC)',
+            'subject' => '['.config('app.name').'] Withdrawal Failure Notification - :time (UTC+8)',
             'greeting' => 'Your withdrawal has been canceled by system.',
-            'content1' => 'Your withdrawal which was submitted at :confirmed_time (UTC) with following information:',
-            'content2' => 'has been canceled by system at :canceled_time (UTC) due to invalid withdrawal information. The possible reasons may include invalid address or invalid tag provided.',
+            'content1' => 'Your withdrawal which was submitted at :confirmed_time (UTC+8) with following information:',
+            'content2' => 'has been canceled by system at :canceled_time (UTC+8) due to invalid withdrawal information. The possible reasons may include invalid address or invalid tag provided.',
             'content3' => 'If you have any question about this withdrawal, please contact us.',
         ],
         'deal_notification' => [
@@ -83,7 +83,7 @@ return [
                 ]
             ],
             'action' => 'View Order',
-            'dst_user_reminder' => 'You must complete your payment before :time UTC, and click the "CONFIRM PAYMENT" button in the order page.'
+            'dst_user_reminder' => 'You must complete your payment before :time (UTC+8), and click the "CONFIRM PAYMENT" button in the order page.'
         ],
         'claim_notification' => [
             'subject' => '['.config('app.name').'] Buyer Paid Order Notification #:order_id',
@@ -173,23 +173,23 @@ return [
             'action' => 'Visit '.config('app.name'),
         ],
         'critical_error_alert' => [
-            'subject' => '['.config('app.name').'] SYSTEM LOG - :time (UTC)',
+            'subject' => '['.config('app.name').'] SYSTEM LOG - :time (UTC+8)',
         ],
         'login_fail_user_lock' => [
-            'subject' => '['.config('app.name').'] User Lock By Login Failure Notification - :time (UTC)',
+            'subject' => '['.config('app.name').'] User Lock By Login Failure Notification - :time (UTC+8)',
             'greeting' => 'Dear :name',
             'content' => 'We notice that your account failed to sign in from the same IP address :IP three times consecutively. We had blocked your account from signing in from this IP address for an hour.',
             'content2' => 'If you consider your account is in a security risk, please change your password as soon as possible.',
             'content3' => 'Please contact us through our customer service if you have any further question.',
         ],
         'security_code_fail_user_lock' => [
-            'subject' => '['.config('app.name').'] User Lock By Security Code Failure Notification - :time (UTC)',
+            'subject' => '['.config('app.name').'] User Lock By Security Code Failure Notification - :time (UTC+8)',
             'greeting' => 'Dear :name',
             'content' => 'We notice that your account enter the wrong security code for three times consecutively. We had blocked your account temporary for 24 hours.',
             'content2' => 'If you consider your account is in a security risk, please change your password as soon as possible.',
         ],
         'announcement_notification' => [
-            'subject' => '['.config('app.name').'] :title - :time (UTC)',
+            'subject' => '['.config('app.name').'] :title - :time (UTC+8)',
             'greeting' => 'Dear :name',
             'content' => ':content',
             'action' => 'Visit '.config('app.name'),

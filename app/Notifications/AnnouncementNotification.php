@@ -60,7 +60,7 @@ class AnnouncementNotification extends Notification implements ShouldQueue
 
         $subject = __('notifications.email.announcement_notification.subject', [
             'title' => $content->title,
-            'time' => $this->announcement->released_at->toDateTimeString(),
+            'time' => datetime($this->announcement->released_at),
             ], $locale);
         $greeting = __('notifications.email.announcement_notification.greeting', [
                 'name' => $notifiable->username,

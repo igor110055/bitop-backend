@@ -44,14 +44,14 @@ class TransferNotification extends Notification implements ShouldQueue
     {
         $locale = $this->transfer->dst_user->preferred_locale;
         $subject = __('notifications.email.transfer_notification.subject', [
-            'time' => $this->transfer->created_at->toDateTimeString(),
+            'time' => datetime($this->transfer->created_at),
         ], $locale);
         $greeting = __('notifications.email.transfer_notification.greeting', [], $locale);
         $content1 = __('notifications.email.transfer_notification.content1', [
             'amount' => comma_format(trim_zeros($this->transfer->amount)),
             'coin' => $this->transfer->coin,
             'source' => $this->transfer->src_user->username,
-            'time' => $this->transfer->created_at->toDateTimeString(),
+            'time' => datetime($this->transfer->created_at),
         ], $locale);
         if (is_null($this->transfer->message)) {
             $message = null;

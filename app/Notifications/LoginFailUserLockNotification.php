@@ -46,7 +46,7 @@ class LoginFailUserLockNotification extends Notification implements ShouldQueue
     {
         $locale = $notifiable->preferred_locale;
         $subject = __('notifications.email.login_fail_user_lock.subject', [
-            'time' => Carbon::now()->toDateTimeString(),
+            'time' => datetime(Carbon::now()),
         ], $locale);
         $greeting = __('notifications.email.login_fail_user_lock.greeting', [
             'name' => $notifiable->username,

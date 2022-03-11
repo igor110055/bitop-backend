@@ -21,15 +21,15 @@ return [
             'content' => '你的安全码重置验证码是',
         ],
         'deactivate_tfa_verification' => [
-            'subject' => '['.config('app.name').'] 停用双重认证验证',
-            'content' => '你的停用双重认证验证码是',
+            'subject' => '['.config('app.name').'] 停用二步骤验证',
+            'content' => '你的停用二步骤验证验证码是',
         ],
         'reset_email_verification' => [
             'subject' => '['.config('app.name').'] Email 重置验证',
             'content' => '你的重置验证码是',
         ],
         'transfer_verification' => [
-            'subject' => '['.config('app.name').'] 划转验证',
+            'subject' => '['.config('app.name').'] 划转验证 - :time (UTC+8)',
             'greeting' => '划转请求',
             'content1' => '你的帐号提出了划转请求，资讯如下:',
             'content2' => '在你确认划转请求之前，请仔细检查目的帐号，若你确认此提现为自己的操作，请点击下方按钮：',
@@ -37,16 +37,16 @@ return [
             'content3' => '基于安全原因，此连结将于 30 分钟后失效。',
         ],
         'transfer_notification' => [
-            'subject' => '['.config('app.name').'] 划转通知 - :time (UTC)',
+            'subject' => '['.config('app.name').'] 划转通知 - :time (UTC+8)',
             'greeting' => '划转已到帐!',
-            'content1' => '您已于 :time (UTC) 收到来自 :source 的划转，数量 :amount :coin',
+            'content1' => '您已于 :time (UTC+8) 收到来自 :source 的划转，数量 :amount :coin',
             'message' => ':source 有一则留言给您: :message',
             'content2' => '请前往交易明细查看更多相关细节，如果对此划转有疑虑或是任何问题，请联络我们',
         ],
         'deposit_notification' => [
-            'subject' => '['.config('app.name').'] 充值成功通知 - :time (UTC)',
+            'subject' => '['.config('app.name').'] 充值成功通知 - :time (UTC+8)',
             'greeting' => '充值成功!',
-            'content1' => '您已于:time (UTC)成功充值:amount :coin',
+            'content1' => '您已于:time (UTC+8)成功充值:amount :coin',
             'content2' => '请前往交易明细查看更多相关细节，如果对此充值有疑虑或是任何问题，请联络我们',
         ],
         'order_confirmation' => [
@@ -54,7 +54,7 @@ return [
             'content' => '你的交易验证码是',
         ],
         'withdrawal_verification' => [
-            'subject' => '['.config('app.name').'] 提现请求 - :time (UTC)',
+            'subject' => '['.config('app.name').'] 提现请求 - :time (UTC+8)',
             'greeting' => '提现请求',
             'content1' => '你的帐号提出了提现请求，资讯如下:',
             'content2' => '在你确认提现请求之前，请仔细检查目的地址与 Tag，若你提现至一个错误的地址，资产将无法取回。若你理解此风险并确认此提现为你自己所操作，请点击下方按钮：',
@@ -62,10 +62,10 @@ return [
             'content3' => '基于安全原因，此连结将于 30 分钟后失效。',
         ],
         'withdrawal_bad_request_notification' => [
-            'subject' => '['.config('app.name').'] 提现失败通知 - :time (UTC)',
+            'subject' => '['.config('app.name').'] 提现失败通知 - :time (UTC+8)',
             'greeting' => '您的提现已被系统取消',
-            'content1' => '您于 :confirmed_time (UTC) 送出的提现：',
-            'content2' => '因为资料有误，已于 :canceled_time (UTC) 被系统取消，可能是地址或是 tag 格式错误，请检查后重新操作。',
+            'content1' => '您于 :confirmed_time (UTC+8) 送出的提现：',
+            'content2' => '因为资料有误，已于 :canceled_time (UTC+8) 被系统取消，可能是地址或是 tag 格式错误，请检查后重新操作。',
             'content3' => '如果对此有疑虑或是任何问题，请联络我们',
         ],
         'deal_notification' => [
@@ -82,7 +82,7 @@ return [
                 ]
             ],
             'action' => '查看订单',
-            'dst_user_reminder' => '请于 :time UTC 之前完成付款，并点选订单中「确认已付款」按钮。'
+            'dst_user_reminder' => '请于 :time (UTC+8) 之前完成付款，并点选订单中「确认已付款」按钮。'
         ],
         'claim_notification' => [
             'subject' => '['.config('app.name').'] 买家已付款通知 #:order_id',
@@ -172,23 +172,29 @@ return [
             'action' => '前往 '.config('app.name'),
         ],
         'login_fail_user_lock' => [
-            'subject' => '['.config('app.name').'] 登入失败锁定通知 - :time (UTC)',
+            'subject' => '['.config('app.name').'] 登入失败锁定通知 - :time (UTC+8)',
             'greeting' => '亲爱的用户 :name',
             'content' => '我们发现你的帐号连续登入失败达 3 次，我们已阻挡你的帐号从 IP 地址 :IP 登入，锁定时间 1 小时。',
             'content2' => '若您认为您的帐号有安全性风险，请尽速更换密码。',
             'content3' => '如有任何问题，请透过客服管道联系我们。',
         ],
         'security_code_fail_user_lock' => [
-            'subject' => '['.config('app.name').'] 帐号锁定通知 - :time (UTC)',
+            'subject' => '['.config('app.name').'] 帐号锁定通知 - :time (UTC+8)',
             'greeting' => '亲爱的用户 :name',
             'content' => '我们发现你的帐号连续输入错误的安全码达 3 次，我们已暂时冻结你的帐号 24 小時。',
             'content2' => '若您认为您的帐号有安全性风险，请尽速联系我们。',
+        ],
+        'announcement_notification' => [
+            'subject' => '['.config('app.name').'] :title - :time (UTC+8)',
+            'greeting' => '亲爱的用户 :name',
+            'content' => ':content',
+            'action' => '前往 '.config('app.name'),
         ],
     ],
     'push' => [
         'deal_notification' => [
             'subject' => '['.config('app.name').'] 订单成立通知 #:order_id',
-            'content' => ' 你有一笔:amount :coin的订单，请登入查看详情。',
+            'content' => '你有一笔:amount :coin的订单，请登入查看详情。',
         ],
     ],
 ];

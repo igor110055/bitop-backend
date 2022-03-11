@@ -46,11 +46,11 @@ class WithdrawalBadRequestNotification extends Notification implements ShouldQue
     {
         $locale = $this->withdrawal->user->preferred_locale;
         $subject = __('notifications.email.withdrawal_bad_request_notification.subject', [
-            'time' => $this->withdrawal->canceled_at->toDateTimeString(),
+            'time' => datetime($this->withdrawal->canceled_at),
         ], $locale);
         $greeting = __('notifications.email.withdrawal_bad_request_notification.greeting', [], $locale);
         $content1 = __('notifications.email.withdrawal_bad_request_notification.content1', [
-            'confirmed_time' => $this->withdrawal->confirmed_at->toDateTimeString(),
+            'confirmed_time' => datetime($this->withdrawal->confirmed_at),
         ], $locale);
         $data = '<table style="margin: 20px 0; font-size: 14px; border-spacing: 10px; border: none; color: #3d4852">';
         $data .= "<tr><td>".__('common.withdrawal', [], $locale)." ID</td><td>{$this->withdrawal->id}</td></tr>";
@@ -61,7 +61,7 @@ class WithdrawalBadRequestNotification extends Notification implements ShouldQue
         }
         $data .= '</table>';
         $content2 = __('notifications.email.withdrawal_bad_request_notification.content2', [
-            'canceled_time' => $this->withdrawal->canceled_at->toDateTimeString(),
+            'canceled_time' => datetime($this->withdrawal->canceled_at),
         ], $locale);
         $content3 = __('notifications.email.withdrawal_bad_request_notification.content3', [], $locale);
         return (new MailMessage)

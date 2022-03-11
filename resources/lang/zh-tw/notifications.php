@@ -21,15 +21,15 @@ return [
             'content' => '你的安全碼重置驗證碼是',
         ],
         'deactivate_tfa_verification' => [
-            'subject' => '['.config('app.name').'] 停用二步驟認證驗證',
-            'content' => '你的停用二步驟認證驗證碼是',
+            'subject' => '['.config('app.name').'] 停用二步驟驗證',
+            'content' => '你的停用二步驟驗證驗證碼是',
         ],
         'reset_email_verification' => [
             'subject' => '['.config('app.name').'] Email 重置驗證',
             'content' => '你的重置驗證碼是',
         ],
         'transfer_verification' => [
-            'subject' => '['.config('app.name').'] 劃轉驗證 - :time (UTC)',
+            'subject' => '['.config('app.name').'] 劃轉驗證 - :time (UTC+8)',
             'greeting' => '劃轉請求',
             'content1' => '你的帳號提出了劃轉請求，資訊如下:',
             'content2' => '在你確認劃轉請求之前，請仔細檢查目的帳號，若你確認此提現為自己的操作，請點擊下方按鈕：',
@@ -37,16 +37,16 @@ return [
             'content3' => '基於安全原因，此連結將於 30 分鐘後失效。',
         ],
         'transfer_notification' => [
-            'subject' => '['.config('app.name').'] 劃轉通知 - :time (UTC)',
+            'subject' => '['.config('app.name').'] 劃轉通知 - :time (UTC+8)',
             'greeting' => '劃轉已到帳!',
-            'content1' => '您已於 :time (UTC) 收到來自 :source 的劃轉，數量 :amount :coin',
+            'content1' => '您已於 :time (UTC+8) 收到來自 :source 的劃轉，數量 :amount :coin',
             'message' => ':source 有一則留言給您: :message',
             'content2' => '請前往交易明細查看更多相關細節，如果對此劃轉有疑慮或是任何問題，請聯絡我們',
         ],
         'deposit_notification' => [
-            'subject' => '['.config('app.name').'] 充值成功通知 - :time (UTC)',
+            'subject' => '['.config('app.name').'] 充值成功通知 - :time (UTC+8)',
             'greeting' => '充值成功!',
-            'content1' => '您已於:time (UTC)成功充值:amount :coin',
+            'content1' => '您已於:time (UTC+8)成功充值:amount :coin',
             'content2' => '請前往交易明細查看更多相關細節，如果對此充值有疑慮或是任何問題，請聯絡我們',
         ],
         'order_confirmation' => [
@@ -54,7 +54,7 @@ return [
             'content' => '你的交易驗證碼是',
         ],
         'withdrawal_verification' => [
-            'subject' => '['.config('app.name').'] 提現請求 - :time (UTC)',
+            'subject' => '['.config('app.name').'] 提現請求 - :time (UTC+8)',
             'greeting' => '提現請求',
             'content1' => '你的帳號提出了提現請求，資訊如下:',
             'content2' => '在你確認提現請求之前，請仔細檢查目的地址與 Tag，若你提現至一個錯誤的地址，資產將無法取回。若你理解此風險並確認此提現為你自己所操作，請點擊下方按鈕：',
@@ -62,10 +62,10 @@ return [
             'content3' => '基於安全原因，此連結將於 30 分鐘後失效。',
         ],
         'withdrawal_bad_request_notification' => [
-            'subject' => '['.config('app.name').'] 提現失敗通知 - :time (UTC)',
+            'subject' => '['.config('app.name').'] 提現失敗通知 - :time (UTC+8)',
             'greeting' => '您的提現已被系統取消',
-            'content1' => '您於 :confirmed_time (UTC) 送出的提現：',
-            'content2' => '因為資料有誤，已於 :canceled_time (UTC) 被系統取消，可能是地址或是 tag 格式錯誤，請檢查後重新操作。',
+            'content1' => '您於 :confirmed_time (UTC+8) 送出的提現：',
+            'content2' => '因為資料有誤，已於 :canceled_time (UTC+8) 被系統取消，可能是地址或是 tag 格式錯誤，請檢查後重新操作。',
             'content3' => '如果對此有疑慮或是任何問題，請聯絡我們',
         ],
         'deal_notification' => [
@@ -82,7 +82,7 @@ return [
                 ]
             ],
             'action' => '查看訂單',
-            'dst_user_reminder' => '請於 :time UTC 之前完成付款，並點選訂單中「確認已付款」按鈕。'
+            'dst_user_reminder' => '請於 :time (UTC+8) 之前完成付款，並點選訂單中「確認已付款」按鈕。'
         ],
         'claim_notification' => [
             'subject' => '['.config('app.name').'] 買家已付款通知 #:order_id',
@@ -115,7 +115,7 @@ return [
         'order_completed_src_notification' => [
             'subject' => '['.config('app.name').'] 訂單完成通知 #:order_id',
             'greeting' => '訂單完成通知 #:order_id',
-            'content' => '訂單號 #:order_id 的付款已確認，虛擬貨幣已將放行至買家的帳戶中。',
+            'content' => '訂單號 #:order_id 的付款已確認，虛擬貨幣已放行至買家的帳戶中。',
             'action' => '查看訂單',
         ],
         'order_payment_check'=> [
@@ -172,17 +172,23 @@ return [
             'action' => '前往 '.config('app.name'),
         ],
         'login_fail_user_lock' => [
-            'subject' => '['.config('app.name').'] 登入失敗鎖定通知 - :time (UTC)',
+            'subject' => '['.config('app.name').'] 登入失敗鎖定通知 - :time (UTC+8)',
             'greeting' => '親愛的用戶 :name',
             'content' => '我們發現你的帳號連續登入失敗達 3 次，我們已阻擋你的帳號從 IP 地址 :IP 登入，鎖定時間 1 小時。',
             'content2' => '若您認為您的帳號有安全性風險，請儘速更換密碼。',
             'content3' => '如有任何問題，請透過客服管道聯繫我們。',
         ],
         'security_code_fail_user_lock' => [
-            'subject' => '['.config('app.name').'] 帳號鎖定通知 - :time (UTC)',
+            'subject' => '['.config('app.name').'] 帳號鎖定通知 - :time (UTC+8)',
             'greeting' => '親愛的用戶 :name',
             'content' => '我們發現你的帳號連續輸入錯誤的安全碼達 3 次，我們已暫時凍結你的帳號 24 小時。',
             'content2' => '若您認為您的帳號有安全性風險，請儘速聯繫我們。',
+        ],
+        'announcement_notification' => [
+            'subject' => '['.config('app.name').'] :title - :time (UTC+8)',
+            'greeting' => '親愛的用戶 :name',
+            'content' => ':content',
+            'action' => '前往 '.config('app.name'),
         ],
     ],
     'push' => [

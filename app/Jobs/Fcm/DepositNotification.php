@@ -47,12 +47,12 @@ class DepositNotification extends ExpBackoffJob implements ShouldQueue
     {
         $locale = $this->user->preferred_locale;
         $subject = __('notifications.email.deposit_notification.subject', [
-            'time' => $this->deposit->confirmed_at->toDateTimeString(),
+            'time' => datetime($this->deposit->confirmed_at),
         ], $locale);
         $content = __('notifications.email.deposit_notification.content1', [
             'amount' => comma_format(trim_zeros($this->deposit->amount)),
             'coin' => $this->deposit->coin,
-            'time' => $this->deposit->confirmed_at->toDateTimeString(),
+            'time' => datetime($this->deposit->confirmed_at),
         ], $locale);
         return [
             'title' => $subject,

@@ -57,7 +57,7 @@ class WithdrawalVerification extends Notification implements ShouldQueue
         $url = url("api/withdrawals/confirm/${id}/${code}");
 
         $subject = __('notifications.email.withdrawal_verification.subject', [
-            'time' => Carbon::now()->toDateTimeString(),
+            'time' => datetime(Carbon::now()),
         ], $locale);
         $greeting = __('notifications.email.withdrawal_verification.greeting', [], $locale);
         $content1 = __('notifications.email.withdrawal_verification.content1', [

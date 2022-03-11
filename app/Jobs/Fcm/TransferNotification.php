@@ -47,13 +47,13 @@ class TransferNotification extends ExpBackoffJob implements ShouldQueue
     {
         $locale = $this->user->preferred_locale;
         $subject = __('notifications.email.transfer_notification.subject', [
-            'time' => $this->transfer->created_at->toDateTimeString(),
+            'time' => datetime($this->transfer->created_at),
         ], $locale);
         $content = __('notifications.email.transfer_notification.content1', [
             'amount' => comma_format(trim_zeros($this->transfer->amount)),
             'coin' => $this->transfer->coin,
             'source' => $this->transfer->src_user->username,
-            'time' => $this->transfer->created_at->toDateTimeString(),
+            'time' => datetime($this->transfer->created_at),
         ], $locale);
         return [
             'title' => $subject,

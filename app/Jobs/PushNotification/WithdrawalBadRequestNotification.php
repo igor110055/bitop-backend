@@ -47,10 +47,10 @@ class WithdrawalBadRequestNotification extends ExpBackoffJob implements ShouldQu
     {
         $locale = $this->user->preferred_locale;
         $subject = __('notifications.email.withdrawal_bad_request_notification.subject', [
-            'time' => $this->withdrawal->canceled_at->toDateTimeString(),
+            'time' => datetime($this->withdrawal->canceled_at),
         ], $locale);
         $content = __('notifications.email.withdrawal_bad_request_notification.content2', [
-            'canceled_time' => $this->withdrawal->canceled_at->toDateTimeString(),
+            'canceled_time' => datetime($this->withdrawal->canceled_at),
         ], $locale);
         return [
             'title' => $subject,

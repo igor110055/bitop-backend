@@ -46,7 +46,7 @@ class SecurityCodeFailUserLockNotification extends Notification implements Shoul
     {
         $locale = $notifiable->preferred_locale;
         $subject = __('notifications.email.security_code_fail_user_lock.subject', [
-            'time' => Carbon::now()->toDateTimeString(),
+            'time' => datetime(Carbon::now()),
         ], $locale);
         $greeting = __('notifications.email.security_code_fail_user_lock.greeting', [
             'name' => $notifiable->username,
