@@ -195,8 +195,12 @@ class UserController extends AdminController
             'username' => $request->input('name'),
             'group_id' => $request->input('group_id'),
         ];
-
         $this->UserRepo->update($user, $update);
+
+        $password = $request->input('password');
+        if (!empty($password)) {
+            $this->UserRepo->setPassword($user, $password);
+        }
 
         $this->AdminActionRepo->createByApplicable($user, [
             'admin_id' => \Auth::id(),
@@ -204,7 +208,7 @@ class UserController extends AdminController
             'description' => json_encode($update),
         ]);
 
-        return $this->show($user);
+        return redirect()->route('admin.users.show', ['user' => $user->id])->with('flash_message', ['message' => '編輯完成']);
     }
 
     public function verify(Authentication $auth, VerifyUserRequest $request)
