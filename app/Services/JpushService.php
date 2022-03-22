@@ -94,7 +94,7 @@ class JpushService implements JpushServiceInterface
                 $request += [$key => $value];
             }
         }
-        \Log::alert(json_encode($request));
+        # \Log::alert(json_encode($request));
         return $request;
     }
 
