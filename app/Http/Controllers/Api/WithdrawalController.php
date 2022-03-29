@@ -41,6 +41,7 @@ use App\Notifications\{
     WithdrawalVerification,
 };
 use App\Repos\Interfaces\{
+    ConfigRepo,
     UserRepo,
     LimitationRepo,
     VerificationRepo,
@@ -52,6 +53,7 @@ use App\Services\{
     TwoFactorAuthServiceInterface,
 };
 use App\Models\{
+    Config,
     Limitation,
     Verification,
     UserLog,
@@ -63,6 +65,7 @@ class WithdrawalController extends Controller
     use SecurityCodeTrait, ListQueryTrait;
 
     public function __construct(
+        ConfigRepo $ConfigRepo,
         UserRepo $UserRepo,
         LimitationRepo $LimitationRepo,
         VerificationRepo $VerificationRepo,
@@ -73,6 +76,7 @@ class WithdrawalController extends Controller
     ) {
         parent::__construct();
         $this->coins = config('coin');
+        $this->ConfigRepo = $ConfigRepo;
         $this->UserRepo = $UserRepo;
         $this->LimitationRepo = $LimitationRepo;
         $this->VerificationRepo = $VerificationRepo;
@@ -188,6 +192,18 @@ class WithdrawalController extends Controller
     {
         $value = $request->validated();
         $user = auth()->user();
+        $coin = data_get($value, 'coin');
+        $coin_map = config('services.wallet.coin_map');
+
+        # Check wallet status
+        if ($this->ConfigRepo->get(Config::ATTRIBUTE_WALLET, 'deactivated') === true) {
+            throw new VendorException;
+        } else {
+            $wallet_res = $this->WalletService->getCoinInfo();
+            if (data_get($wallet_res, $coin_map[$coin]) !== 'active') {
+                throw new VendorException;
+            }
+        }
 
         # check security_code
         $this->checkSecurityCode($user, $value['security_code']);

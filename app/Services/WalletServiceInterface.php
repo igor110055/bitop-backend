@@ -5,6 +5,7 @@ namespace App\Services;
 interface WalletServiceInterface
 {
     public function serverTime();
+    public function getCoinInfo();
     public function getSupportedCoinList();
     public function getSupportedErrors();
     public function createAddress($coin, $client_id, array $callback);

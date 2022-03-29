@@ -10,13 +10,18 @@ use App\Http\Controllers\Traits\ListQueryTrait;
 use App\Exceptions\{
     Core\BadRequestError,
     DuplicateRecordError,
+    ServiceUnavailableError,
     VendorException,
 };
 use App\Http\Requests\DepositListRequest;
 use App\Http\Resources\{
     DepositResource,
 };
+use App\Models\{
+    Config,
+};
 use App\Repos\Interfaces\{
+    ConfigRepo,
     DepositRepo,
     UserRepo,
 };
@@ -34,6 +39,7 @@ class DepositController extends Controller
     use ListQueryTrait;
 
     public function __construct(
+        ConfigRepo $ConfigRepo,
         DepositRepo $DepositRepo,
         UserRepo $UserRepo,
         AccountServiceInterface $AccountService,
@@ -41,6 +47,7 @@ class DepositController extends Controller
     ) {
         parent::__construct();
         $this->coins = config('coin');
+        $this->ConfigRepo = $ConfigRepo;
         $this->DepositRepo = $DepositRepo;
         $this->UserRepo = $UserRepo;
         $this->AccountService = $AccountService;
@@ -88,10 +95,22 @@ class DepositController extends Controller
     public function getAddress(Request $request)
     {
         $coin = $request->input('coin');
+        $coin_map = config('services.wallet.coin_map');
         $user = auth()->user();
         if (is_null($coin) or !in_array($coin, array_keys(hide_beta_coins($user, $this->coins)))) {
             throw new BadRequestError;
         }
+
+        # Check wallet status
+        if ($this->ConfigRepo->get(Config::ATTRIBUTE_WALLET, 'deactivated') === true) {
+            throw new ServiceUnavailableError;
+        } else {
+            $wallet_res = $this->WalletService->getCoinInfo();
+            if (data_get($wallet_res, $coin_map[$coin]) !== 'active') {
+                throw new ServiceUnavailableError;
+            }
+        }
+
         $result = $this->AccountService->getWalletAddress($user, $coin);
         return [
             'coin' => $result['coin'],

@@ -114,6 +114,22 @@ class WalletService implements WalletServiceInterface
         return $this->get($link);
     }
 
+    public function getCoinInfo()
+    {
+        try {
+            $res = $this->getSupportedCoinList();
+            if (is_null($res)) {
+                return null;
+            }
+        } catch (\Throwable $e) {
+            return null;
+        }
+        foreach ($res as $value) {
+            $result[$value['id']] = $value['status'];
+        }
+        return $result;
+    }
+
     public function getSupportedCoinList()
     {
         $link = $this->publicLink('currencies');

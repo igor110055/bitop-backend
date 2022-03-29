@@ -66,23 +66,6 @@ class InfoController extends ApiController
         return Iso3166::all()->keyBy('alpha_2');
     }
 
-    protected function getWalletCoinInfo()
-    {
-        $result = [];
-        try {
-            $res = app()->make(WalletServiceInterface::class)->getSupportedCoinList();
-            if (is_null($res)) {
-                return null;
-            }
-        } catch (\Throwable $e) {
-            return null;
-        }
-        foreach ($res as $value) {
-            $result[$value['id']] = $value['status'];
-        }
-        return $result;
-    }
-
     public function getWalletStatus(
         Request $request,
         ConfigRepo $ConfigRepo
@@ -98,7 +81,7 @@ class InfoController extends ApiController
                 ];
             }
         } else {
-            $wallet_res = $this->getWalletCoinInfo();
+            $wallet_res = app()->make(WalletServiceInterface::class)->getCoinInfo();
             foreach ($this->coins as $coin => $values) {
                 $response[$coin] =  [
                     'coin' => $coin,
