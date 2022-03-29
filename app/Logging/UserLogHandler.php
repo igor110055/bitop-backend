@@ -22,7 +22,7 @@ class UserLogHandler extends AbstractProcessingHandler
             'message' => $record['message'],
             'context' => json_encode($record['context']),
             'remote_addr' => request_ip(),
-            'user_agent' => data_get($record['context'], 'agent'),
+            'user_agent' => substr(data_get($record['context'], 'agent'), 0, 254),
             'created_at' => $record['datetime']->format('Uv'),
             'updated_at' => $record['datetime']->format('Uv'),
         ];
