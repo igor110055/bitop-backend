@@ -257,7 +257,7 @@ class ExportService implements ExportServiceInterface
             "Amount" => $data->amount,
             "BankFee" => $data->bank_fee,
             "SystemFee" => $data->system_fee,
-            "cFee" => $data->c_fee,
+            "cfee" => $data->c_fee,
             "type" => $data->type,
             "Coin" => $data->coin,
             "BankcFee" => $data->bankc_fee,
