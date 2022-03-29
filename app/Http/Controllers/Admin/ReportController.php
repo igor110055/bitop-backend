@@ -122,7 +122,7 @@ class ReportController extends AdminController
             $to = null;
         }
         if (is_null($from) && is_null($to)) {
-            $to = Carbon::yesterday();
+            $to = Carbon::yesterday($this->timezone);
             $from = $to->copy()->subDays(9);
         } elseif (is_null($from)) {
             $to = Carbon::createFromDate($to);
@@ -135,8 +135,8 @@ class ReportController extends AdminController
             $to = Carbon::createFromDate($to);
         }
 
-        if ($to->gte(Carbon::today())) {
-            $to = Carbon::yesterday();
+        if ($to->gte(Carbon::today($this->timezone))) {
+            $to = Carbon::yesterday($this->timezone);
         }
         if ($from->gte($to)) {
             $from = $to->copy()->subDays(9);
