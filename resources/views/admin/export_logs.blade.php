@@ -32,7 +32,7 @@
                         <th>事件</th>
                         <th>Account</th>
                         <th>Amount</th>
-                        <th>SystemFee</th>
+                        <th>cfee</th>
                         <th>type</th>
                         <th>coin</th>
                         <th>BankcFee</th>
@@ -100,7 +100,7 @@ $(function () {
                 data: 'amount',
             },
             {
-                data: 'system_fee',
+                data: 'c_fee',
             },
             {
                 data: 'type',
