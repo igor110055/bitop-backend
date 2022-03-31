@@ -152,6 +152,7 @@ class ExportService implements ExportServiceInterface
             'coin' => $amount,
             'bank_fee' => '0.000',
             'system_fee' => '0.000',
+            'c_fee' => $order->fee,
             'type' => data_get($this->coin_types, $order->coin),
             'bankc_fee' => $unit_price,
             'handler_id' =>  $order->src_user_id,
