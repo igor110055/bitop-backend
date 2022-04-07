@@ -35,6 +35,7 @@ class Fallback
             $request->is('api/*') or
             $request->is('admin') or
             $request->is('admin/*') or
+            $request->is('redirect/*') or
             strpos($path, '.') !== false) {
             return false;
         }

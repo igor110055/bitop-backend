@@ -15,6 +15,14 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+
+Route::get('redirect/android', function () {
+    return redirect(env('ANDROID_DOWNLOAD_LINK'));
+});
+Route::get('redirect/ios', function () {
+    return redirect(env('IOS_DOWNLOAD_LINK'));
+});
+
 Route::get('admin/login', 'Admin\\AuthController@login')->name('login');
 Route::post('admin/auth/login', 'Admin\\AuthController@login');
 
