@@ -89,6 +89,12 @@
                 'icon' => 'accounts',
             ],
             [
+                'model' => function ($user) { return $user->is_admin; },
+                'title' => '商戶管理',
+                'path' => 'merchants',
+                'icon' => 'money',
+            ],
+            [
                 'model' => function ($user) { return $user->can('edit-configs'); },
                 'title' => '全站設定',
                 'path' => 'configs',

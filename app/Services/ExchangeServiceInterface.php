@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\{
+    Merchant,
     User,
 };
 
@@ -27,4 +28,8 @@ interface ExchangeServiceInterface
     public function USDTToCoin($USDT_amount, $coin);
 
     /* public function getAgencyCurrencyPrice(User $user, $currency); */
+
+    public function getMerchantExchangeRate(Merchant $merchant, $coin);
+    public function getMerchantExchangeRates(Merchant $merchant);
+    public function get_system_exchange_rate($coin, $currency);
 }

@@ -162,4 +162,13 @@ return [
             App\Models\AdminAction::TYPE_REJECT_BANK_ACCOUNT => 'Reject',
         ],
     ],
+    'merchant' => [
+        'exchange_rate' => [
+            App\Models\ExchangeRate::TYPE_SYSTEM => 'Original',
+            App\Models\ExchangeRate::TYPE_FIXED => 'Fixed',
+            App\Models\ExchangeRate::TYPE_FLOATING => 'Adjustment',
+            App\Models\ExchangeRate::TYPE_DIFF => 'Difference',
+        ],
+    ],
+
 ];

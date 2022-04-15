@@ -77,6 +77,7 @@ class InitialAdminAuthorizationCommand extends Command
             'edit-agents',
             'edit-configs',
             'edit-bank-accounts',
+            'edit-merchants',
         ];
 
         $assistant_permissions = [

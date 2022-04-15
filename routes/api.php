@@ -5,6 +5,7 @@ use Dingo\Api\Routing\Router;
 use App\Http\Controllers\Api\{
     AuthController,
     MeController,
+    MerchantController,
     AdvertisementController,
     BankController,
     BankAccountController,
@@ -117,6 +118,13 @@ $api->version('v1', function ($api) {
     $exchange = ExchangeController::class;
     $api->group(['prefix' => 'exchanges'], function ($api) use ($exchange) {
         $api->get('/', "{$exchange}@getCoinPrice");
+    });
+
+    # /api/merchant/*
+    $merchant = MerchantController::class;
+    $api->group(['prefix' => 'merchants'], function ($api) use ($merchant) {
+        $api->get('{merchant}/exchange-rates/{coin}', "{$merchant}@getExchangeRate");
+        $api->get('{merchant}/exchange-rates/', "{$merchant}@getExchangeRates");
     });
 
     # /api/transfers/*

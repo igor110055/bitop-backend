@@ -40,7 +40,10 @@ return [
                 'edit-configs',
             ],
             'bank_account' => [
-                'edit-bank-accounts'
+                'edit-bank-accounts',
+            ],
+            'merchant' => [
+                'edit-merchants',
             ],
         ],
     ],

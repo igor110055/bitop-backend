@@ -18,6 +18,7 @@ class AdminAction extends UuidModel
     const TYPE_DEACTIVATE_TFA = 'deactivate-tfa';
     const TYPE_APPROVE_BANK_ACCOUNT = 'approve-bank-account';
     const TYPE_REJECT_BANK_ACCOUNT = 'reject-bank-account';
+    const TYPE_MERCHANT_UPDATE = 'merchant-update';
 
     protected $fillable = [
         'admin_id',

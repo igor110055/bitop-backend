@@ -161,5 +161,18 @@ Route::group(
         Route::get('export_logs/search', 'ExportLogController@search')->name('admin.export_logs.search');
         Route::post('export_logs/submit', 'ExportLogController@submit')->name('admin.export_logs.submit');
         Route::resource('export_logs', 'ExportLogController', ['only' => ['index'], 'as' => 'admin']);
+
+        /* Route::get('groups/{group}/delete', 'GroupController@delete')->name('admin.groups.delete');
+        Route::get('groups/{group}/limitations', 'GroupController@getLimitations')->name('admin.groups.limitations');
+        Route::get('groups/{group}/limitations/edit/{type}/{coin}', 'GroupController@editLimitations')->name('admin.groups.limitations.edit');
+        Route::post('groups/{group}/limitations/store', 'GroupController@storeLimitation')->name('admin.groups.limitations.store');
+        Route::put('groups/{group}', 'GroupController@update')->name('admin.groups.update');
+        Route::post('groups', 'GroupController@store')->name('admin.groups.store');
+        Route::get('groups/applications/', 'GroupController@getApplications')->name('admin.groups.applications');
+        Route::get('groups/applications/{application}', 'GroupController@getApplication')->name('admin.groups.application');
+        Route::post('groups/applications/{application}/verify', 'GroupController@verifyApplication')->name('admin.groups.application-verify'); */
+        Route::get('merchants/{merchant}/exchange_rate/{coin}', 'MerchantController@editExchangeRate')->name('admin.merchants.exchange-rate');
+        Route::post('merchants/{merchant}/exchange_rate/{coin}', 'MerchantController@createExchangeRate')->name('admin.merchants.create-exchange-rate');
+        Route::resource('merchants', 'MerchantController', ['only' => ['index', 'show', 'create', 'store', 'update', 'destroy'], 'as' => 'admin']);
     }
 );

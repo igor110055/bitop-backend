@@ -6,6 +6,8 @@ use Dec\Dec;
 use App\Models\{
     Advertisement,
     CurrencyExchangeRate,
+    Merchant,
+    ExchangeRate,
     User,
 };
 use App\Repos\Interfaces\{
@@ -13,6 +15,7 @@ use App\Repos\Interfaces\{
     AssetRepo,
     CurrencyExchangeRateRepo,
     CoinExchangeRateRepo,
+    MerchantRepo,
 };
 
 class ExchangeService implements ExchangeServiceInterface
@@ -21,12 +24,14 @@ class ExchangeService implements ExchangeServiceInterface
         AgencyRepo $AgencyRepo,
         AssetRepo $AssetRepo,
         CurrencyExchangeRateRepo $CurrencyRepo,
-        CoinExchangeRateRepo $CoinRepo
+        CoinExchangeRateRepo $CoinRepo,
+        MerchantRepo $MerchantRepo
     ) {
         $this->AgencyRepo = $AgencyRepo;
         $this->AssetRepo = $AssetRepo;
         $this->CurrencyExchangeRateRepo = $CurrencyRepo;
         $this->CoinExchangeRateRepo = $CoinRepo;
+        $this->MerchantRepo = $MerchantRepo;
         $this->coins = config('coin');
         $this->currencies = config('currency');
         $this->base_currency = config('core.currency.base');
@@ -184,5 +189,69 @@ class ExchangeService implements ExchangeServiceInterface
         $coin_price = $this->CoinExchangeRateRepo->getLatest($coin)->price;
         $USDT_price = $this->CoinExchangeRateRepo->getLatest('USDT-ERC20')->price;
         return (string) Dec::div($USDT_amount, $coin_price)->mul($USDT_price, $this->coins[$coin]['decimal']);
+    }
+
+    public function getMerchantExchangeRate(Merchant $merchant, $coin)
+    {
+        $currency = config('core.currency.base');
+        $decimal = config('core.currency.scale');
+        assert(in_array($coin, array_keys($this->coins)));
+
+        $exchange_rate = $this->MerchantRepo->getLatestExchangeRate($merchant, $coin);
+
+        if (empty($exchange_rate) or data_get($exchange_rate, 'type') === ExchangeRate::TYPE_SYSTEM) {
+            # Get system exchange rate
+            list($bid, $ask) = $this->get_system_exchange_rate($coin, $currency);
+            $exchange_rate['type'] = ExchangeRate::TYPE_SYSTEM;
+        } elseif ($exchange_rate['type'] === ExchangeRate::TYPE_FIXED) {
+            $bid = (string) Dec::mul($exchange_rate['bid'], '1', $decimal);
+            $ask = (string) Dec::mul($exchange_rate['ask'], '1', $decimal);
+        } elseif ($exchange_rate['type'] === ExchangeRate::TYPE_FLOATING) {
+            list($bid, $ask) = $this->get_system_exchange_rate($coin, $currency);
+            $bid = (string) Dec::add($bid, $exchange_rate['bid_diff'], $decimal);
+            $ask = (string) Dec::add($ask, $exchange_rate['ask_diff'], $decimal);
+        } elseif ($exchange_rate['type'] === ExchangeRate::TYPE_DIFF) {
+            list($bid, $ask) = $this->get_system_exchange_rate($coin, $currency);
+            if (Dec::create($ask)->comp($bid) >= 0) {
+                $ask = (string) Dec::add($ask, $exchange_rate['diff'], $decimal);
+            } else {
+                $ask = (string) Dec::add($bid, $exchange_rate['diff'], $decimal);
+            }
+            $bid = (string) Dec::mul($bid, '1', $decimal);
+        }
+        return [
+            'bid' => $bid,
+            'ask' => $ask,
+            'coin' => $coin,
+            'currency' => $currency,
+            'type' => $exchange_rate['type'],
+            'exchange_rate' => $exchange_rate,
+        ];
+    }
+
+    public function getMerchantExchangeRates(Merchant $merchant)
+    {
+        $coins = $this->coins;
+        foreach (array_keys($this->coins) as $coin) {
+            $rates[$coin] = $this->getMerchantExchangeRate($merchant, $coin);
+        }
+        return $rates;
+    }
+
+    public function get_system_exchange_rate($coin, $currency)
+    {
+        $decimal = config('core.currency.scale');
+
+        $unit_price_base = $this->CoinExchangeRateRepo
+            ->getLatest($coin)
+            ->price;
+
+        $currency_rate = $this->CurrencyExchangeRateRepo
+            ->getLatest($currency, null);
+
+        $bid = (string) Dec::mul($unit_price_base, $currency_rate['bid'], $decimal);
+        $ask = (string) Dec::mul($unit_price_base, $currency_rate['ask'], $decimal);
+
+        return [$bid, $ask];
     }
 }

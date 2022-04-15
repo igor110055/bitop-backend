@@ -162,4 +162,12 @@ return [
             App\Models\AdminAction::TYPE_REJECT_BANK_ACCOUNT => '審核不通過',
         ],
     ],
+    'merchant' => [
+        'exchange_rate' => [
+            App\Models\ExchangeRate::TYPE_SYSTEM => '原匯率',
+            App\Models\ExchangeRate::TYPE_FIXED => '人工匯率',
+            App\Models\ExchangeRate::TYPE_FLOATING => '即時匯率調整',
+            App\Models\ExchangeRate::TYPE_DIFF => '買賣匯差',
+        ],
+    ],
 ];
