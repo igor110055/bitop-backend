@@ -40,6 +40,7 @@ class ExportService implements ExportServiceInterface
         $this->coin_decimal = config('core.coin.default_exp');
         $this->coin_types = ExportLog::COIN_TYPES;
         $this->order_sell_accounts = ExportLog::ORDER_SELL_ACCOUNTS;
+        $this->member_accounts = ExportLog::MEMBER_ACCOUNTS;
         $this->link = config('services.export_log.link');
     }
 
@@ -65,6 +66,7 @@ class ExportService implements ExportServiceInterface
         $data = [
             'user_id' => $withdrawal->user_id,
             'transaction_id' => data_get($transaction, 'id'),
+            'account' => data_get($this->member_accounts, $withdrawal->coin),
             'amount' => $total,
             'coin' => $amount,
             'bank_fee' => '0.000',
@@ -100,6 +102,7 @@ class ExportService implements ExportServiceInterface
         $data = [
             'user_id' => $deposit->user_id,
             'transaction_id' => data_get($transaction, 'id'),
+            'account' => data_get($this->member_accounts, $deposit->coin),
             'amount' => $total,
             'coin' => $amount,
             'bank_fee' => '0.000',
@@ -121,12 +124,14 @@ class ExportService implements ExportServiceInterface
         $advertisement = $order->advertisement;
         $account = null;
         if ($advertisement->type === Advertisement::TYPE_SELL) {
+            $type = 'express-buy';
             $wfpayment = $order->payment_src;
             if (!is_null($wfpayment) and ($wfpayment instanceof Wfpayment)) {
                 $wfpay_account = $wfpayment->wfpay_account;
                 $account = $wfpay_account->id;
             }
         } else {
+            $type = 'express-sell';
             $wftransfer = $order->payment_src;
             if (!is_null($wftransfer) and ($wftransfer instanceof Wftransfer)) {
                 $wfpay_account = $wftransfer->wfpay_account;
@@ -141,14 +146,15 @@ class ExportService implements ExportServiceInterface
             ->first();
 
         $unit_price = $order->unit_price;
-        $total = (string) Dec::mul($order->total, -1, $this->currency_decimal);
+        $total = (string) Dec::mul($order->total, 1, $this->currency_decimal);
+        $negative_total = (string) Dec::mul($order->total, -1, $this->currency_decimal);
         $amount = (string) Dec::mul($order->amount, 1, $this->coin_decimal);
         $fee = (string) Dec::mul(data_get($order, 'fee', 0), $unit_price, $this->coin_decimal);
         $data = [
             'user_id' => $order->src_user_id,
             'transaction_id' => data_get($transaction, 'id'),
-            'account' => data_get($this->order_sell_accounts, $order->coin),
-            'amount' => $total,
+            'account' => ($type === 'express-sell') ? data_get($this->order_sell_accounts, $order->coin) : data_get($this->member_accounts, $order->coin),
+            'amount' => $negative_total,
             'coin' => $amount,
             'bank_fee' => '0.000',
             'system_fee' => '0.000',
@@ -166,11 +172,10 @@ class ExportService implements ExportServiceInterface
             ->latest()
             ->first();
 
-        $total = (string) Dec::mul($order->total, 1, $this->currency_decimal);
         $data = [
             'user_id' => $order->dst_user_id,
             'transaction_id' => data_get($transaction, 'id'),
-            'account' => null,
+            'account' => ($type === 'express-buy') ? data_get($this->order_sell_accounts, $order->coin) : data_get($this->member_accounts, $order->coin),
             'amount' => $total,
             'coin' => $amount,
             'bank_fee' => '0.000',
@@ -187,7 +192,7 @@ class ExportService implements ExportServiceInterface
             'user_id' => $order->dst_user_id,
             'transaction_id' => data_get($transaction, 'id'),
             'account' => $account,
-            'amount' => $total,
+            'amount' => ($type === 'express-sell') ? $total : $negative_total,
             'coin' => $amount,
             'bank_fee' => '0.000',
             'system_fee' => '0.000',

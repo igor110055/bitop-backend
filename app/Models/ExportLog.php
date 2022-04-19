@@ -20,6 +20,14 @@ class ExportLog extends Model
         'TRX' => 'sellouttrx',
     ];
 
+    const MEMBER_ACCOUNTS = [
+        'USDT-TRC20' => 'memberTRC',
+        'USDT-ERC20' => 'memberERC',
+        'BTC' => 'memberBTC',
+        'ETH' => 'memberETH',
+        'TRX' => 'memberTRX',
+    ];
+
     protected $fillable = [
         'user_id',
         'transaction_id',
