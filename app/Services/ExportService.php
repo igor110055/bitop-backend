@@ -153,7 +153,7 @@ class ExportService implements ExportServiceInterface
         $data = [
             'user_id' => $order->src_user_id,
             'transaction_id' => data_get($transaction, 'id'),
-            'account' => ($type === 'express-sell') ? data_get($this->order_sell_accounts, $order->coin) : data_get($this->member_accounts, $order->coin),
+            'account' => ($type === 'express-buy') ? data_get($this->order_sell_accounts, $order->coin) : data_get($this->member_accounts, $order->coin),
             'amount' => $negative_total,
             'coin' => $amount,
             'bank_fee' => '0.000',
@@ -175,7 +175,7 @@ class ExportService implements ExportServiceInterface
         $data = [
             'user_id' => $order->dst_user_id,
             'transaction_id' => data_get($transaction, 'id'),
-            'account' => ($type === 'express-buy') ? data_get($this->order_sell_accounts, $order->coin) : data_get($this->member_accounts, $order->coin),
+            'account' => ($type === 'express-sell') ? data_get($this->order_sell_accounts, $order->coin) : data_get($this->member_accounts, $order->coin),
             'amount' => $total,
             'coin' => $amount,
             'bank_fee' => '0.000',
@@ -192,7 +192,7 @@ class ExportService implements ExportServiceInterface
             'user_id' => $order->dst_user_id,
             'transaction_id' => data_get($transaction, 'id'),
             'account' => $account,
-            'amount' => ($type === 'express-sell') ? $total : $negative_total,
+            'amount' => ($type === 'express-buy') ? $total : $negative_total,
             'coin' => $amount,
             'bank_fee' => '0.000',
             'system_fee' => '0.000',
