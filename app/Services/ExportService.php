@@ -196,7 +196,7 @@ class ExportService implements ExportServiceInterface
             'coin' => $amount,
             'bank_fee' => '0.000',
             'system_fee' => '0.000',
-            'type' => '3',
+            'type' => ($type === 'express-buy') ? '3' : 'W',
             'bankc_fee' => $unit_price,
             'handler_id' =>  $order->dst_user_id,
         ];
