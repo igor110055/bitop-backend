@@ -75,8 +75,8 @@ class ConfigController extends AdminController
     {
         $data = [];
         $values = $request->validate([
-            '*_latest' => 'required|regex:/^[1-9]+\.\d+\.\d+$/',
-            '*_min' => 'required|regex:/^[1-9]+\.\d+\.\d+$/',
+            '*_latest' => 'required|regex:/^[1-9]+\.\d+\.\d+(\.\d+)?$/',
+            '*_min' => 'required|regex:/^[1-9]+\.\d+\.\d+(\.\d+)?$/',
         ]);
         foreach (['web', 'ios', 'android'] as $platform) {
             $data[$platform]['latest'] = $values["{$platform}_latest"];
