@@ -46,6 +46,8 @@ class ExportLog extends Model
         'confirmed_at',
     ];
 
+    protected $appends = ['serial'];
+
 
     public function user()
     {
@@ -65,5 +67,16 @@ class ExportLog extends Model
     public function loggable()
     {
         return $this->morphTo();
+    }
+
+    public function getSerialAttribute()
+    {
+        if ($this->loggable_type === 'Withdrawal') {
+            return 'Z'.$this->id;
+        }
+        if ($this->loggable_type === 'Order') {
+            return 'Q'.$this->id;
+        }
+        return $this->id;
     }
 }

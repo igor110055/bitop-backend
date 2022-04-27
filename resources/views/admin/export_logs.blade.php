@@ -65,7 +65,7 @@ $(function () {
         },
         columns: [
             {
-                data: 'id',
+                data: 'serial',
             },
             {
                 data: 'user_id',

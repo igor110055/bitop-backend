@@ -257,7 +257,7 @@ class ExportService implements ExportServiceInterface
     public function formatData($data)
     {
         $formatted_data = [
-            "SerialNumber" => $data->id,
+            "SerialNumber" => $data->serial,
             "LoginID" => $data->user_id,
             "Account" => $data->account,
             "Amount" => $data->amount,
