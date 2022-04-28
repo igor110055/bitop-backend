@@ -285,6 +285,8 @@ class UserController extends AdminController
     public function orderList(User $user)
     {
         $dateFormat = 'Y-m-d';
+        $coins = array_merge(['All'], array_keys(config('coin')));
+        $coins = array_combine($coins, $coins);
         return view('admin.user_orders', [
             'from' => Carbon::parse('today -10 days', $this->tz)->format($dateFormat),
             'to' => Carbon::parse('today', $this->tz)->format($dateFormat),
@@ -301,15 +303,18 @@ class UserController extends AdminController
                 '1' => '快捷交易',
             ],
             'user' => $user,
+            'coins' => $coins,
         ]);
     }
 
     public function advertisementList(User $user)
     {
         $dateFormat = 'Y-m-d';
+        $coins = array_merge(['All'], array_keys(config('coin')));
+        $coins = array_combine($coins, $coins);
         return view('admin.advertisements', [
-            'from' => null,//Carbon::parse('today -10 days', $this->tz)->format($dateFormat),
-            'to' => null,//Carbon::parse('today', $this->tz)->format($dateFormat),
+            'from' => Carbon::parse('today -1 month', $this->tz)->format($dateFormat),
+            'to' => Carbon::parse('today', $this->tz)->format($dateFormat),
             'status' => [
                 'all' => 'All',
                 Advertisement::STATUS_AVAILABLE => 'Available',
@@ -323,6 +328,7 @@ class UserController extends AdminController
                 '1' => '快捷交易',
             ],
             'user' => $user,
+            'coins' => $coins,
         ]);
     }
 
@@ -334,10 +340,14 @@ class UserController extends AdminController
         $from = Carbon::parse(data_get($values, 'from', 'today - 10 days'), $this->tz);
         $to = Carbon::parse(data_get($values, 'to', 'today'), $this->tz)->addDay();
         $is_express = data_get($values, 'is_express');
+        $coin = data_get($values, 'coin');
 
         $condition = [];
         if ($status !== 'all') {
             $condition[] = ['status', '=', $status];
+        }
+        if ($coin !== 'All') {
+            $condition[] = ['coin', '=', $coin];
         }
         $condition[] = ['created_at', '>=', $from];
         $condition[] = ['created_at', '<', $to];
@@ -372,11 +382,15 @@ class UserController extends AdminController
         $keyword = data_get($values, 'search.value');
         $status = data_get($values, 'status');
         $is_express = data_get($values, 'is_express');
+        $coin = data_get($values, 'coin');
 
         $condition = [];
 
         if ($status !== 'all') {
             $condition[] = ['status', '=', $status];
+        }
+        if ($coin !== 'All') {
+            $condition[] = ['coin', '=', $coin];
         }
         if (!empty(data_get($values, 'from'))) {
             $from = Carbon::parse(data_get($values, 'from'), $this->tz);

@@ -66,6 +66,8 @@ class OrderController extends AdminController
     public function index()
     {
         $dateFormat = 'Y-m-d';
+        $coins = array_merge(['All'], array_keys(config('coin')));
+        $coins = array_combine($coins, $coins);
         return view('admin.orders', [
             'from' => Carbon::parse('today -10 days', $this->tz)->format($dateFormat),
             'to' => Carbon::parse('today', $this->tz)->format($dateFormat),
@@ -81,6 +83,7 @@ class OrderController extends AdminController
                 '0' => '一般交易',
                 '1' => '快捷交易',
             ],
+            'coins' => $coins,
         ]);
     }
 
@@ -203,10 +206,14 @@ class OrderController extends AdminController
         $from = Carbon::parse(data_get($values, 'from', 'today -10 days'), $this->tz);
         $to = Carbon::parse(data_get($values, 'to', 'today'), $this->tz)->addDay();
         $is_express = data_get($values, 'is_express');
+        $coin = data_get($values, 'coin');
 
         $condition = [];
         if ($status !== 'all') {
             $condition[] = ['status', '=', $status];
+        }
+        if ($coin !== 'All') {
+            $condition[] = ['coin', '=', $coin];
         }
         $condition[] = ['created_at', '>=', $from];
         $condition[] = ['created_at', '<', $to];

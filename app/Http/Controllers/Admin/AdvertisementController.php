@@ -50,9 +50,11 @@ class AdvertisementController extends AdminController
     public function index()
     {
         $dateFormat = 'Y-m-d';
+        $coins = array_merge(['All'], array_keys(config('coin')));
+        $coins = array_combine($coins, $coins);
         return view('admin.advertisements', [
-            'from' => null,
-            'to' => null,
+            'from' => Carbon::parse('today -1 month', $this->tz)->format($dateFormat),
+            'to' => Carbon::parse('today', $this->tz)->format($dateFormat),
             'status' => [
                 'all' => 'All',
                 Advertisement::STATUS_AVAILABLE => 'Available',
@@ -65,6 +67,7 @@ class AdvertisementController extends AdminController
                 '0' => '一般交易',
                 '1' => '快捷交易',
             ],
+            'coins' => $coins,
         ]);
     }
 
@@ -116,14 +119,20 @@ class AdvertisementController extends AdminController
     public function getAdvertisements(AdvertisementSearchRequest $request)
     {
         $values = $request->validated();
+        $from = Carbon::parse(data_get($values, 'from', 'today -1 months'), $this->tz);
+        $to = Carbon::parse(data_get($values, 'to', 'today'), $this->tz)->addDay();
         $keyword = data_get($values, 'search.value');
         $status = data_get($values, 'status');
         $is_express = data_get($values, 'is_express');
+        $coin = data_get($values, 'coin');
 
         $condition = [];
 
         if ($status !== 'all') {
             $condition[] = ['status', '=', $status];
+        }
+        if ($coin !== 'All') {
+            $condition[] = ['coin', '=', $coin];
         }
         if (!empty(data_get($values, 'from'))) {
             $from = Carbon::parse(data_get($values, 'from'), $this->tz);

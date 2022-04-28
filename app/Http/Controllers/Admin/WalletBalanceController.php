@@ -26,9 +26,12 @@ class WalletBalanceController extends AdminController
 
     public function getTransactions()
     {
+        $coins = array_merge(['All'], array_keys(config('coin')));
+        $coins = array_combine($coins, $coins);
         return view('admin.wallet_balance_transactions', [
             'from' => Carbon::parse('today', $this->tz)->format($this->dateFormat),
             'to' => Carbon::parse('today', $this->tz)->format($this->dateFormat),
+            'coins' => $coins,
         ]);
     }
 
@@ -38,7 +41,12 @@ class WalletBalanceController extends AdminController
         $keyword = data_get($values, 'search.value');
         $from = Carbon::parse(data_get($values, 'from', 'today'), $this->tz);
         $to = Carbon::parse(data_get($values, 'to', 'today'), $this->tz)->addDay();
+        $coin = data_get($values, 'coin');
+
         $condition = $this->timeIntervalCondition('created_at', $from, $to);
+        if ($coin !== 'All') {
+            $condition[] = ['coin', '=', $coin];
+        }
         $query = $this->WalletBalanceLogRepo
             ->queryLog($condition, $keyword, true);
         $total = $this->WalletBalanceLogRepo->countAll();

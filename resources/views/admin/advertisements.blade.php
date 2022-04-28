@@ -8,17 +8,24 @@
 <div class="card">
     <div class="card-header">
         <h2 class="card-title">
-            <h2 class="card-title">廣告管理：</h2>
+            @isset ($user)
+                <a href="{{ route('admin.users.show', ['user' => $user->id]) }}">{{ $user->username }}</a> 的廣告管理
+            @else
+                廣告管理
+            @endif
         </h2>
     </div>
 </div>
 <div class="card">
     <div class="card-block row">
-        <div class="col-sm-3">
+        <div class="col-sm-2">
         @include('widgets.forms.input', ['name' => 'from', 'class' => 'search-control', 'title' => 'From', 'value' => $from, 'type' => 'date'])
         </div>
-        <div class="col-sm-3">
+        <div class="col-sm-2">
         @include('widgets.forms.input', ['name' => 'to', 'class' => 'search-control', 'title' => 'To', 'value' => $to, 'type' => 'date'])
+        </div>
+        <div class="col-sm-2">
+        @include('widgets.forms.select', ['name' => 'coin', 'class' => '', 'values' => $coins, 'value' => '', 'title' => '幣別'])
         </div>
         <div class="col-sm-2">
         @include('widgets.forms.select', ['name' => 'status', 'class' => 'search-control', 'title' => 'Advertisement Status', 'value' => '', 'values' => $status])
@@ -147,6 +154,7 @@ $(function () {
             data: {
                 status: 'all',
                 is_express: 'all',
+                coin: 'All',
             }
         },
         columns: col,
@@ -158,19 +166,14 @@ $(function () {
             from: $('[name="from"]').val(),
             to: $('[name="to"]').val(),
             is_express: $('[name="is_express"]').val(),
+            coin: $('[name="coin"]').val(),
         };
-        if (moment(param.to).diff(moment(param.from), 'months') > 2) {
-            swal({
-                type: 'warning',
-                title: '查詢範圍不可超過 3 個月',
-            });
-        } else {
-            table.settings()[0].ajax.data = param;
-            table
-                .ajax
-                .url(url)
-                .load(null, false);
-        }
+
+        table.settings()[0].ajax.data = param;
+        table
+            .ajax
+            .url(url)
+            .load(null, false);
     });
 
 });

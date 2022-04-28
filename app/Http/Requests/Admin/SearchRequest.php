@@ -10,6 +10,7 @@ class SearchRequest extends AdminRequest
             'search.value' => 'string|nullable',
             'from' => 'date',
             'to' => 'date',
+            'coin' => 'string|nullable',
         ];
     }
 }

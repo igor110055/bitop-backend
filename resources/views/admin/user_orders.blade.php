@@ -8,17 +8,20 @@
 <div class="card">
     <div class="card-header">
         <h2 class="card-title">
-            <a href="{{ route('admin.users.show', ['user' => $user->id]) }}">{{ $user->username }}</a> 的訂單管理：
+            <a href="{{ route('admin.users.show', ['user' => $user->id]) }}">{{ $user->username }}</a> 的訂單管理
         </h2>
     </div>
 </div>
 <div class="card">
     <div class="card-block row">
-        <div class="col-sm-3">
+        <div class="col-sm-2">
         @include('widgets.forms.input', ['name' => 'from', 'class' => 'search-control', 'title' => 'From', 'value' => $from, 'type' => 'date'])
         </div>
-        <div class="col-sm-3">
+        <div class="col-sm-2">
         @include('widgets.forms.input', ['name' => 'to', 'class' => 'search-control', 'title' => 'To', 'value' => $to, 'type' => 'date'])
+        </div>
+        <div class="col-sm-2">
+        @include('widgets.forms.select', ['name' => 'coin', 'class' => '', 'values' => $coins, 'value' => '', 'title' => '幣別'])
         </div>
         <div class="col-sm-2">
         @include('widgets.forms.select', ['name' => 'status', 'class' => 'search-control', 'title' => 'Order Status', 'value' => '', 'values' => $status])
@@ -70,6 +73,7 @@ $(function () {
             data: {
                 status: 'all',
                 is_express: 'all',
+                coin: 'All',
             }
         },
         columns: [
@@ -165,11 +169,12 @@ $(function () {
             from: $('[name="from"]').val(),
             to: $('[name="to"]').val(),
             is_express: $('[name="is_express"]').val(),
+            coin: $('[name="coin"]').val(),
         };
         table.settings()[0].ajax.data = param;
         table
             .ajax
-            .url('{{ route('admin.orders.list') }}')
+            .url('{{ route('admin.users.orders.search', ['user' => $user->id]) }}')
             .load(null, false);
     });
 

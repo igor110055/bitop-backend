@@ -18,6 +18,9 @@
         @include('widgets.forms.input', ['name' => 'to', 'class' => 'search-control', 'title' => 'To', 'value' => $to, 'type' => 'date'])
         </div>
         <div class="col-sm-3">
+        @include('widgets.forms.select', ['name' => 'coin', 'class' => '', 'values' => $coins, 'value' => '', 'title' => '幣別'])
+        </div>
+        <div class="col-sm-3">
             <button class="btn btn-primary mt-4" id="search-submit" name="submit" value="1">Submit</button>
         </div>
     </div>
@@ -57,6 +60,9 @@ $(function () {
         serverSide: true,
         ajax: {
             url: '/admin/wallet_balances/transactions/search/',
+            data: {
+                coin: 'All',
+            }
         },
         columns: [
             {
@@ -103,19 +109,14 @@ $(function () {
         var param = {
             from: $('[name="from"]').val(),
             to: $('[name="to"]').val(),
+            coin: $('[name="coin"]').val(),
         };
-        if (moment(param.to).diff(moment(param.from), 'days') > 30) {
-            swal({
-                type: 'warning',
-                title: '查詢範圍不可超過 30 天',
-            });
-        } else {
-            table.settings()[0].ajax.data = param;
-            table
-                .ajax
-                .url('{{ route('admin.wallet-balances.transactions.search') }}')
-                .load(null, false);
-        }
+
+        table.settings()[0].ajax.data = param;
+        table
+            .ajax
+            .url('{{ route('admin.wallet-balances.transactions.search') }}')
+            .load(null, false);
     });
 });
 </script>
