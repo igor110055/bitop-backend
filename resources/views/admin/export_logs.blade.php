@@ -57,7 +57,7 @@ $(function () {
     var timezoneUtcOffset = {{ config('core.timezone_utc_offset.default') }};
 
     var table = $('#logs').DataTable({
-        ordering: false,
+        order: [[0, 'desc']],
         processing: true,
         serverSide: true,
         ajax: {
@@ -131,7 +131,8 @@ $(function () {
                 data: 'id',
                 render: function (data, type, row, meta) {
                     return '<a href="#" class="resubmit" data-id="' + data + '">重送</a>';
-                }
+                },
+                orderable: false,
             }
         ],
     });

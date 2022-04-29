@@ -51,7 +51,7 @@
 $(function () {
     var timezoneUtcOffset = {{ config('core.timezone_utc_offset.default') }};
     var table = $('#deposits').DataTable({
-        ordering: false,
+        order: [[0, 'desc']],
         processing: true,
         serverSide: true,
         ajax: {

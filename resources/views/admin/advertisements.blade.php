@@ -146,7 +146,7 @@ $(function () {
         });
     @endif
     var table = $('#advertisements').DataTable({
-        ordering: false,
+        order: [[0, 'desc']],
         processing: true,
         serverSide: true,
         ajax: {

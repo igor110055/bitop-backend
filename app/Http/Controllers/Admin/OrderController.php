@@ -207,6 +207,28 @@ class OrderController extends AdminController
         $to = Carbon::parse(data_get($values, 'to', 'today'), $this->tz)->addDay();
         $is_express = data_get($values, 'is_express');
         $coin = data_get($values, 'coin');
+        $sorting = null;
+
+        $sort_map = [
+            0 => 'created_at',
+            1 => 'id',
+            2 => 'is_express',
+            3 => 'src_user_id',
+            4 => 'dst_user_id',
+            5 => 'coin',
+            6 => 'amount',
+            7 => 'total',
+            8 => 'unit_price',
+            9 => 'status',
+            10 => 'completed_at',
+        ];
+        $column_key = data_get($values, 'order.0.column');
+        if (array_key_exists($column_key, $sort_map)) {
+            $sorting = [
+                'column' => $sort_map[$column_key],
+                'dir' => data_get($values, 'order.0.dir'),
+            ];
+        }
 
         $condition = [];
         if ($status !== 'all') {
@@ -223,7 +245,7 @@ class OrderController extends AdminController
             $condition[] = ['is_express', '=', false];
         }
 
-        $query = $this->OrderRepo->queryOrder($condition, $keyword);
+        $query = $this->OrderRepo->queryOrder($condition, $keyword, null, $sorting);
         $total = $this->OrderRepo->getOrdersCount();
         $filtered = $query->count();
 

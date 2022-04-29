@@ -211,7 +211,7 @@ class OrderRepo implements \App\Repos\Interfaces\OrderRepo
         return (string)Dec::div($avg, $release_times->count())->floor(0);
     }
 
-    public function queryOrder($where = [], $keyword = null, $user = null)
+    public function queryOrder($where = [], $keyword = null, $user = null, $sorting = null)
     {
         $query = $this->order->with(['src_user', 'dst_user']);
         if ($user) {
@@ -235,6 +235,9 @@ class OrderRepo implements \App\Repos\Interfaces\OrderRepo
                         });
                 });
 
+            })
+            ->when(($sorting), function($query) use ($sorting) {
+                return $query->orderBy($sorting['column'], $sorting['dir']);
             })
             ->orderBy('created_at', 'desc');
     }

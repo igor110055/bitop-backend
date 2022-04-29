@@ -40,7 +40,7 @@ class ExportLogRepo implements \App\Repos\Interfaces\ExportLogRepo
             ->count();
     }
 
-    public function queryExportLogs($where = [], $keyword = null)
+    public function queryExportLogs($where = [], $keyword = null, $sorting = null)
     {
         return $this->export_log
             ->when($where, function($query, $where){
@@ -53,6 +53,9 @@ class ExportLogRepo implements \App\Repos\Interfaces\ExportLogRepo
                         ->orWhere('id', 'like', $like)
                         ->orWhere('loggable_id', 'like', $like);
                 });
+            })
+            ->when(($sorting), function($query) use ($sorting) {
+                return $query->orderBy($sorting['column'], $sorting['dir']);
             })
             ->orderBy('id', 'desc');
     }

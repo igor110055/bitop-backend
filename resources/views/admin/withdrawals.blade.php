@@ -54,7 +54,7 @@
 $(function () {
     var timezoneUtcOffset = {{ config('core.timezone_utc_offset.default') }};
     var table = $('#withdrawals').DataTable({
-        ordering: false,
+        order: [[0, 'desc']],
         processing: true,
         serverSide: true,
         ajax: {
@@ -115,6 +115,7 @@ $(function () {
             },
             {
                 data: 'status',
+                orderable: false,
             },
         ],
     });

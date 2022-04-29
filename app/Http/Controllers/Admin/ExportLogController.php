@@ -44,8 +44,31 @@ class ExportLogController extends AdminController
         $from = Carbon::parse(data_get($values, 'from', 'today - 3 months'), $this->tz);
         $to = Carbon::parse(data_get($values, 'to', 'today'), $this->tz)->addDay();
         $condition = $this->timeIntervalCondition('created_at', $from, $to);
+        $sorting = null;
+
+        $sort_map = [
+            0 => 'id',
+            1 => 'user_id',
+            2 => 'loggable_id',
+            3 => 'account',
+            4 => 'amount',
+            5 => 'c_fee',
+            6 => 'type',
+            7 => 'coin',
+            8 => 'bankc_fee',
+            9 => 'created_at',
+            10 => 'submitted_at',
+        ];
+        $column_key = data_get($values, 'order.0.column');
+        if (array_key_exists($column_key, $sort_map)) {
+            $sorting = [
+                'column' => $sort_map[$column_key],
+                'dir' => data_get($values, 'order.0.dir'),
+            ];
+        }
+
         $query = $this->ExportLogRepo
-            ->queryExportLogs($condition, $keyword);
+            ->queryExportLogs($condition, $keyword, $sorting);
         $total = $this->ExportLogRepo->countAll();
         $filtered = $query->count();
         $data = $this->queryPagination($query, $total);

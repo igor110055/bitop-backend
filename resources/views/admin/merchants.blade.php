@@ -48,7 +48,7 @@
 <script src="/vendors/bower_components/datatables.net-buttons/js/buttons.html5.min.js"></script>
 <script>
 $(function(){
-    var table = $('#merchants').DataTable();
+    var table = $('#merchants').DataTable({ordering: false,});
 });
 </script>
 @endpush

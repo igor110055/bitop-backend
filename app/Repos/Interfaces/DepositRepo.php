@@ -14,7 +14,7 @@ interface DepositRepo
     public function findOrFail($id);
     public function findByWalletId($wallet_id);
     public function create(array $values);
-    public function queryDeposit($where = [], $keyword = null);
+    public function queryDeposit($where = [], $keyword = null, $sorting = null);
     public function countAll();
     public function getUserDeposits(
         User $user,

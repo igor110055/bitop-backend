@@ -181,7 +181,7 @@ class AdvertisementRepo implements \App\Repos\Interfaces\AdvertisementRepo
         return $advertisement1->toArray() == $advertisement2->toArray();
     }
 
-    public function queryAdvertisement($where = [], $keyword = null, $user = null)
+    public function queryAdvertisement($where = [], $keyword = null, $user = null, $sorting = null)
     {
         $query = $this->ad->with(['owner']);
         if ($user) {
@@ -202,6 +202,9 @@ class AdvertisementRepo implements \App\Repos\Interfaces\AdvertisementRepo
                             $query->where('username', 'like', $like);
                         });
                 });
+            })
+            ->when(($sorting), function($query) use ($sorting) {
+                return $query->orderBy($sorting['column'], $sorting['dir']);
             })
             ->orderBy('created_at', 'desc');
     }

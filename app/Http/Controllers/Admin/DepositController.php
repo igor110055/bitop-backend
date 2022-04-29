@@ -48,13 +48,29 @@ class DepositController extends AdminController
         $from = Carbon::parse(data_get($values, 'from', 'today - 3 months'), $this->tz);
         $to = Carbon::parse(data_get($values, 'to', 'today'), $this->tz)->addDay();
         $coin = data_get($values, 'coin');
+        $sorting = null;
+
+        $sort_map = [
+            0 => 'id',
+            1 => 'user_id',
+            2 => 'coin',
+            3 => 'amount',
+            4 => 'created_at',
+        ];
+        $column_key = data_get($values, 'order.0.column');
+        if (array_key_exists($column_key, $sort_map)) {
+            $sorting = [
+                'column' => $sort_map[$column_key],
+                'dir' => data_get($values, 'order.0.dir'),
+            ];
+        }
 
         $condition = $this->timeIntervalCondition('created_at', $from, $to);
         if ($coin !== 'All') {
             $condition[] = ['coin', '=', $coin];
         }
         $query = $this->DepositRepo
-            ->queryDeposit($condition, $keyword);
+            ->queryDeposit($condition, $keyword, $sorting);
         $total = $this->DepositRepo->countAll();
         $filtered = $query->count();
 

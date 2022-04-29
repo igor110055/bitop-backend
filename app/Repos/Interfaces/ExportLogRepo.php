@@ -15,6 +15,6 @@ interface ExportLogRepo
     public function findOrFail($id);
     public function update(ExportLog $log, array $values);
     public function countAll();
-    public function queryExportLogs($where = [], $keyword = null);
+    public function queryExportLogs($where = [], $keyword = null, $sorting = null);
     public function getAllPending();
 }

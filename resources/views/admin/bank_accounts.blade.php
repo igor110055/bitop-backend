@@ -50,6 +50,7 @@
 <script>
 $(function () {
     var table = $('#data').DataTable({
+        ordering: false,
         processing: true,
         serverSide: true,
         ajax: {

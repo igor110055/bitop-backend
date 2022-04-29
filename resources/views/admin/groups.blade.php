@@ -53,7 +53,9 @@
 <script src="/vendors/bower_components/datatables.net-buttons/js/buttons.html5.min.js"></script>
 <script>
 $(function(){
-    var table = $('#groups').DataTable();
+    var table = $('#groups').DataTable({
+        ordering: false,
+    });
 });
 </script>
 @endpush

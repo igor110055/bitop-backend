@@ -19,6 +19,7 @@
         <!-- App styles -->
         @stack('styles')
         <link rel="stylesheet" href="/css/app.min.css">
+        <link rel="stylesheet" href="/css/custom.css">
 
         <title>@yield('title', config('app.name'))</title>
     </head>

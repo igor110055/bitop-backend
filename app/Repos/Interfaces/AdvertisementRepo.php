@@ -35,7 +35,7 @@ interface AdvertisementRepo
     public function delete(Advertisement $advertisement);
     public function calculateProportionFee(Advertisement $advertisement, $amount);
     public function checkValuesUnchanged(Advertisement $advertisement1, Advertisement $advertisement2);
-    public function queryAdvertisement($where = [], $keyword = null, $user_id = null);
+    public function queryAdvertisement($where = [], $keyword = null, $user = null, $sorting = null);
     public function countAll();
     public function getUserAdsCount(User $user);
     public function getTransaction(Advertisement $advertisement, string $type);

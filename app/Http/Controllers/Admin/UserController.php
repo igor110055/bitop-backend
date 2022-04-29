@@ -287,7 +287,7 @@ class UserController extends AdminController
         $dateFormat = 'Y-m-d';
         $coins = array_merge(['All'], array_keys(config('coin')));
         $coins = array_combine($coins, $coins);
-        return view('admin.user_orders', [
+        return view('admin.orders', [
             'from' => Carbon::parse('today -10 days', $this->tz)->format($dateFormat),
             'to' => Carbon::parse('today', $this->tz)->format($dateFormat),
             'status' => [
@@ -341,6 +341,28 @@ class UserController extends AdminController
         $to = Carbon::parse(data_get($values, 'to', 'today'), $this->tz)->addDay();
         $is_express = data_get($values, 'is_express');
         $coin = data_get($values, 'coin');
+        $sorting = null;
+
+        $sort_map = [
+            0 => 'created_at',
+            1 => 'id',
+            2 => 'is_express',
+            3 => 'src_user_id',
+            4 => 'dst_user_id',
+            5 => 'coin',
+            6 => 'amount',
+            7 => 'total',
+            8 => 'unit_price',
+            9 => 'status',
+            10 => 'completed_at',
+        ];
+        $column_key = data_get($values, 'order.0.column');
+        if (array_key_exists($column_key, $sort_map)) {
+            $sorting = [
+                'column' => $sort_map[$column_key],
+                'dir' => data_get($values, 'order.0.dir'),
+            ];
+        }
 
         $condition = [];
         if ($status !== 'all') {
@@ -357,7 +379,7 @@ class UserController extends AdminController
             $condition[] = ['is_express', '=', false];
         }
 
-        $query = $this->OrderRepo->queryOrder($condition, $keyword, $user);
+        $query = $this->OrderRepo->queryOrder($condition, $keyword, $user, $sorting);
         $total = $this->OrderRepo->getUserOrdersCount($user);
         $filtered = $query->count();
 
@@ -383,6 +405,26 @@ class UserController extends AdminController
         $status = data_get($values, 'status');
         $is_express = data_get($values, 'is_express');
         $coin = data_get($values, 'coin');
+        $sorting = null;
+
+        $sort_map = [
+            0 => 'created_at',
+            1 => 'is_express',
+            2 => 'id',
+            3 => 'type',
+            4 => 'status',
+            5 => 'coin',
+            6 => 'remaining_amount',
+            7 => 'currency',
+            8 => 'unit_price',
+        ];
+        $column_key = data_get($values, 'order.0.column');
+        if (array_key_exists($column_key, $sort_map)) {
+            $sorting = [
+                'column' => $sort_map[$column_key],
+                'dir' => data_get($values, 'order.0.dir'),
+            ];
+        }
 
         $condition = [];
 
@@ -406,7 +448,7 @@ class UserController extends AdminController
             $condition[] = ['is_express', '=', false];
         }
 
-        $query = $this->AdvertisementRepo->queryAdvertisement($condition, $keyword, $user);
+        $query = $this->AdvertisementRepo->queryAdvertisement($condition, $keyword, $user, $sorting);
         $total = $this->AdvertisementRepo->getUserAdsCount($user);
 
         $data = $this->queryPagination($query, $total)

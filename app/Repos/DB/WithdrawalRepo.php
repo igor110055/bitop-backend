@@ -170,7 +170,7 @@ class WithdrawalRepo implements \App\Repos\Interfaces\WithdrawalRepo
         }
     }
 
-    public function queryWithdrawal($where = [], $keyword = null)
+    public function queryWithdrawal($where = [], $keyword = null, $sorting = null)
     {
         return $this->withdrawal
             ->when($where, function($query, $where){
@@ -186,6 +186,9 @@ class WithdrawalRepo implements \App\Repos\Interfaces\WithdrawalRepo
                 });
             })
             ->with('user')
+            ->when(($sorting), function($query) use ($sorting) {
+                return $query->orderBy($sorting['column'], $sorting['dir']);
+            })
             ->orderBy('id', 'desc');
     }
 

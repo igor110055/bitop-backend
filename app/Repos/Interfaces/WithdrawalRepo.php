@@ -26,7 +26,7 @@ interface WithdrawalRepo
     public function cancel(Withdrawal $withdrawal);
     public function confirm(Withdrawal $withdrawal);
     public function setNotifed(Withdrawal $withdrawal);
-    public function queryWithdrawal($where = [], $keyword = null);
+    public function queryWithdrawal($where = [], $keyword = null, $sorting = null);
     public function countAll();
     public function getUserUncanceledWithdrawals(
         User $user,

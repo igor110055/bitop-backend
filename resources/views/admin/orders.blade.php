@@ -8,7 +8,11 @@
 <div class="card">
     <div class="card-header">
         <h2 class="card-title">
+            @isset($user)
+            <a href="{{ route('admin.users.show', ['user' => $user->id]) }}">{{ $user->username }}</a> 的訂單管理
+            @else
             <h2 class="card-title">訂單管理</h2>
+            @endif
         </h2>
     </div>
 </div>
@@ -44,7 +48,8 @@
                         <th>快捷</th>
                         <th>賣家</th>
                         <th>買家</th>
-                        <th>商品</th>
+                        <th>幣別</th>
+                        <th>數量</th>
                         <th>總價</th>
                         <th>單價</th>
                         <th>狀態</th>
@@ -65,11 +70,15 @@
 $(function () {
     var timezoneUtcOffset = {{ config('core.timezone_utc_offset.default') }};
     var table = $('#orders').DataTable({
-        ordering: false,
+        order: [[0, 'desc']],
         processing: true,
         serverSide: true,
         ajax: {
+            @isset($user)
+            url: '/admin/users/{{ $user->id }}/orders/search',
+            @else
             url: '/admin/orders/list',
+            @endif
             data: {
                 status: 'all',
                 is_express: 'all',
@@ -121,12 +130,12 @@ $(function () {
             },
             {
                 data: 'coin',
-                render: function (data, type, row) {
-                    return row.amount + ' ' + row.coin;
-                },
             },
             {
-                data: 'currency',
+                data: 'amount',
+            },
+            {
+                data: 'total',
                 render: function (data, type, row) {
                     return row.total + ' ' + row.currency;
                 },
@@ -174,7 +183,11 @@ $(function () {
         table.settings()[0].ajax.data = param;
         table
             .ajax
+            @isset($user)
+            .url('{{ route('admin.users.orders.search', ['user' => $user->id]) }}')
+            @else
             .url('{{ route('admin.orders.list') }}')
+            @endif
             .load(null, false);
     });
 

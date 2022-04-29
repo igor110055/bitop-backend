@@ -26,6 +26,6 @@ interface OrderRepo
     public function getUserOrdersCount($user, $status = null);
     public function getUserAveragePayTime($user);
     public function getUserAverageReleaseTime($user);
-    public function queryOrder($where = [], $keyword = null, $user_id = null);
+    public function queryOrder($where = [], $keyword = null, $user = null, $sorting = null);
     public function getExpiredOrders();
 }

@@ -125,6 +125,27 @@ class AdvertisementController extends AdminController
         $status = data_get($values, 'status');
         $is_express = data_get($values, 'is_express');
         $coin = data_get($values, 'coin');
+        $sorting = null;
+
+        $sort_map = [
+            0 => 'created_at',
+            1 => 'is_express',
+            2 => 'user_id',
+            3 => 'id',
+            4 => 'type',
+            5 => 'status',
+            6 => 'coin',
+            7 => 'remaining_amount',
+            8 => 'currency',
+            9 => 'unit_price',
+        ];
+        $column_key = data_get($values, 'order.0.column');
+        if (array_key_exists($column_key, $sort_map)) {
+            $sorting = [
+                'column' => $sort_map[$column_key],
+                'dir' => data_get($values, 'order.0.dir'),
+            ];
+        }
 
         $condition = [];
 
@@ -148,7 +169,7 @@ class AdvertisementController extends AdminController
             $condition[] = ['is_express', '=', false];
         }
 
-        $query = $this->AdvertisementRepo->queryAdvertisement($condition, $keyword);
+        $query = $this->AdvertisementRepo->queryAdvertisement($condition, $keyword, null, $sorting);
         $total = $this->AdvertisementRepo->countAll();
         $filtered = $query->count();
 

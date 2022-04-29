@@ -39,7 +39,7 @@ class DepositRepo implements \App\Repos\Interfaces\DepositRepo
         return $this->deposit->create($values);
     }
 
-    public function queryDeposit($where = [], $keyword = null)
+    public function queryDeposit($where = [], $keyword = null, $sorting = null)
     {
         return $this->deposit
             ->when($where, function($query, $where){
@@ -54,6 +54,9 @@ class DepositRepo implements \App\Repos\Interfaces\DepositRepo
                 });
             })
             ->with(['user'])
+            ->when(($sorting), function($query) use ($sorting) {
+                return $query->orderBy($sorting['column'], $sorting['dir']);
+            })
             ->orderBy('id', 'desc');
     }
 
