@@ -91,7 +91,6 @@ class OrderController extends AdminController
     {
         if ($order->canceled_at) {
             $info = [];
-            $info['canceled_at'] = $order->canceled_at->setTimezone($this->tz)->toDateTimeString();
             if ($order->system_actions()->first()) {
                 $info['action'] = 'System';
             } elseif ($admin_action = $order->admin_actions()->first()) {

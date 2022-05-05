@@ -31,7 +31,7 @@
                     </dd>
                     @if ($cancel_info)
                     <dt class="col-sm-3">取消時間</dt>
-                    <dd class="col-sm-9">{{ datetime($cancel_info['canceled_at']) }}</dd>
+                    <dd class="col-sm-9">{{ datetime($order->canceled_at) }}</dd>
                     <dt class="col-sm-3">取消操作者</dt>
                     <dd class="col-sm-9">{{ $cancel_info['action'] }}</dd>
                         @if ($cancel_info['action'] === 'Admin')
@@ -41,6 +41,8 @@
                         <dd class="col-sm-9">{{ $cancel_info['description'] }}</dd>
                         @endif
                     @endif
+                    <dt class="col-sm-3">生成時間</dt>
+                    <dd class="col-sm-9">{{ datetime($order->created_at) }}</dd>
                     <dt class="col-sm-3">商品</dt>
                     <dd class="col-sm-9">{{ formatted_coin_amount($order->amount) }} {{ $order->coin }}</dd>
                     <dt class="col-sm-3">總價</dt>
