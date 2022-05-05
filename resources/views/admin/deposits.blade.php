@@ -37,6 +37,13 @@
                         <th>入帳時間</th>
                     </tr>
                 </thead>
+                <tfoot>
+                    <tr>
+                        <th colspan="3">Total </th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </tfoot>
             </table>
         </div>
     </div>
@@ -92,6 +99,30 @@ $(function () {
                 }
             },
         ],
+        footerCallback: function ( row, data, start, end, display ) {
+            var api = this.api();
+
+            // Remove the formatting to get integer data for summation
+            var intVal = function ( i ) {
+                return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                        i : 0;
+            };
+
+            amountTotal = api
+                .column(3, { page: 'current'} )
+                .data()
+                .reduce(function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0 );
+
+            // Update footer
+            $(api.column(3).footer()).html(
+                amountTotal.toFixed(6)
+            );
+
+        }
     });
 
     $('#search-submit').on('click', function (e) {

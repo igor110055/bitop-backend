@@ -56,6 +56,16 @@
                         <th>完成時間</th>
                     </tr>
                 </thead>
+                <tfoot>
+                    <tr>
+                        <th colspan="6">Total </th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </tfoot>
             </table>
         </div>
     </div>
@@ -170,6 +180,48 @@ $(function () {
                 }
             },
         ],
+        footerCallback: function ( row, data, start, end, display ) {
+            var api = this.api();
+
+            // Remove the formatting to get integer data for summation
+            var intVal = function ( i ) {
+                return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                        i : 0;
+            };
+
+            /* // Total over all pages
+            total = api
+                .column( 6 )
+                .data()
+                .reduce( function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0 ); */
+
+            // Total over this page
+            amountTotal = api
+                .column(6, { page: 'current'} )
+                .data()
+                .reduce(function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0 );
+
+            totalTotal = api
+                .column(7, { page: 'current'} )
+                .data()
+                .reduce(function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0 );
+
+            // Update footer
+            $(api.column(6).footer()).html(
+                amountTotal.toFixed(6)
+            );
+            $(api.column(7).footer()).html(
+                totalTotal.toFixed(6)
+            );
+        }
     });
 
     $('#search-submit').on('click', function (e) {

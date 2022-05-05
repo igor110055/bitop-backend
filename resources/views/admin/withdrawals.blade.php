@@ -40,6 +40,14 @@
                         <th>狀態</th>
                     </tr>
                 </thead>
+                <tfoot>
+                    <tr>
+                        <th colspan="5">Total </th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </tfoot>
             </table>
         </div>
     </div>
@@ -118,6 +126,39 @@ $(function () {
                 orderable: false,
             },
         ],
+        footerCallback: function ( row, data, start, end, display ) {
+            var api = this.api();
+
+            // Remove the formatting to get integer data for summation
+            var intVal = function ( i ) {
+                return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                        i : 0;
+            };
+
+            amountTotal = api
+                .column(5, { page: 'current'} )
+                .data()
+                .reduce(function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0 );
+            feeTotal = api
+                .column(6, { page: 'current'} )
+                .data()
+                .reduce(function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0 );
+
+            // Update footer
+            $(api.column(5).footer()).html(
+                amountTotal.toFixed(6)
+            );
+            $(api.column(6).footer()).html(
+                feeTotal.toFixed(6)
+            );
+
+        }
     });
 
     $('#search-submit').on('click', function (e) {

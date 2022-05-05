@@ -45,9 +45,7 @@
                     <tr>
                         <th>生成時間</th>
                         <th>快捷</th>
-                        @if (!isset($user))
                         <th>發佈者</th>
-                        @endif
                         <th>廣告ID</th>
                         <th>類型</th>
                         <th>狀態</th>
@@ -57,6 +55,14 @@
                         <th>單價</th>
                     </tr>
                 </thead>
+                <tfoot>
+                    <tr>
+                        <th colspan="7">Total </th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </tfoot>
             </table>
         </div>
     </div>
@@ -91,6 +97,15 @@ $(function () {
                     return '<i class="zmdi zmdi-check"></i>'
                 }
                 return '';
+            },
+        },
+        {
+            data: 'owner.username',
+            render: function (data, type, row) {
+                return $('<a/>')
+                    .text(data)
+                    .attr('href', '/admin/users/' + row.user_id)
+                    .prop('outerHTML');
             },
         },
         {
@@ -134,17 +149,7 @@ $(function () {
             data: 'unit_price',
         },
     ];
-    @if (!isset($user))
-        col.splice(2, 0, {
-            data: 'owner.username',
-            render: function (data, type, row) {
-                return $('<a/>')
-                    .text(data)
-                    .attr('href', '/admin/users/' + row.user_id)
-                    .prop('outerHTML');
-            },
-        });
-    @endif
+
     var table = $('#advertisements').DataTable({
         order: [[0, 'desc']],
         processing: true,
@@ -158,6 +163,30 @@ $(function () {
             }
         },
         columns: col,
+        footerCallback: function ( row, data, start, end, display ) {
+            var api = this.api();
+
+            // Remove the formatting to get integer data for summation
+            var intVal = function ( i ) {
+                return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                        i : 0;
+            };
+
+            amountTotal = api
+                .column(7, { page: 'current'} )
+                .data()
+                .reduce(function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0 );
+
+            // Update footer
+            $(api.column(7).footer()).html(
+                amountTotal.toFixed(6)
+            );
+
+        }
     });
 
     $('#search-submit').on('click', function (e) {
