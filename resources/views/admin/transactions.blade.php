@@ -11,16 +11,19 @@
     </div>
 
     <div class="card-block row">
-        <div class="col-sm-3">
+        <div class="col-sm-2">
         @include('widgets.forms.input', ['name' => 'from', 'class' => 'search-control', 'title' => 'From', 'value' => $from, 'type' => 'date'])
         </div>
-        <div class="col-sm-3">
+        <div class="col-sm-2">
         @include('widgets.forms.input', ['name' => 'to', 'class' => 'search-control', 'title' => 'To', 'value' => $to, 'type' => 'date'])
         </div>
-        <div class="col-sm-3">
+        <div class="col-sm-2">
         @include('widgets.forms.select', ['name' => 'coin', 'class' => '', 'values' => $coins, 'value' => '', 'title' => '幣別'])
         </div>
-        <div class="col-sm-3">
+        <div class="col-sm-2">
+        @include('widgets.forms.select', ['name' => 'type', 'class' => '', 'values' => $types, 'value' => '', 'title' => '類型'])
+        </div>
+        <div class="col-sm-2">
             <button class="btn btn-primary mt-4" id="search-submit" name="submit" value="1">Submit</button>
         </div>
     </div>
@@ -129,6 +132,7 @@ $(function () {
             from: $('[name="from"]').val(),
             to: $('[name="to"]').val(),
             coin: $('[name="coin"]').val(),
+            type: $('[name="type"]').val(),
         };
         table.settings()[0].ajax.data = param;
         table

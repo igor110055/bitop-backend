@@ -11,6 +11,7 @@ class SearchRequest extends AdminRequest
             'from' => 'date',
             'to' => 'date',
             'coin' => 'string|nullable',
+            'type' => 'string|nullable',
             'order' => 'array|nullable',
         ];
     }

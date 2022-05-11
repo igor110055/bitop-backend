@@ -77,8 +77,8 @@ return [
     ],
     'transaction' => [
         'types' => [
-            'transfer-in' => '划转',
-            'transfer-out' => '划转',
+            'transfer-in' => '划转入',
+            'transfer-out' => '划转出',
             'sell-order' => '售出',
             'buy-order' => '购入',
             'order-fee' => '订单手续费',

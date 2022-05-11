@@ -29,10 +29,12 @@ class TransactionController extends AdminController
     {
         $coins = array_merge(['All'], array_keys(config('coin')));
         $coins = array_combine($coins, $coins);
+        $types = array_merge(['All' => 'All'], __('messages.transaction.types'));
         return view('admin.transactions', [
             'from' => Carbon::parse('today', $this->tz)->format($this->dateFormat),
             'to' => Carbon::parse('today', $this->tz)->format($this->dateFormat),
             'coins' => $coins,
+            'types' => $types,
         ]);
     }
 
@@ -43,6 +45,7 @@ class TransactionController extends AdminController
         $from = Carbon::parse(data_get($values, 'from', 'today'), $this->tz);
         $to = Carbon::parse(data_get($values, 'to', 'today'), $this->tz)->addDay();
         $coin = data_get($values, 'coin');
+        $type = data_get($values, 'type');
         $sorting = null;
 
         $sort_map = [
@@ -66,6 +69,10 @@ class TransactionController extends AdminController
         $condition = $this->timeIntervalCondition('created_at', $from, $to);
         if ($coin !== 'All') {
             $condition[] = ['coin', '=', $coin];
+        }
+        if ($type !== 'All') {
+            $condition[] = ['type', '=', $type];
+            \Log::debug($type);
         }
         $query = $this->TransactionRepo
             ->queryTransaction($condition, $keyword, true, true, $sorting);

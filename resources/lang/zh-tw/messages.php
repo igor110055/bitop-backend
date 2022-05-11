@@ -77,8 +77,8 @@ return [
     ],
     'transaction' => [
         'types' => [
-            'transfer-in' => '劃轉',
-            'transfer-out' => '劃轉',
+            'transfer-in' => '劃轉入',
+            'transfer-out' => '劃轉出',
             'sell-order' => '售出',
             'buy-order' => '購入',
             'order-fee' => '訂單手續費',
@@ -98,9 +98,9 @@ return [
             'fee-share' => '手續費分潤，訂單：',
             'manual-deposit' => '手動充值，操作人：',
             'manual-withdrawal' => '手動提領，操作人：',
-            'wallet-deposit' => '充值，帳號：',
-            'wallet-withdrawal' => '提領，帳號：',
-            'withdrawal-fee' => '提領手續費，自帳號：',
+            'wallet-deposit' => '充值：',
+            'wallet-withdrawal' => '提現：',
+            'withdrawal-fee' => '提現手續費：',
         ],
     ],
     'wallet_balance_transaction' => [
