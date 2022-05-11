@@ -6,18 +6,6 @@
  * -------------------------------------------------------------------------
  */
 return [
-    "USDT-ERC20" => [
-        'icon' => config('app.url')."/asset/icon/coin/usdt.svg",
-        'network' => 'ERC20',
-        'has_tag' => false,
-        'tag_name' => null,
-        'confirmation' => 10,
-        'decimal' => 6,
-        'fee_decimal' => 2,
-        'checksummable' => true,
-        'base' => 'USDT',
-        'fee_coin' => 'ETH',
-    ],
     "USDT-TRC20" => [
         'icon' => config('app.url')."/asset/icon/coin/usdt-trc20.svg",
         'network' => 'TRC20',
@@ -29,6 +17,18 @@ return [
         'checksummable' => false,
         'base' => 'USDT',
         'fee_coin' => 'TRX',
+    ],
+    "USDT-ERC20" => [
+        'icon' => config('app.url')."/asset/icon/coin/usdt.svg",
+        'network' => 'ERC20',
+        'has_tag' => false,
+        'tag_name' => null,
+        'confirmation' => 10,
+        'decimal' => 6,
+        'fee_decimal' => 2,
+        'checksummable' => true,
+        'base' => 'USDT',
+        'fee_coin' => 'ETH',
     ],
     "BTC" => [
         'icon' => config('app.url')."/asset/icon/coin/btc.svg",

@@ -50,24 +50,24 @@ return [
         'rate_scale' => 6,
         'scale' => 30,
         'all' => [
+            'USDT-TRC20',
             'USDT-ERC20',
             'BTC',
             'ETH',
             'TRX',
-            'USDT-TRC20',
         ],
         'default_exp' => 6,
         'exp' => [              # exponent for amount
+            'USDT-TRC20' => 6,
             'USDT-ERC20' => 6,
             'BTC' => 6,
             'ETH' => 6,
             'TRX' => 6,
-            'USDT-TRC20' => 6,
         ],
         'require_tag' => [],
         'support_internal_transfer' => [
-            'USDT-ERC20',
             'USDT-TRC20',
+            'USDT-ERC20',
         ],
     ],
     'nationality' => [
