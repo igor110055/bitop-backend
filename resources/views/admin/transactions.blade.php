@@ -66,6 +66,7 @@ $(function () {
             url: '/admin/transactions/search/',
             data: {
                 coin: 'All',
+                type: 'All',
             }
         },
         columns: [
