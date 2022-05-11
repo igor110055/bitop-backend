@@ -124,11 +124,11 @@ class AccountController extends AdminController
                     break;
                 case in_array($item->type, Transaction::MANUAL_TYPES):
                     $item->link = route('admin.users.show', ['user' => data_get($item, 'transactable.user.id')]);
-                    $item->text = data_get($item, 'transactable.user.name');
+                    $item->text = data_get($item, 'transactable.user.username');
                     break;
                 case in_array($item->type, Transaction::WALLET_TYPES):
                     $item->link = route('admin.accounts.show', ['user' => data_get($item, 'transactable.user.id'), 'account' => data_get($item, 'account.id')]);
-                    $item->text = data_get($item, 'transactable.user.name');
+                    $item->text = data_get($item, 'transactable.user.username');
                     break;
                 }
                 return $item;

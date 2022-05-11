@@ -1,6 +1,3 @@
-@php
-    use App\Models\Transaction;
-@endphp
 @extends('layouts.main')
 @section('content')
 <div class="card">
@@ -36,11 +33,11 @@
                 <thead class="thead-default">
                     <tr>
                         <th>ID</th>
-                        <th>Date</th>
-                        <th>Type</th>
-                        <th>Amount</th>
-                        <th>Balance</th>
-                        <th>Description</th>
+                        <th>時間</th>
+                        <th>類型</th>
+                        <th>數量</th>
+                        <th>餘額</th>
+                        <th>描述</th>
                     </tr>
                 </thead>
             </table>

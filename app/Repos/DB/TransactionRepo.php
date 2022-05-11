@@ -118,7 +118,7 @@ class TransactionRepo implements \App\Repos\Interfaces\TransactionRepo
         return $transaction->fresh();
     }
 
-    public function queryTransaction($where = [], $keyword = null, $with_transactable = false)
+    public function queryTransaction($where = [], $keyword = null, $with_transactable = false, $with_user = false)
     {
         return $this->transaction
             ->where('is_locked', false)
@@ -135,6 +135,9 @@ class TransactionRepo implements \App\Repos\Interfaces\TransactionRepo
             })
             ->when($with_transactable, function($query) {
                 return $query->with('transactable');
+            })
+            ->when($with_user, function($query) {
+                return $query->with('account.user');
             })
             ->orderBy('id', 'desc');
     }

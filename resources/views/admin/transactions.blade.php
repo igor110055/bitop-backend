@@ -31,11 +31,13 @@
                 <thead class="thead-default">
                     <tr>
                         <th>ID</th>
-                        <th>Date</th>
-                        <th>Type</th>
-                        <th>Amount</th>
-                        <th>Balance</th>
-                        <th>Description</th>
+                        <th>時間</th>
+                        <th>餘額帳號</th>
+                        <th>幣別</th>
+                        <th>類型</th>
+                        <th>數量</th>
+                        <th>餘額</th>
+                        <th>描述</th>
                     </tr>
                 </thead>
             </table>
@@ -72,6 +74,23 @@ $(function () {
                 render: function (data, type, row, meta) {
                     return moment(data).utcOffset(timezoneUtcOffset).format('YYYY-MM-DD HH:mm:ss');
                 }
+            },
+            {
+                data: 'account_id',
+                render: function (data, type, row, meta) {
+                    return $('<a/>')
+                            .text(row.user_text)
+                            .attr('href', '/admin/users/'+row.account.user_id)
+                            .prop('outerHTML')
+                            + ' 的<br>'
+                            + $('<a/>')
+                            .text(row.coin + ' 帳號')
+                            .attr('href', '/admin/accounts/'+data)
+                            .prop('outerHTML');
+                }
+            },
+            {
+                data: 'coin',
             },
             {
                 data: 'type',

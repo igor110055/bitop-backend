@@ -84,6 +84,12 @@
             ],
             [
                 'model' => function ($user) { return $user->is_admin; },
+                'title' => '全站交易明細',
+                'path' => 'transactions',
+                'icon' => 'view-list-alt',
+            ],
+            [
+                'model' => function ($user) { return $user->is_admin; },
                 'title' => '群組管理',
                 'path' => 'groups',
                 'icon' => 'accounts',
@@ -134,12 +140,6 @@
                 'model' => function ($user) { return $user->is_admin; },
                 'title' => '發送交易資料管理',
                 'path' => 'export_logs',
-                'icon' => 'view-list-alt',
-            ],
-            [
-                'model' => function ($user) { return $user->hasRole('super-admin'); },
-                'title' => '交易明細',
-                'path' => 'transactions',
                 'icon' => 'view-list-alt',
             ],
             [

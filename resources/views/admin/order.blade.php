@@ -208,7 +208,9 @@
                         {{ csrf_field() }}
                         {{ method_field('PUT') }}
                         @include('widgets.forms.input', ['name' => 'description', 'value' => '', 'title' => '操作記錄說明', 'required' => true])
+                        @if ($order->status === Order::STATUS_CLAIMED)
                         <button type="submit" name="action" value="cancel-order" class="btn btn-primary">強制取消</button>
+                        @endif
                         <button type="submit" name="action" value="complete-order" class="btn btn-primary">強制完成</button>
                         @if ($action === 'express-sell')
                         <button type="submit" name="action" value="new-order-transfer" class="btn btn-primary">執行新的下發</button>

@@ -19,6 +19,7 @@ class TransactionController extends AdminController
 
     public function __construct(TransactionRepo $tr)
     {
+        parent::__construct();
         $this->TransactionRepo = $tr;
         $this->tz = config('core.timezone.default');
         $this->dateFormat = 'Y-m-d';
@@ -48,7 +49,7 @@ class TransactionController extends AdminController
             $condition[] = ['coin', '=', $coin];
         }
         $query = $this->TransactionRepo
-            ->queryTransaction($condition, $keyword, true);
+            ->queryTransaction($condition, $keyword, true, true);
         $total = $this->TransactionRepo->countAll();
         $filtered = $query->count();
 
@@ -56,26 +57,35 @@ class TransactionController extends AdminController
             ->map(function ($item) {
                 $item->balance = formatted_coin_amount($item->balance);
                 $item->amount = formatted_coin_amount($item->amount);
+                $item->user_text = data_get($item, 'account.user.username').' ('.data_get($item, 'account.user.id').')';
                 switch ($item->type) {
                 case Transaction::TYPE_TRANSFER_IN:
-                    $item->link = route('admin.users.show', ['user' => data_get($item, 'transactable.src_user.id')]);
+                    $item->link = route('admin.users.show', ['user' => data_get($item, 'transactable.src_user_id')]);
                     $item->text = data_get($item, 'transactable.src_user.username');
                     break;
                 case Transaction::TYPE_TRANSFER_OUT:
-                    $item->link = route('admin.users.show', ['user' => data_get($item, 'transactable.dst_user.id')]);
+                    $item->link = route('admin.users.show', ['user' => data_get($item, 'transactable.dst_user_id')]);
                     $item->text = data_get($item, 'transactable.dst_user.username');
                     break;
+                case Transaction::TYPE_WALLET_DEPOSIT:
+                    $item->link = route('admin.deposits.show', ['deposit' => data_get($item, 'transactable_id')]);
+                    $item->text = data_get($item, 'transactable_id');;
+                    break;
+                case Transaction::TYPE_WALLET_WITHDRAWAL:
+                    $item->link = route('admin.withdrawals.show', ['withdrawal' => data_get($item, 'transactable_id')]);
+                    $item->text = data_get($item, 'transactable_id');;
+                    break;
                 case in_array($item->type, Transaction::ORDER_TYPES):
-                    $item->link = route('admin.orders.show', ['order' => data_get($item, 'transactable.id')]);
-                    $item->text = data_get($item, 'transactable.id');
+                    $item->link = route('admin.orders.show', ['order' => data_get($item, 'transactable_id')]);
+                    $item->text = data_get($item, 'transactable_id');
                     break;
                 case in_array($item->type, Transaction::MANUAL_TYPES):
-                    $item->link = route('admin.users.show', ['user' => data_get($item, 'transactable.user.id')]);
-                    $item->text = data_get($item, 'transactable.user.name');
+                    $item->link = route('admin.users.show', ['user' => data_get($item, 'transactable.user_id')]);
+                    $item->text = data_get($item, 'transactable.user.username');
                     break;
                 case in_array($item->type, Transaction::WALLET_TYPES):
-                    $item->link = route('admin.accounts.show', ['user' => data_get($item, 'transactable.user.id'), 'account' => data_get($item, 'account.id')]);
-                    $item->text = data_get($item, 'transactable.user.name');
+                    $item->link = route('admin.accounts.show', ['user' => data_get($item, 'transactable.user_id'), 'account' => data_get($item, 'account.id')]);
+                    $item->text = data_get($item, 'transactable_id');
                     break;
                 }
                 return $item;

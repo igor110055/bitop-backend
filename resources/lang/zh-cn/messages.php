@@ -67,12 +67,12 @@ return [
     'fee_setting' => [
         'types' => [
             'order' => '订单出售手续费',
-            'withdrawal' => '提领手续费',
+            'withdrawal' => '提現手续费',
         ],
     ],
     'limitation' => [
         'types' => [
-            'withdrawal' => '提领限额',
+            'withdrawal' => '提現限额',
         ],
     ],
     'transaction' => [
@@ -86,21 +86,21 @@ return [
             'manual-deposit' => '手动充值',
             'manual-withdrawal' => '手动提领',
             'wallet-deposit' => '充值',
-            'wallet-withdrawal' => '提领',
-            'withdrawal-fee' => '提领手续费',
+            'wallet-withdrawal' => '提現',
+            'withdrawal-fee' => '提現手续费',
         ],
         'des_prefix' => [
             'transfer-in' => '划转自 ',
-            'transfer-out' => '划转给 ',
+            'transfer-out' => '划转至 ',
             'sell-order' => '售出，订单：',
             'buy-order' => '购入，订单：',
             'order-fee' => '订单手续费，订单：',
             'fee-share' => '手续费分润，订单：',
             'manual-deposit' => '手动充值，操作人：',
             'manual-withdrawal' => '手动提领，操作人：',
-            'wallet-deposit' => '充值，帐号：',
-            'wallet-withdrawal' => '提领，帐号：',
-            'withdrawal-fee' => '提领手续费，自帐号：',
+            'wallet-deposit' => '充值：',
+            'wallet-withdrawal' => '提現：',
+            'withdrawal-fee' => '提現手续费：',
         ],
     ],
     'wallet_balance_transaction' => [
