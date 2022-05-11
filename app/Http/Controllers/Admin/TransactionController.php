@@ -43,13 +43,32 @@ class TransactionController extends AdminController
         $from = Carbon::parse(data_get($values, 'from', 'today'), $this->tz);
         $to = Carbon::parse(data_get($values, 'to', 'today'), $this->tz)->addDay();
         $coin = data_get($values, 'coin');
+        $sorting = null;
+
+        $sort_map = [
+            0 => 'id',
+            1 => 'id',
+            2 => 'account_id',
+            3 => 'coin',
+            4 => 'type',
+            5 => 'amount',
+            6 => 'balance',
+            7 => 'remaining_amount',
+        ];
+        $column_key = data_get($values, 'order.0.column');
+        if (array_key_exists($column_key, $sort_map)) {
+            $sorting = [
+                'column' => $sort_map[$column_key],
+                'dir' => data_get($values, 'order.0.dir'),
+            ];
+        }
 
         $condition = $this->timeIntervalCondition('created_at', $from, $to);
         if ($coin !== 'All') {
             $condition[] = ['coin', '=', $coin];
         }
         $query = $this->TransactionRepo
-            ->queryTransaction($condition, $keyword, true, true);
+            ->queryTransaction($condition, $keyword, true, true, $sorting);
         $total = $this->TransactionRepo->countAll();
         $filtered = $query->count();
 

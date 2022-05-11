@@ -56,7 +56,7 @@ $(function () {
     var des_prefix = @json(__('messages.transaction.des_prefix'));
     var types = @json(__('messages.transaction.types'));
     var table = $('#transactions').DataTable({
-        ordering: false,
+        order: [[0, 'desc']],
         processing: true,
         serverSide: true,
         ajax: {
@@ -109,6 +109,7 @@ $(function () {
             },
             {
                 data: 'type',
+                orderable: false,
                 render: function (data, type, row) {
                     if (row.link && row.text) {
                         return des_prefix[data] + $('<a/>')

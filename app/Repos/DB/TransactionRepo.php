@@ -118,7 +118,7 @@ class TransactionRepo implements \App\Repos\Interfaces\TransactionRepo
         return $transaction->fresh();
     }
 
-    public function queryTransaction($where = [], $keyword = null, $with_transactable = false, $with_user = false)
+    public function queryTransaction($where = [], $keyword = null, $with_transactable = false, $with_user = false, $sorting = null)
     {
         return $this->transaction
             ->where('is_locked', false)
@@ -132,6 +132,9 @@ class TransactionRepo implements \App\Repos\Interfaces\TransactionRepo
                         ->orWhere('id', 'like', $like)
                         ->orWhere('transactable_id', 'like', $like);
                 });
+            })
+            ->when(($sorting), function($query) use ($sorting) {
+                return $query->orderBy($sorting['column'], $sorting['dir']);
             })
             ->when($with_transactable, function($query) {
                 return $query->with('transactable');

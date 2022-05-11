@@ -23,5 +23,5 @@ interface TransactionRepo
     public function countAllByAccount(Account $account);
     public function countAll();
     public function create($account, $coin, $type, $amount, $balance, $unit_price, $result_unit_price, $is_locked = false, $transactable = null, $status = true, $message = null);
-    public function queryTransaction($where = [], $keyword = null, $with_transactable = false, $with_user = false);
+    public function queryTransaction($where = [], $keyword = null, $with_transactable = false, $with_user = false, $sorting = null);
 }
