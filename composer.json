@@ -6,7 +6,7 @@
         "framework",
         "laravel"
     ],
-    "license": "MIT",
+    "license": "proprietary",
     "repositories": [
         {
           "type": "git",
